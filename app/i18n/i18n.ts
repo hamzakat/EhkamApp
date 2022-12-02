@@ -17,8 +17,10 @@ i18n.translations = { ar, en, "en-US": en, ko }
 
 i18n.locale = Localization.locale
 
-// handle RTL languages
-export const isRTL = Localization.isRTL
+// if (__DEV__) console.log("i18n.locale:", i18n.locale)
+
+// enforce RTL
+export const isRTL = true
 I18nManager.allowRTL(isRTL)
 I18nManager.forceRTL(isRTL)
 
