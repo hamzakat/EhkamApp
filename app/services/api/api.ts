@@ -5,14 +5,10 @@
  * See the [Backend API Integration](https://github.com/infinitered/ignite/blob/master/docs/Backend-API-Integration.md)
  * documentation for more details.
  */
-import {
-  ApisauceInstance,
-  create,
-} from "apisauce"
+import { ApisauceInstance, create, ApiResponse } from "apisauce"
 import Config from "../../config"
-import type {
-  ApiConfig,
-} from "./api.types"
+import type { ApiConfig, ApiLoginResponse } from "./api.types"
+import { GeneralApiProblem, getGeneralApiProblem } from "./apiProblem"
 
 /**
  * Configuring the apisauce instance.
@@ -44,6 +40,37 @@ export class Api {
     })
   }
 
+  async login(
+    email: string,
+    password: string,
+  ): Promise<{ kind: "ok"; loginResponse: ApiLoginResponse } | GeneralApiProblem> {
+    const response: ApiResponse<any> = await this.apisauce.post("/auth/login", {
+      email: email,
+      password: password,
+    })
+
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+
+    // transform login response
+    try {
+      const loginResponse: ApiLoginResponse = {
+        accessToken: response.data.data.access_token,
+        expires: response.data.data.expires,
+        refreshToken: response.data.data.refresh_token,
+      }
+
+      return { kind: "ok", loginResponse }
+    } catch (e) {
+      if (__DEV__) {
+        console.tron.error(`Bad data: ${e.message}\n${response.data}`, e.stack)
+        console.log("Error from api.ts:", e)
+      }
+      return { kind: "bad-data" }
+    }
+  }
 }
 
 // Singleton instance of the API for convenience

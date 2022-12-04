@@ -8,6 +8,7 @@ import {
   DarkTheme,
   DefaultTheme,
   NavigationContainer,
+  NavigatorScreenParams,
 } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { StackScreenProps } from "@react-navigation/stack"
@@ -15,10 +16,10 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useColorScheme } from "react-native"
 import Config from "../config"
-import {
-  WelcomeScreen,
-} from "../screens"
+import { LoginScreen } from "../screens"
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
+import { useStores } from "../models"
+import { TeacherNavigator, TeacherTabParamList } from "./TeacherNavigator"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -34,8 +35,8 @@ import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
  *   https://reactnavigation.org/docs/typescript/#organizing-types
  */
 export type AppStackParamList = {
-  Welcome: undefined
-  // 🔥 Your screens go here
+  Login: undefined
+  Teacher: NavigatorScreenParams<TeacherTabParamList>
 }
 
 /**
@@ -53,11 +54,28 @@ export type AppStackScreenProps<T extends keyof AppStackParamList> = StackScreen
 const Stack = createNativeStackNavigator<AppStackParamList>()
 
 const AppStack = observer(function AppStack() {
+  const {
+    authenticationStore: { isAuthenticated },
+  } = useStores()
+
+  // @demo remove-block-end
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false }}
+      initialRouteName={isAuthenticated ? "Teacher" : "Login"} // @demo remove-current-line
     >
-          <Stack.Screen name="Welcome" component={WelcomeScreen} />
+      {/* @demo remove-block-start */}
+      {isAuthenticated ? (
+        <>
+          <Stack.Screen name="Teacher" component={TeacherNavigator} />
+        </>
+      ) : (
+        <>
+          <Stack.Screen name="Login" component={LoginScreen} />
+        </>
+      )}
+      {/* @demo remove-block-end */}
+
       {/** 🔥 Your screens go here */}
     </Stack.Navigator>
   )

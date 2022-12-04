@@ -1,19 +1,34 @@
 import { observer } from "mobx-react-lite"
 import React, { FC } from "react"
 import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
-import {
-  Text,
-} from "../components"
-import { isRTL } from "../i18n"
-import { colors, spacing } from "../theme"
-import { useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
+import { Button, Text } from "../../components"
+import { isRTL } from "../../i18n"
+import { useStores } from "../../models" // @demo remove-current-line
+import { TeacherTabScreenProps } from "../../navigators/TeacherNavigator"
+import { colors, spacing } from "../../theme"
+import { useHeader } from "../../utils/useHeader" // @demo remove-current-line
+import { useSafeAreaInsetsStyle } from "../../utils/useSafeAreaInsetsStyle"
 
-const welcomeLogo = require("../../assets/images/logo.png")
-const welcomeFace = require("../../assets/images/welcome-face.png")
+const welcomeLogo = require("../../../assets/images/logo.png")
+const welcomeFace = require("../../../assets/images/welcome-face.png")
 
+interface HomeScreenProps extends TeacherTabScreenProps<"Home"> {} // @demo remove-current-line
 
-export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeScreen(
-) {
+export const HomeScreen: FC<HomeScreenProps> = observer(function WelcomeScreen(_props) {
+  // const { navigation } = _props
+  const {
+    authenticationStore: { logout },
+  } = useStores()
+
+  function goNext() {
+    return
+  }
+
+  useHeader({
+    rightTx: "common.logOut",
+    onRightPress: logout,
+  })
+  // @demo remove-block-end
 
   const $bottomContainerInsets = useSafeAreaInsetsStyle(["bottom"])
 
@@ -33,6 +48,9 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
 
       <View style={[$bottomContainer, $bottomContainerInsets]}>
         <Text tx="welcomeScreen.postscript" size="md" />
+        {/* @demo remove-block-start */}
+        <Button testID="next-screen-button" preset="reversed" text="Let's go" onPress={goNext} />
+        {/* @demo remove-block-end */}
       </View>
     </View>
   )
