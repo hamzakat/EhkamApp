@@ -37,6 +37,7 @@ import { TeacherNavigator, TeacherTabParamList } from "./TeacherNavigator"
 export type AppStackParamList = {
   Login: undefined
   Teacher: NavigatorScreenParams<TeacherTabParamList>
+  StudentsList: undefined
 }
 
 /**

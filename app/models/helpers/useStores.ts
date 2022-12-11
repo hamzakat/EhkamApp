@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react"
+import { api } from "../../services/api"
 import { setReactotronRootStore } from "../../services/reactotron"
 import { RootStore, RootStoreModel } from "../RootStore"
 import { setupRootStore } from "./setupRootStore"
@@ -15,7 +16,7 @@ import { setupRootStore } from "./setupRootStore"
  * very large), you may want to use a different strategy than immediately
  * instantiating it, although that should be rare.
  */
-const _rootStore = RootStoreModel.create({})
+const _rootStore = RootStoreModel.create({}, { api })
 
 /**
  * The RootStoreContext provides a way to access

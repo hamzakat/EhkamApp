@@ -2,16 +2,19 @@ import { flow, Instance, SnapshotOut, types } from "mobx-state-tree"
 
 import { api, ApiLoginResponse } from "../services/api"
 import { GeneralApiProblem } from "../services/api/apiProblem"
+import { withSetPropAction } from "./helpers/withSetPropAction"
+import { UserModel, UserSnapshotIn } from "./User"
 
 export const AuthenticationStoreModel = types
   .model("AuthenticationStore")
   .props({
-    authToken: types.maybe(types.string),
     authEmail: types.optional(types.string, ""),
     authPassword: types.optional(types.string, ""),
+    authToken: types.maybe(types.string),
     authRefreshToken: types.maybe(types.string), // this was not included in demo
     authExpires: types.maybe(types.number),
     authState: types.optional(types.enumeration("State", ["pending", "done", "error"]), "done"),
+    currentUser: types.maybe(UserModel),
   })
   .views((store) => ({
     get isAuthenticated() {
@@ -34,25 +37,13 @@ export const AuthenticationStoreModel = types
       }
     },
   }))
+  .actions(withSetPropAction)
   .actions((store) => ({
-    setAuthToken(value?: string) {
-      store.authToken = value
-    },
     setAuthEmail(value: string) {
       store.authEmail = value.replace(/ /g, "")
     },
     setAuthPassword(value: string) {
       store.authPassword = value.replace(/ /g, "")
-    },
-    setRefreshAuthToken(value?: string) {
-      // this was not included in demo
-      store.authRefreshToken = value
-    },
-    setAuthExpires(timeout: number) {
-      store.authExpires = timeout
-    },
-    setAuthState(value: "pending" | "done" | "error") {
-      store.authState = value
     },
     logout() {
       store.authToken = undefined
@@ -60,22 +51,41 @@ export const AuthenticationStoreModel = types
       store.authPassword = ""
       store.authRefreshToken = undefined
       store.authExpires = undefined
+      api.setAuthToken(undefined)
+      api.setRefreshToken(undefined)
     },
+  }))
+  .actions((store) => ({
+    fetchCurrentUser: flow(function* () {
+      const result: { kind: "ok"; currentUser: UserSnapshotIn } | GeneralApiProblem =
+        yield api.getCurrentUser()
+
+      if (result.kind === "ok") {
+        store.setProp("currentUser", UserModel.create(result.currentUser))
+      } else {
+        store.setProp("currentUser", undefined)
+        __DEV__ && console.tron.log(result)
+        console.log("fetchCurrentUser:", result)
+      }
+    }),
   }))
   .actions((store) => ({
     // this will run only if there's no validation errors
     login: flow(function* () {
-      store.setAuthState("pending")
+      store.setProp("authState", "pending")
       const result: { kind: "ok"; loginResponse: ApiLoginResponse } | GeneralApiProblem =
         yield api.login(store.authEmail, store.authPassword)
 
       if (result.kind === "ok") {
-        store.setAuthState("done")
-        store.setAuthToken(result.loginResponse.accessToken)
-        store.setAuthExpires(result.loginResponse.expires)
-        store.setRefreshAuthToken(result.loginResponse.refreshToken)
+        store.setProp("authState", "done")
+        store.setProp("authToken", result.loginResponse.accessToken)
+        store.setProp("authExpires", result.loginResponse.expires)
+        store.setProp("authRefreshToken", result.loginResponse.refreshToken)
+
+        // get user info after the successful login
+        yield store.fetchCurrentUser()
       } else {
-        store.setAuthState("error")
+        store.setProp("authState", "error")
         __DEV__ && console.tron.log(result)
       }
       return result

@@ -10,7 +10,7 @@ import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
 
 export type TeacherTabParamList = {
   Home: undefined
-  StudentList: undefined
+  StudentsList: undefined
   RecititionList: undefined
   AttendanceList: undefined
 }

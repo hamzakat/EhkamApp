@@ -12,23 +12,18 @@ import { useSafeAreaInsetsStyle } from "../../utils/useSafeAreaInsetsStyle"
 const welcomeLogo = require("../../../assets/images/logo.png")
 const welcomeFace = require("../../../assets/images/welcome-face.png")
 
-interface HomeScreenProps extends TeacherTabScreenProps<"Home"> {} // @demo remove-current-line
+interface HomeScreenProps extends TeacherTabScreenProps<"Home"> {}
 
 export const HomeScreen: FC<HomeScreenProps> = observer(function WelcomeScreen(_props) {
   // const { navigation } = _props
-  const {
-    authenticationStore: { logout },
-  } = useStores()
+  const { authenticationStore } = useStores()
 
-  function goNext() {
-    return
-  }
+  console.log(authenticationStore.currentUser)
 
   useHeader({
     rightTx: "common.logOut",
-    onRightPress: logout,
+    onRightPress: authenticationStore.logout,
   })
-  // @demo remove-block-end
 
   const $bottomContainerInsets = useSafeAreaInsetsStyle(["bottom"])
 
@@ -36,20 +31,22 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function WelcomeScreen(_
     <View style={$container}>
       <View style={$topContainer}>
         <Image style={$welcomeLogo} source={welcomeLogo} resizeMode="contain" />
-        <Text
-          testID="welcome-heading"
-          style={$welcomeHeading}
-          tx="welcomeScreen.readyForLaunch"
-          preset="heading"
-        />
-        <Text tx="welcomeScreen.exciting" preset="subheading" />
+        <Text testID="welcome-heading" style={$welcomeHeading} text="الترويسة" preset="heading" />
+        <Text text="مرحباً" preset="subheading" />
         <Image style={$welcomeFace} source={welcomeFace} resizeMode="contain" />
       </View>
 
       <View style={[$bottomContainer, $bottomContainerInsets]}>
         <Text tx="welcomeScreen.postscript" size="md" />
         {/* @demo remove-block-start */}
-        <Button testID="next-screen-button" preset="reversed" text="Let's go" onPress={goNext} />
+        <Button
+          testID="next-screen-button"
+          preset="reversed"
+          text="Let's go"
+          onPress={async function () {
+            await authenticationStore.fetchCurrentUser()
+          }}
+        />
         {/* @demo remove-block-end */}
       </View>
     </View>
