@@ -20,7 +20,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
       setAuthEmail,
       setAuthPassword,
       validationErrors,
-      login,
+      logIn,
     },
   } = useStores()
 
@@ -42,7 +42,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
 
     // Make a request to your server to get an authentication token.
     // If successful, reset the fields and set the token.
-    login().then((result) => {
+    logIn(authEmail, authPassword).then((result) => {
       if (result.kind === "ok") {
         setIsSubmitted(false)
       } else if (result.kind === "unauthorized") {

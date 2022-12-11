@@ -22,7 +22,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function WelcomeScreen(_
 
   useHeader({
     rightTx: "common.logOut",
-    onRightPress: authenticationStore.logout,
+    onRightPress: authenticationStore.logOut,
   })
 
   const $bottomContainerInsets = useSafeAreaInsetsStyle(["bottom"])

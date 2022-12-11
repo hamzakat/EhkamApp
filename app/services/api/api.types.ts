@@ -9,6 +9,17 @@ export interface ApiLoginResponse {
   refreshToken: string
 }
 
+export interface ApiUserResponse {
+  id: string
+  first_name: string
+  last_name: string
+  role: string
+  title: string
+  location: string
+  description: string
+  class_id: string
+  school_id: string
+}
 /**
  * The options used to configure apisauce.
  */
