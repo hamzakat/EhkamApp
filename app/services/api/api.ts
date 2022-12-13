@@ -7,7 +7,7 @@
  */
 import { ApisauceInstance, create } from "apisauce"
 import Config from "../../config"
-import axios, { AxiosInstance } from "axios"
+
 import type { ApiConfig } from "./api.types"
 
 /**
@@ -23,7 +23,7 @@ export const DEFAULT_API_CONFIG: ApiConfig = {
  * various requests that you need to call from your backend API.
  */
 export class Api {
-  axios: AxiosInstance
+  apisauce: ApisauceInstance
   config: ApiConfig
 
   /**
@@ -31,68 +31,13 @@ export class Api {
    */
   constructor(config: ApiConfig = DEFAULT_API_CONFIG) {
     this.config = config
-    this.axios = axios.create({
+    this.apisauce = create({
       baseURL: this.config.url,
       timeout: this.config.timeout,
       headers: {
         Accept: "application/json",
       },
     })
-    // this.apisauce.addAsyncResponseTransform(async (response) => {
-    //   console.log("addAsyncResponseTransform", response.status)
-
-    //   if (response.status === 401) {
-    //     console.log("REFRESH TOKEN")
-
-    //     this.apisauce.setHeaders({
-    //       Authorization: undefined,
-    //     })
-
-    //     console.log("HEADERS", this.apisauce.headers)
-    //     // get new refresh token
-    //     const refreshResponse: ApiResponse<any> = await this.apisauce.post(
-    //       "/auth/refresh",
-    //       {
-    //         refresh_token: this.refreshToken,
-    //       },
-    //       {
-    //         ...response.config,
-    //         headers: {
-    //           Authorization: undefined,
-    //         },
-    //       },
-    //     )
-
-    //     if (!refreshResponse.ok) {
-    //       console.log("!refreshResponse.ok")
-    //       this.authToken = undefined
-    //       this.refreshToken = undefined
-    //       this.apisauce.setHeaders({
-    //         Authorization: undefined,
-    //       })
-    //     } else {
-    //       this.authToken = refreshResponse.data.data.access_token
-    //       this.refreshToken = refreshResponse.data.data.refresh_token
-
-    //       this.apisauce.setHeaders({
-    //         Authorization: `Bearer ${this.authToken}`,
-    //       })
-
-    //       // retry the call that was failure
-    //       const retryResponse = await this.apisauce.any({
-    //         ...response.config,
-    //         headers: {
-    //           Authorization: `Bearer ${this.authToken}`,
-    //         },
-    //       })
-
-    //       response.data = retryResponse.data
-    //       response.status = retryResponse.status
-    //       response.ok = retryResponse.ok
-    //       response.problem = retryResponse.problem
-    //     }
-    //   }
-    // })
   }
 }
 

@@ -16,9 +16,9 @@ interface HomeScreenProps extends TeacherTabScreenProps<"Home"> {}
 
 export const HomeScreen: FC<HomeScreenProps> = observer(function WelcomeScreen(_props) {
   // const { navigation } = _props
-  const { authenticationStore } = useStores()
+  const { authenticationStore, currentUserStore } = useStores()
 
-  console.log(authenticationStore.currentUser)
+  console.log(currentUserStore.user.first_name)
 
   useHeader({
     rightTx: "common.logOut",
@@ -44,7 +44,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function WelcomeScreen(_
           preset="reversed"
           text="Let's go"
           onPress={async function () {
-            await authenticationStore.fetchCurrentUser()
+            await currentUserStore.fetchCurrentUser()
           }}
         />
         {/* @demo remove-block-end */}

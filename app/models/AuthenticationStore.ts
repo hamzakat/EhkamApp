@@ -1,8 +1,9 @@
 import { api, ApiLoginResponse } from "../services/api"
-import { flow, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
-import { UserModel, UserSnapshotIn } from "./User"
+import { flow, Instance, SnapshotIn, SnapshotOut, types, getRoot } from "mobx-state-tree"
+
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { ApiResponse } from "apisauce"
+import { GeneralApiProblem, getGeneralApiProblem } from "../services/api/apiProblem"
 
 export const AuthenticationStoreModel = types
   .model("AuthStore", {
@@ -11,7 +12,6 @@ export const AuthenticationStoreModel = types
     authEmail: types.optional(types.string, ""),
     authPassword: types.optional(types.string, ""),
     authState: types.optional(types.enumeration("State", ["pending", "done", "error"]), "done"),
-    currentUser: types.maybe(UserModel),
   })
   .views((self) => ({
     get isAuthenticated() {
@@ -36,54 +36,45 @@ export const AuthenticationStoreModel = types
   }))
   .actions(withSetPropAction)
   .actions((self) => {
-    const fetchCurrentUser = flow(function* () {
-      const response: { kind: "ok"; currentUser: UserSnapshotIn } =
-        yield self.currentUser.fetchCurrentUser()
+    let refreshTokensPromise = null
+    const refreshTokens = flow(function* () {
+      // No catch clause because we want the caller to handle the error.
 
-      if (response.kind !== "ok") {
-        console.log("fetchCurrentUser", response)
-        return
+      const refreshTokenRes = yield api.apisauce.any({
+        method: "POST",
+        url: "/auth/refresh/",
+        data: {
+          refresh_token: self.refreshToken,
+        },
+        headers: {
+          Authorization: undefined,
+        },
+      })
+
+      if (!refreshTokenRes.ok) {
+        const problem: void | GeneralApiProblem = getGeneralApiProblem(refreshTokenRes)
+        __DEV__ && console.log("Problem from AuthenticationStore.refreshTokens():", refreshTokenRes)
+
+        if (problem) return problem
       }
-
       try {
-        self.currentUser = UserModel.create(response.currentUser)
-        return { kind: "ok" }
+        self.accessToken = refreshTokenRes.data.data.access_token
+        self.refreshToken = refreshTokenRes.data.data.refresh_token
+        console.log("Successful refresh token!")
+        refreshTokensPromise = null
+
+        return { kind: "ok", refreshTokenRes }
       } catch (e) {
         if (__DEV__) {
-          console.tron.error(`Bad data: ${e.message}\n${response}`, e.stack)
+          console.tron.error(`Bad data: ${e.message}\n${refreshTokenRes}`, e.stack)
           console.log("Error from AuthenticationStore.fetchCurrentUser():", e)
         }
-        self.currentUser = undefined
+        refreshTokensPromise = null
         return { kind: "bad-data" }
       }
     })
 
-    return { fetchCurrentUser }
-  })
-  .actions((self) => {
-    let refreshTokensPromise = null
-    const refreshTokens = flow(function* () {
-      // No catch clause because we want the caller to handle the error.
-      try {
-        const res = yield api.axios({
-          method: "POST",
-          url: "/auth/refresh/",
-          data: {
-            refresh_token: self.refreshToken,
-          },
-          headers: {
-            Authorization: undefined,
-          },
-        })
-
-        self.accessToken = res.data.data.access_token
-        self.refreshToken = res.data.data.refresh_token
-        console.log("Successful refresh token!")
-      } finally {
-        refreshTokensPromise = null
-      }
-    })
-
+    const rootStore = getRoot(self)
     return {
       // Multiple requests could fail at the same time because of an old
       // accessToken, so we want to make sure only one token refresh
@@ -96,16 +87,22 @@ export const AuthenticationStoreModel = types
       },
       logIn: flow(function* (email, password) {
         self.authState = "pending"
-        try {
-          const response: ApiResponse<any> = yield api.axios({
-            method: "POST",
-            url: "/auth/login/",
-            data: {
-              email,
-              password,
-            },
-          })
+        const response: ApiResponse<any> = yield api.apisauce.any({
+          method: "POST",
+          url: "/auth/login/",
+          data: {
+            email,
+            password,
+          },
+        })
 
+        if (!response.ok) {
+          const problem = getGeneralApiProblem(response)
+          __DEV__ && console.log("Problem from AuthenticationStore.logIn()", response)
+
+          if (problem) return problem
+        }
+        try {
           // transform login response
           const loginResponse: ApiLoginResponse = {
             accessToken: response.data.data.access_token,
@@ -118,7 +115,9 @@ export const AuthenticationStoreModel = types
           self.refreshToken = loginResponse.refreshToken
 
           // get user info after the successful login
-          yield self.fetchCurrentUser()
+          // @ts-ignore
+          yield rootStore.currentUserStore.fetchCurrentUser()
+
           return { kind: "ok" }
         } catch (e) {
           if (__DEV__) {
@@ -135,6 +134,9 @@ export const AuthenticationStoreModel = types
         self.refreshToken = null
         self.authEmail = ""
         self.authPassword = ""
+
+        // @ts-ignore
+        rootStore.currentUserStore.cleanCurrentUser()
       },
       setAuthEmail(value: string) {
         self.authEmail = value.replace(/ /g, "")
@@ -155,30 +157,26 @@ export const AuthenticationStoreModel = types
           },
         }
 
-        try {
-          return yield api.axios(authConf)
-        } catch (error) {
-          const { status } = error.response
-          console.log("LOG STATUS", status)
+        const res = yield api.apisauce.any(authConf)
 
-          // Throw the error to the caller if it's not an authorization error.
-          if (status !== 401) throw error
+        if (res.ok) return res
 
-          try {
-            yield self.refreshTokens()
-          } catch (err) {
-            // If refreshing of the tokens fail we have an old
-            // refreshToken and we must log out the user.
-            self.logOut()
-            // We still throw the error so the caller doesn't
-            // treat it as a successful request.
-            throw err
-          }
+        // Return the raw response to the caller if it's not an authorization error.
+        if (res.status !== 401) return res
 
-          authConf.headers.Authorization = `Bearer ${self.accessToken}`
+        const refreshTokenRes = yield self.refreshTokens()
 
-          return yield api.axios(authConf)
+        if (refreshTokenRes.kind !== "ok") {
+          // If refreshing of the tokens fail we have an old
+          // refreshToken and we must log out the user.
+          self.logOut()
+          // We still throw the error so the caller doesn't
+          // treat it as a successful request.
+          return refreshTokenRes
         }
+        authConf.headers.Authorization = `Bearer ${self.accessToken}`
+
+        return yield api.apisauce.any(authConf)
       }),
     }
   })
@@ -189,16 +187,3 @@ export interface AuthenticationStoreSnapshotIn
   extends SnapshotIn<typeof AuthenticationStoreModel> {}
 export const createAuthenticationStoreDefaultModel = () =>
   types.optional(AuthenticationStoreModel, {})
-
-// const SomeDeepModel = t
-//   .model({
-//     foo: "foo",
-//   })
-//   .extend(withRequest)
-//   .actions((self) => ({
-//     getFoo: flow(function* () {
-//       const res = yield self.request({ url: "/api/foo/" })
-
-//       self.foo = res.data.foo
-//     }),
-//   }))
