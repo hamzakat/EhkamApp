@@ -1,4 +1,7 @@
 export * from "./Teacher/HomeScreen"
-
+export * from "./Teacher/StudentsScreen"
+export * from "./Teacher/AttendanceScreen"
+export * from "./Teacher/MessagesScreen"
+export * from "./Teacher/SessionsScreen"
 export * from "./LoginScreen"
 export * from "./ErrorScreen/ErrorBoundary"

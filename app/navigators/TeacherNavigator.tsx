@@ -4,15 +4,22 @@ import React from "react"
 import { TextStyle, ViewStyle } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { Icon } from "../components"
-import { HomeScreen } from "../screens"
+import {
+  AttendanceScreen,
+  HomeScreen,
+  MessagesScreen,
+  SessionsScreen,
+  StudentsScreen,
+} from "../screens"
 import { colors, spacing, typography } from "../theme"
 import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
 
 export type TeacherTabParamList = {
   Home: undefined
-  StudentsList: undefined
-  RecititionList: undefined
-  AttendanceList: undefined
+  Students: undefined
+  Sessions: undefined
+  Attendance: undefined
+  Messages: undefined
 }
 
 /**
@@ -43,10 +50,44 @@ export function TeacherNavigator() {
       }}
     >
       <Tab.Screen
+        name="Sessions"
+        component={SessionsScreen}
+        options={{
+          tabBarLabel: "Sessions",
+          tabBarIcon: ({ focused }) => <Icon icon="components" color={focused && colors.tint} />,
+        }}
+      />
+      <Tab.Screen
+        name="Attendance"
+        component={AttendanceScreen}
+        options={{
+          tabBarLabel: "Attendance",
+          tabBarIcon: ({ focused }) => <Icon icon="components" color={focused && colors.tint} />,
+        }}
+      />
+
+      <Tab.Screen
         name="Home"
         component={HomeScreen}
         options={{
           tabBarLabel: "Home",
+          tabBarIcon: ({ focused }) => <Icon icon="components" color={focused && colors.tint} />,
+        }}
+      />
+
+      <Tab.Screen
+        name="Messages"
+        component={MessagesScreen}
+        options={{
+          tabBarLabel: "Messages",
+          tabBarIcon: ({ focused }) => <Icon icon="components" color={focused && colors.tint} />,
+        }}
+      />
+      <Tab.Screen
+        name="Students"
+        component={StudentsScreen}
+        options={{
+          tabBarLabel: "Students",
           tabBarIcon: ({ focused }) => <Icon icon="components" color={focused && colors.tint} />,
         }}
       />
