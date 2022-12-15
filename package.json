@@ -30,7 +30,8 @@
     "expo:ios": "expo start --ios",
     "expo:web": "expo start --web",
     "expo:build:detox": "detox build -c ios.sim.expo",
-    "expo:test:detox": "./bin/downloadExpoApp.sh && detox test --configuration ios.sim.expo"
+    "expo:test:detox": "./bin/downloadExpoApp.sh && detox test --configuration ios.sim.expo",
+    "ignite": "ignite-cli"
   },
   "overrides": {
     "react-error-overlay": "6.0.9"
@@ -102,6 +103,7 @@
     "expo-detox-hook": "1.0.10",
     "expo-modules-autolinking": "0.10.1",
     "fbjs-scripts": "3.0.1",
+    "ignite-cli": "^8.4.4",
     "jest": "26",
     "jest-circus": "26",
     "jest-environment-node": "26",
