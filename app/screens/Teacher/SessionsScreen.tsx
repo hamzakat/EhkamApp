@@ -24,7 +24,7 @@ export const SessionsScreen: FC<StackScreenProps<AppStackScreenProps, "Sessions"
     // Pull in navigation via hook
     // const navigation = useNavigation()
     return (
-      <Screen style={$root} preset="scroll">
+      <Screen safeAreaEdges={["top", "left"]} style={$root} preset="scroll">
         <Text text="sessions" />
       </Screen>
     )

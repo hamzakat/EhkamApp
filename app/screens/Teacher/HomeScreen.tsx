@@ -30,15 +30,12 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function WelcomeScreen(_
   return (
     <View style={$container}>
       <View style={$topContainer}>
-        <Image style={$welcomeLogo} source={welcomeLogo} resizeMode="contain" />
         <Text testID="welcome-heading" style={$welcomeHeading} text="الترويسة" preset="heading" />
         <Text text="مرحباً" preset="subheading" />
         <Image style={$welcomeFace} source={welcomeFace} resizeMode="contain" />
       </View>
 
       <View style={[$bottomContainer, $bottomContainerInsets]}>
-        <Text tx="welcomeScreen.postscript" size="md" />
-        {/* @demo remove-block-start */}
         <Button
           testID="next-screen-button"
           preset="reversed"
@@ -47,7 +44,6 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function WelcomeScreen(_
             await currentUserStore.fetchCurrentUser()
           }}
         />
-        {/* @demo remove-block-end */}
       </View>
     </View>
   )

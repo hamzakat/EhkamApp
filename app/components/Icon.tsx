@@ -107,6 +107,11 @@ export const iconRegistry = {
   slack: require("../../assets/icons/slack.png"),
   view: require("../../assets/icons/view.png"),
   x: require("../../assets/icons/x.png"),
+  home: require("../../assets/icons/ehkam/home.png"),
+  envelope: require("../../assets/icons/ehkam/envelope.png"),
+  persontime: require("../../assets/icons/ehkam/attendance.png"),
+  book: require("../../assets/icons/ehkam/book.png"),
+  people: require("../../assets/icons/ehkam/users.png"),
 }
 
 const $imageStyle: ImageStyle = {

@@ -35,6 +35,9 @@ const palette = {
 
   overlay20: "rgba(25, 16, 21, 0.2)",
   overlay50: "rgba(25, 16, 21, 0.5)",
+
+  peachypink: "#FB9C80",
+  cyan: "#68CAD7",
 }
 
 export const colors = {
@@ -59,15 +62,19 @@ export const colors = {
   /**
    * The default color of the screen background.
    */
-  background: palette.neutral200,
+  background: palette.neutral100,
   /**
    * The default border color.
    */
   border: palette.neutral400,
   /**
+   * The default border color.
+   */
+  shadow: palette.neutral900,
+  /**
    * The main tinting color.
    */
-  tint: palette.primary500,
+  tint: palette.peachypink,
   /**
    * A subtle color used for lines.
    */
@@ -81,4 +88,10 @@ export const colors = {
    *
    */
   errorBackground: palette.angry100,
+
+  /**
+   *  Ehkam colors
+   */
+  ehkam_peach: palette.peachypink,
+  ehkam_cyan: palette.cyan,
 }

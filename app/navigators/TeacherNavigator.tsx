@@ -1,7 +1,7 @@
 import { BottomTabScreenProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { CompositeScreenProps } from "@react-navigation/native"
 import React from "react"
-import { TextStyle, ViewStyle } from "react-native"
+import { ImageStyle, TextStyle, View, ViewStyle } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { Icon } from "../components"
 import {
@@ -47,14 +47,20 @@ export function TeacherNavigator() {
         tabBarInactiveTintColor: colors.text,
         tabBarLabelStyle: $tabBarLabel,
         tabBarItemStyle: $tabBarItem,
+        tabBarShowLabel: false,
       }}
+      defaultScreenOptions={{}}
     >
       <Tab.Screen
         name="Sessions"
         component={SessionsScreen}
         options={{
           tabBarLabel: "Sessions",
-          tabBarIcon: ({ focused }) => <Icon icon="components" color={focused && colors.tint} />,
+          tabBarIcon: ({ focused }) => (
+            <View style={focused ? $tabBarIconContainerActive : $tabBarIconContainer}>
+              <Icon icon="book" style={$tabBarIcon} color={focused && colors.background} />
+            </View>
+          ),
         }}
       />
       <Tab.Screen
@@ -62,7 +68,11 @@ export function TeacherNavigator() {
         component={AttendanceScreen}
         options={{
           tabBarLabel: "Attendance",
-          tabBarIcon: ({ focused }) => <Icon icon="components" color={focused && colors.tint} />,
+          tabBarIcon: ({ focused }) => (
+            <View style={focused ? $tabBarIconContainerActive : $tabBarIconContainer}>
+              <Icon icon="persontime" style={$tabBarIcon} color={focused && colors.background} />
+            </View>
+          ),
         }}
       />
 
@@ -71,7 +81,11 @@ export function TeacherNavigator() {
         component={HomeScreen}
         options={{
           tabBarLabel: "Home",
-          tabBarIcon: ({ focused }) => <Icon icon="components" color={focused && colors.tint} />,
+          tabBarIcon: ({ focused }) => (
+            <View style={focused ? $tabBarIconContainerActive : $tabBarIconContainer}>
+              <Icon icon="home" style={$tabBarIcon} color={focused && colors.background} />
+            </View>
+          ),
         }}
       />
 
@@ -80,7 +94,11 @@ export function TeacherNavigator() {
         component={MessagesScreen}
         options={{
           tabBarLabel: "Messages",
-          tabBarIcon: ({ focused }) => <Icon icon="components" color={focused && colors.tint} />,
+          tabBarIcon: ({ focused }) => (
+            <View style={focused ? $tabBarIconContainerActive : $tabBarIconContainer}>
+              <Icon icon="envelope" style={$tabBarIcon} color={focused && colors.background} />
+            </View>
+          ),
         }}
       />
       <Tab.Screen
@@ -88,7 +106,11 @@ export function TeacherNavigator() {
         component={StudentsScreen}
         options={{
           tabBarLabel: "Students",
-          tabBarIcon: ({ focused }) => <Icon icon="components" color={focused && colors.tint} />,
+          tabBarIcon: ({ focused }) => (
+            <View style={focused ? $tabBarIconContainerActive : $tabBarIconContainer}>
+              <Icon icon="people" style={$tabBarIcon} color={focused && colors.background} />
+            </View>
+          ),
         }}
       />
     </Tab.Navigator>
@@ -97,11 +119,56 @@ export function TeacherNavigator() {
 
 const $tabBar: ViewStyle = {
   backgroundColor: colors.background,
-  borderTopColor: colors.transparent,
+  borderTopWidth: 0.5,
+  borderLeftWidth: 0.5,
+  borderRightWidth: 0.5,
+  borderColor: colors.border,
+  borderTopEndRadius: 20,
+  borderTopStartRadius: 20,
+  shadowColor: colors.shadow,
+  shadowOffset: {
+    width: 0,
+    height: 12,
+  },
+  shadowOpacity: 0.58,
+  shadowRadius: 5.0,
+
+  elevation: 10,
+  position: "absolute",
 }
 
 const $tabBarItem: ViewStyle = {
-  paddingTop: spacing.medium,
+  paddingTop: spacing.small,
+  paddingBottom: spacing.small,
+}
+
+const $tabBarIconContainer: ViewStyle = {
+  width: 48,
+  height: 48,
+  alignItems: "center",
+  justifyContent: "center",
+}
+const $tabBarIconContainerActive: ViewStyle = {
+  width: 48,
+  height: 48,
+  borderRadius: 25,
+
+  backgroundColor: colors.tint,
+  justifyContent: "center",
+  shadowColor: colors.shadow,
+  shadowOffset: {
+    width: 0,
+    height: 1,
+  },
+  shadowOpacity: 0.2,
+  shadowRadius: 1.41,
+
+  elevation: 3,
+}
+const $tabBarIcon: ImageStyle = {
+  width: 25.65,
+  height: 17.11,
+  alignSelf: "center",
 }
 
 const $tabBarLabel: TextStyle = {

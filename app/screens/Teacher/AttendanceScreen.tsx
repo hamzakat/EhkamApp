@@ -23,7 +23,7 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
   // Pull in navigation via hook
   // const navigation = useNavigation()
   return (
-    <Screen style={$root} preset="scroll">
+    <Screen safeAreaEdges={["top", "left"]} style={$root} preset="scroll">
       <Text text="attendance" />
     </Screen>
   )
