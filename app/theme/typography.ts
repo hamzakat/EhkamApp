@@ -2,31 +2,16 @@
 // markdown file and add links from here
 
 import { Platform } from "react-native"
-import {
-  SpaceGrotesk_300Light as spaceGroteskLight,
-  SpaceGrotesk_400Regular as spaceGroteskRegular,
-  SpaceGrotesk_500Medium as spaceGroteskMedium,
-  SpaceGrotesk_600SemiBold as spaceGroteskSemiBold,
-  SpaceGrotesk_700Bold as spaceGroteskBold,
-} from "@expo-google-fonts/space-grotesk"
 
 export const customFontsToLoad = {
-  spaceGroteskLight,
-  spaceGroteskRegular,
-  spaceGroteskMedium,
-  spaceGroteskSemiBold,
-  spaceGroteskBold,
+  expoArabicBook: require("../../assets/fonts/ExpoArabic-Book.ttf"),
+  expoArabicMedium: require("../../assets/fonts/ExpoArabic-Medium.ttf"),
+  expoArabicLight: require("../../assets/fonts/ExpoArabic-Light.ttf"),
+  expoArabicSemiBold: require("../../assets/fonts/ExpoArabic-SemiBold.ttf"),
+  expoArabicBold: require("../../assets/fonts/ExpoArabic-Bold.otf"),
 }
 
 const fonts = {
-  spaceGrotesk: {
-    // Cross-platform Google font.
-    light: "spaceGroteskLight",
-    normal: "spaceGroteskRegular",
-    medium: "spaceGroteskMedium",
-    semiBold: "spaceGroteskSemiBold",
-    bold: "spaceGroteskBold",
-  },
   helveticaNeue: {
     // iOS only font.
     thin: "HelveticaNeue-Thin",
@@ -49,6 +34,13 @@ const fonts = {
     // Android only font.
     normal: "monospace",
   },
+  expoArabic: {
+    book: "expoArabicBook",
+    medium: "expoArabicMedium",
+    light: "expoArabicLight",
+    semiBold: "expoArabicSemiBold",
+    bold: "expoArabicBold",
+  },
 }
 
 export const typography = {
@@ -59,7 +51,7 @@ export const typography = {
   /**
    * The primary font. Used in most places.
    */
-  primary: fonts.spaceGrotesk,
+  primary: fonts.expoArabic,
   /**
    * An alternate font used for perhaps titles and stuff.
    */

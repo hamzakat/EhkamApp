@@ -107,11 +107,22 @@ export const iconRegistry = {
   slack: require("../../assets/icons/slack.png"),
   view: require("../../assets/icons/view.png"),
   x: require("../../assets/icons/x.png"),
+
+  // Ehkamp icons
   home: require("../../assets/icons/ehkam/home.png"),
   envelope: require("../../assets/icons/ehkam/envelope.png"),
   persontime: require("../../assets/icons/ehkam/attendance.png"),
   book: require("../../assets/icons/ehkam/book.png"),
   people: require("../../assets/icons/ehkam/users.png"),
+
+  searchCyan: require("../../assets/icons/ehkam/search-cyan.png"),
+  sortCyan: require("../../assets/icons/ehkam/sort-cyan.png"),
+  sortPeach: require("../../assets/icons/ehkam/sort-peach.png"),
+  filterCyan: require("../../assets/icons/ehkam/filter-cyan.png"),
+  filterPeach: require("../../assets/icons/ehkam/filter-peach.png"),
+  leftArrowCyan: require("../../assets/icons/ehkam/left-arrow-cyan.png"),
+  downArrowsGrey: require("../../assets/icons/ehkam/down-grey.png"),
+  upArrowsGrey: require("../../assets/icons/ehkam/up-grey.png"),
 }
 
 const $imageStyle: ImageStyle = {

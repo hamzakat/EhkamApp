@@ -36,8 +36,13 @@ const palette = {
   overlay20: "rgba(25, 16, 21, 0.2)",
   overlay50: "rgba(25, 16, 21, 0.5)",
 
-  peachypink: "#FB9C80",
+  /**
+   *  Ehkam colors
+   */
+  peachyPink: "#FB9C80",
   cyan: "#68CAD7",
+  grey: "#9E9E9E",
+  darkGrey: "#707070",
 }
 
 export const colors = {
@@ -74,7 +79,7 @@ export const colors = {
   /**
    * The main tinting color.
    */
-  tint: palette.peachypink,
+  tint: palette.peachyPink,
   /**
    * A subtle color used for lines.
    */
@@ -92,6 +97,8 @@ export const colors = {
   /**
    *  Ehkam colors
    */
-  ehkam_peach: palette.peachypink,
-  ehkam_cyan: palette.cyan,
+  ehkamPeach: palette.peachyPink,
+  ehkamCyan: palette.cyan,
+  ehkamGrey: palette.grey,
+  ehkamDarkGrey: palette.darkGrey,
 }
