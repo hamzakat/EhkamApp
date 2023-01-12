@@ -43,6 +43,7 @@ const palette = {
   cyan: "#68CAD7",
   grey: "#9E9E9E",
   darkGrey: "#707070",
+  red: "#F96565",
 }
 
 export const colors = {
@@ -101,4 +102,5 @@ export const colors = {
   ehkamCyan: palette.cyan,
   ehkamGrey: palette.grey,
   ehkamDarkGrey: palette.darkGrey,
+  ehkamRed: palette.red,
 }

@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, { FC, useEffect, useRef, useState } from "react"
 import { observer } from "mobx-react-lite"
 import {
@@ -14,13 +15,12 @@ import {
   Button,
   Icon,
   Screen,
-  TextField,
   Text,
-  Card,
-  AutoImage,
+  StudentCard,
   EmptyState,
   Toggle,
   ListItem,
+  SearchBar,
 } from "../../components"
 import { useStores } from "../../models"
 import { colors, spacing } from "../../theme"
@@ -57,7 +57,7 @@ export const StudentsScreen: FC<TeacherTabScreenProps<"Students">> = observer(
     // const navigation = useNavigation()
 
     const [isLoading, setIsLoading] = useState(false)
-    const [searchFocused, setSearchFocused] = useState(false)
+    const [searchBarFocused, setSearchBarFocused] = useState(false)
     const [searchPhrase, setSearchPhrase] = useState("")
     const [refreshing, setRefreshing] = useState(false)
     const [showFilterSettings, setShowFilterSettings] = useState(false)
@@ -94,9 +94,21 @@ export const StudentsScreen: FC<TeacherTabScreenProps<"Students">> = observer(
       setRefreshing(false)
     }
 
-    const renderItem = ({ item }: { item: Student }) => {
+    const renderSearchItem = ({ item }: { item: Student }) => {
       if (searchPhrase === "") {
-        return <StudentCard key={item.id} student={item} />
+        return (
+          <StudentCard
+            key={item.id}
+            student={item}
+            additionalComponent={
+              <View style={$studentCardCircle}>
+                <Text weight="bold" style={{ color: colors.background }} size="xxs">
+                  013
+                </Text>
+              </View>
+            }
+          />
+        )
       }
       // filter of the name
       if (item.fullname.includes(searchPhrase.trim().replace(/\s/g, ""))) {
@@ -114,8 +126,8 @@ export const StudentsScreen: FC<TeacherTabScreenProps<"Students">> = observer(
                 /* Search area */
                 ListHeaderComponent={
                   <SearchArea
-                    searchFocused={searchFocused}
-                    setSearchFocused={setSearchFocused}
+                    searchFocused={searchBarFocused}
+                    setSearchBarFocused={setSearchBarFocused}
                     setSearchPhrase={setSearchPhrase}
                     searchBarRef={searchBarRef}
                     setShowSortSettings={setShowSortSettings}
@@ -129,7 +141,7 @@ export const StudentsScreen: FC<TeacherTabScreenProps<"Students">> = observer(
                 refreshControl={
                   <RefreshControl refreshing={refreshing} onRefresh={() => manualRefresh()} />
                 }
-                renderItem={renderItem}
+                renderItem={renderSearchItem}
                 ListEmptyComponent={
                   isLoading ? (
                     <ActivityIndicator />
@@ -180,12 +192,20 @@ const SearchArea = function ({
   searchBarRef,
   searchFocused,
   setSearchPhrase,
-  setSearchFocused,
+  setSearchBarFocused,
   setShowFilterSettings,
   setShowSortSettings,
 }) {
   return (
-    <View style={$searchArea}>
+    <View
+      style={{
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginVertical: spacing.medium,
+      }}
+    >
       {!searchFocused && (
         <View style={$searchIcons}>
           <Icon onPress={() => setShowSortSettings(true)} style={$searchIcon} icon="sortCyan" />
@@ -193,17 +213,11 @@ const SearchArea = function ({
           <Icon onPress={() => setShowFilterSettings(true)} style={$searchIcon} icon="filterCyan" />
         </View>
       )}
-      <View style={searchFocused ? $searchBarFocused : $searchBarBlurred}>
-        <TextField
+      <View style={{ flex: searchFocused ? 1 : 0.7 }}>
+        <SearchBar
           ref={searchBarRef}
-          RightAccessory={() => {
-            return <Icon icon="searchCyan" style={$searchBarIcon} />
-          }}
-          inputWrapperStyle={$inputWrapper}
-          onFocus={() => setSearchFocused(true)}
-          onBlur={() => setSearchFocused(false)}
-          placeholder={"اسم الطالب ..."}
-          placeholderTextColor={colors.ehkamGrey}
+          onFocus={() => setSearchBarFocused(true)}
+          onBlur={() => setSearchBarFocused(false)}
           onChangeText={(value) => setSearchPhrase(value)}
         />
       </View>
@@ -531,43 +545,6 @@ const FilterSettings = function ({
   )
 }
 
-const StudentCard = observer(function StudentCard({ student }: { student: Student }) {
-  const studentImg = require("../../../assets/images/boy.jpeg")
-  const handlePressCard = () => {
-    // open student profile page
-  }
-  return (
-    <Card
-      style={$studentCard}
-      verticalAlignment="center"
-      onPress={() => handlePressCard()}
-      LeftComponent={<AutoImage style={$studentCardAvatar} source={studentImg} />}
-      RightComponent={
-        <View style={$studentCardCircle}>
-          <Text weight="bold" style={{ color: colors.background }} size="xxs">
-            013
-          </Text>
-        </View>
-      }
-      HeadingComponent={
-        <Text size="md" weight="bold" style={{ color: colors.ehkamDarkGrey }}>
-          {student.fullname}
-        </Text>
-      }
-      ContentComponent={
-        <View style={$studentCardInfo}>
-          <Text weight="book" style={{ color: colors.ehkamGrey }}>
-            سورة البقرة
-          </Text>
-          <Text weight="book" style={{ color: colors.ehkamPeach }}>
-            ص 30
-          </Text>
-        </View>
-      }
-    />
-  )
-})
-
 const $root: ViewStyle = {
   flex: 1,
 }
@@ -576,22 +553,6 @@ const $container: ViewStyle = {
   paddingHorizontal: spacing.large,
   marginBottom: spacing.medium,
   justifyContent: "space-around",
-}
-
-const $searchArea: ViewStyle = {
-  flex: 1,
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginVertical: spacing.medium,
-}
-
-const $searchBarBlurred: ViewStyle = {
-  flex: 0.75,
-}
-
-const $searchBarFocused: ViewStyle = {
-  flex: 1,
 }
 
 const $searchIcons: ViewStyle = {
@@ -614,29 +575,6 @@ const $inputWrapper: ViewStyle = {
   borderColor: colors.ehkamPeach,
   borderRadius: 12,
   borderWidth: 1,
-}
-
-const $studentCard: ViewStyle = {
-  flex: 1,
-  flexDirection: "row",
-  borderRadius: 20,
-  borderWidth: 0,
-  alignItems: "center",
-  padding: 0,
-  height: 100,
-  marginTop: spacing.small,
-}
-
-const $studentCardAvatar: ImageStyle = {
-  alignSelf: "center",
-  borderRadius: 20,
-  width: 100,
-  height: 100,
-}
-const $studentCardInfo: ViewStyle = {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  width: 130,
 }
 
 const $studentCardCircle: ViewStyle = {

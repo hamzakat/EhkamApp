@@ -50,6 +50,15 @@ export const StudentModel = types
       }
       return self.first_name
     },
+    // get lastNewSession() {
+    //   return
+    // },
+    // get lastRepeatSession() {
+    //   // access sessionStore using rootStore
+    //   // starting from the end of the sessionStore (assuming it is sorted ascendantly based on the creation date)
+    //   // search for the first hit where student.id == self.id
+    //   return
+    // },
   })) // eslint-disable-line @typescript-eslint/no-unused-vars
   .actions((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
 

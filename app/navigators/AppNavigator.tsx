@@ -64,7 +64,6 @@ const AppStack = observer(function AppStack() {
       screenOptions={{ headerShown: false }}
       initialRouteName={isAuthenticated ? "Teacher" : "Login"} // @demo remove-current-line
     >
-      {/* @demo remove-block-start */}
       {isAuthenticated ? (
         <>
           <Stack.Screen name="Teacher" component={TeacherNavigator} />
@@ -74,8 +73,6 @@ const AppStack = observer(function AppStack() {
           <Stack.Screen name="Login" component={LoginScreen} />
         </>
       )}
-      {/* @demo remove-block-end */}
-
       {/** 🔥 Your screens go here */}
     </Stack.Navigator>
   )

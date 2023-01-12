@@ -123,6 +123,14 @@ export const iconRegistry = {
   leftArrowCyan: require("../../assets/icons/ehkam/left-arrow-cyan.png"),
   downArrowsGrey: require("../../assets/icons/ehkam/down-grey.png"),
   upArrowsGrey: require("../../assets/icons/ehkam/up-grey.png"),
+  menuCyan: require("../../assets/icons/ehkam/menu-cyan.png"),
+  locationCheck: require("../../assets/icons/ehkam/location-check.png"),
+  locationPlus: require("../../assets/icons/ehkam/location-plus.png"),
+  trash: require("../../assets/icons/ehkam/trash.png"),
+  info: require("../../assets/icons/ehkam/info.png"),
+  commentBlock: require("../../assets/icons/ehkam/comment-block.png"),
+  checkPeach: require("../../assets/icons/ehkam/check-peach.png"),
+  record: require("../../assets/icons/ehkam/record.png"),
 }
 
 const $imageStyle: ImageStyle = {

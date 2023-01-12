@@ -4,6 +4,7 @@ import { ApiUserResponse } from "../services/api"
 import { GeneralApiProblem, getGeneralApiProblem } from "../services/api/apiProblem"
 import { withRequest } from "./helpers/withRequest"
 import { withSetPropAction } from "./helpers/withSetPropAction"
+import { NotificationItemModel } from "./NotificationItem"
 import { UserModel } from "./User"
 
 export const CurrentUserStoreModel = types
@@ -11,6 +12,7 @@ export const CurrentUserStoreModel = types
   .extend(withRequest)
   .props({
     user: types.optional(UserModel, {}),
+    notifications: types.optional(types.array(NotificationItemModel), []),
   })
   .actions(withSetPropAction)
   .views((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars

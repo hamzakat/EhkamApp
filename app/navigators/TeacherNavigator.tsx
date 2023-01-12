@@ -1,5 +1,5 @@
 import { BottomTabScreenProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs"
-import { CompositeScreenProps } from "@react-navigation/native"
+import { CompositeScreenProps, NavigatorScreenParams } from "@react-navigation/native"
 import React from "react"
 import { ImageStyle, TextStyle, View, ViewStyle } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
@@ -8,16 +8,18 @@ import {
   AttendanceScreen,
   HomeScreen,
   MessagesScreen,
-  SessionsScreen,
   StudentsScreen,
-} from "../screens"
+  SessionStackScreen,
+  SessionStackParamList,
+} from "../screens/Teacher"
+
 import { colors, spacing, typography } from "../theme"
 import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
 
 export type TeacherTabParamList = {
   Home: undefined
   Students: undefined
-  Sessions: undefined
+  Sessions: NavigatorScreenParams<SessionStackParamList>
   Attendance: undefined
   Messages: undefined
 }
@@ -53,7 +55,7 @@ export function TeacherNavigator() {
     >
       <Tab.Screen
         name="Sessions"
-        component={SessionsScreen}
+        component={SessionStackScreen}
         options={{
           tabBarLabel: "Sessions",
           tabBarIcon: ({ focused }) => (

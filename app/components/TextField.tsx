@@ -246,9 +246,9 @@ const $inputWrapperStyle: ViewStyle = {
 const $inputStyle: TextStyle = {
   flex: 1,
   alignSelf: "stretch",
-  fontFamily: typography.primary.normal,
+  fontFamily: typography.primary.light,
   color: colors.text,
-  fontSize: 16,
+  fontSize: 14,
   height: 24,
   // https://github.com/facebook/react-native/issues/21720#issuecomment-532642093
   paddingVertical: 0,
