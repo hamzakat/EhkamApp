@@ -52,6 +52,7 @@ export function TeacherNavigator() {
         tabBarShowLabel: false,
       }}
       defaultScreenOptions={{}}
+      initialRouteName="Home"
     >
       <Tab.Screen
         name="Sessions"
