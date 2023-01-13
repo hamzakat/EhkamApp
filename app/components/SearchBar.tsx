@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, { Ref } from "react"
 import { ViewStyle, TextInput } from "react-native"
 import { colors } from "../theme"
@@ -9,7 +10,7 @@ type SearchBarProps = {
   onBlur: (event: any) => void
   onChangeText: (text: string) => void
   onFocus: (event: any) => void
-  style: ViewStyle
+  style?: ViewStyle
 }
 
 export const SearchBar = React.forwardRef(function SearchBar(

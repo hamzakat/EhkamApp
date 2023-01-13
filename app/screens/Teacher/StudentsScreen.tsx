@@ -14,13 +14,13 @@ import {
 import {
   Button,
   Icon,
-  Screen,
   Text,
   StudentCard,
   EmptyState,
   Toggle,
   ListItem,
   SearchBar,
+  DrawerLayoutScreen,
 } from "../../components"
 import { useStores } from "../../models"
 import { colors, spacing } from "../../theme"
@@ -30,6 +30,7 @@ import { delay } from "../../utils/delay"
 import MultiSlider from "@ptomasroos/react-native-multi-slider"
 import CustomLabel from "../../components/Slider/CustomLabel"
 import { TeacherTabScreenProps } from "../../navigators/TeacherNavigator"
+import { useNavigation } from "@react-navigation/native"
 
 interface SortOptions {
   sortType: "alphabet" | "attendence" | "reciting" | "registration"
@@ -54,7 +55,7 @@ export const StudentsScreen: FC<TeacherTabScreenProps<"Students">> = observer(
     const { studentStore } = useStores()
 
     // Pull in navigation via hook
-    // const navigation = useNavigation()
+    const navigation = useNavigation()
 
     const [isLoading, setIsLoading] = useState(false)
     const [searchBarFocused, setSearchBarFocused] = useState(false)
@@ -101,7 +102,18 @@ export const StudentsScreen: FC<TeacherTabScreenProps<"Students">> = observer(
             key={item.id}
             student={item}
             additionalComponent={
-              <View style={$studentCardCircle}>
+              <View
+                style={{
+                  backgroundColor: colors.ehkamCyan,
+                  width: 25,
+                  height: 25,
+                  borderRadius: 25,
+                  justifyContent: "space-around",
+                  alignItems: "center",
+                  paddingVertical: spacing.tiny,
+                  marginHorizontal: spacing.small,
+                }}
+              >
                 <Text weight="bold" style={{ color: colors.background }} size="xxs">
                   013
                 </Text>
@@ -117,7 +129,7 @@ export const StudentsScreen: FC<TeacherTabScreenProps<"Students">> = observer(
     }
 
     return (
-      <Screen safeAreaEdges={["top", "bottom"]} style={$root} preset="fixed">
+      <DrawerLayoutScreen title="الطلاب" backBtn={false} navigation={navigation}>
         {/* Students list & Search Area */}
         {!(showFilterSettings || showSortSettings) && (
           <View>
@@ -154,18 +166,30 @@ export const StudentsScreen: FC<TeacherTabScreenProps<"Students">> = observer(
                       content=""
                       button="تحديث القائمة"
                       ButtonProps={{ preset: "reversed" }}
-                      buttonStyle={$addStudentButton}
+                      buttonStyle={{
+                        backgroundColor: colors.ehkamPeach,
+                        borderRadius: 20,
+                      }}
                       imageSource={{}}
                     />
                   )
                 }
               />
             </TouchableWithoutFeedback>
-            <View style={$container}>
+            <View
+              style={{
+                paddingHorizontal: spacing.large,
+                marginBottom: spacing.medium,
+                justifyContent: "space-around",
+              }}
+            >
               <Button
                 preset="reversed"
                 text="إضافة طالب"
-                style={$addStudentButton}
+                style={{
+                  backgroundColor: colors.ehkamPeach,
+                  borderRadius: 20,
+                }}
                 onPress={async function () {
                   // got to add student screen
                 }}
@@ -183,7 +207,7 @@ export const StudentsScreen: FC<TeacherTabScreenProps<"Students">> = observer(
             filter={filter}
           />
         )}
-      </Screen>
+      </DrawerLayoutScreen>
     )
   },
 )
@@ -203,7 +227,7 @@ const SearchArea = function ({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginVertical: spacing.medium,
+        marginBottom: spacing.medium,
       }}
     >
       {!searchFocused && (
@@ -274,7 +298,7 @@ const SortSettings = function ({
           justifyContent: "space-between",
           alignItems: "center",
           margin: spacing.medium,
-          paddingVertical: spacing.small,
+          paddingBottom: spacing.small,
         }}
       >
         <View style={{ flexDirection: "row" }}>
@@ -417,7 +441,7 @@ const FilterSettings = function ({
           justifyContent: "space-between",
           alignItems: "center",
           margin: spacing.medium,
-          paddingVertical: spacing.small,
+          paddingBottom: spacing.small,
         }}
       >
         <View style={{ flexDirection: "row" }}>
@@ -545,16 +569,6 @@ const FilterSettings = function ({
   )
 }
 
-const $root: ViewStyle = {
-  flex: 1,
-}
-
-const $container: ViewStyle = {
-  paddingHorizontal: spacing.large,
-  marginBottom: spacing.medium,
-  justifyContent: "space-around",
-}
-
 const $searchIcons: ViewStyle = {
   flex: 0.25,
   flexDirection: "row",
@@ -565,33 +579,6 @@ const $searchIcon: ImageStyle = {
   width: 14,
 }
 
-const $searchBarIcon: ImageStyle = {
-  width: 18,
-  top: 6,
-  right: 12,
-}
-
-const $inputWrapper: ViewStyle = {
-  borderColor: colors.ehkamPeach,
-  borderRadius: 12,
-  borderWidth: 1,
-}
-
-const $studentCardCircle: ViewStyle = {
-  backgroundColor: colors.ehkamCyan,
-  width: 25,
-  height: 25,
-  borderRadius: 25,
-  justifyContent: "space-around",
-  alignItems: "center",
-  paddingVertical: spacing.tiny,
-  marginHorizontal: spacing.small,
-}
-
-const $addStudentButton: ViewStyle = {
-  backgroundColor: colors.ehkamPeach,
-  borderRadius: 20,
-}
 const $contentContainer: ViewStyle = {
   alignContent: "center",
   paddingHorizontal: spacing.large,
