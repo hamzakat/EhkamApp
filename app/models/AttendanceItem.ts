@@ -15,6 +15,7 @@ import { Student, StudentModel } from "./Student"
 export const AttendanceItemModel = types
   .model("AttendanceItem")
   .props({
+    attendance_id: types.optional(types.string, ""),
     student_id: types.optional(types.string, ""),
     present: types.optional(types.boolean, false),
   })

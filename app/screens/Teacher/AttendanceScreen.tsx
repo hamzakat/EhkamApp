@@ -12,6 +12,8 @@ import { AttendanceRecordModel, AttendanceRecord } from "../../models/Attendance
 import { AttendanceItem, AttendanceItemModel } from "../../models/AttendanceItem"
 import { Student } from "../../models/Student"
 import { getSnapshot } from "mobx-state-tree"
+import "react-native-get-random-values"
+import { v4 as uuidv4 } from "uuid"
 
 interface AttendanceScreenProps extends TeacherTabScreenProps<"Attendance"> {}
 
@@ -23,14 +25,20 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
   const [isLoading, setIsLoading] = useState(false)
 
   const createNewAttendanceRecord = (timestamp: string): void => {
+    __DEV__ && console.log("CREATING NEW ATTENDANCE RECORD")
+
     attendanceStore.setProp(
       "currentAttendanceRecord",
       AttendanceRecordModel.create({
+        _id: uuidv4(),
         timestamp,
         items:
           studentStore.students.length > 0
             ? studentStore.students.map((student, i) => {
-                return AttendanceItemModel.create({ student_id: student.id, present: false })
+                return AttendanceItemModel.create({
+                  student_id: student.id,
+                  present: false,
+                })
               })
             : [],
       }),
@@ -58,27 +66,26 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
     // })()
 
     const currentAttendanceRecord: AttendanceRecord = attendanceStore.currentAttendanceRecord
-    if (currentAttendanceRecord) {
-      if (currentAttendanceRecord.timestamp.substring(0, 10) !== todayDate) {
+
+    // eslint-disable-next-line no-extra-boolean-cast
+    if (!!currentAttendanceRecord) {
+      // check if it's a new day
+      if (currentAttendanceRecord?.timestamp.substring(0, 10) !== todayDate) {
+        __DEV__ && console.log("NEW DAY")
         if (currentAttendanceRecord.items.length > 0) {
-          // push the old record to the store (if it holds items)
-          attendanceStore.setProp("attendanceRecords", [
-            ...attendanceStore.attendanceRecords,
-            getSnapshot(currentAttendanceRecord),
-          ])
-          // TODO: send the old record to the server
-          // attendanceStore.sendAttendanceRecord()
+          // push the old record to the store (if it holds items) AND send the old record to the server
+          attendanceStore.sendAttendanceRecord(getSnapshot(currentAttendanceRecord))
         }
 
         // create a new empty record on new day
         createNewAttendanceRecord(timestamp)
       }
     } else {
+      __DEV__ && console.log("FRESH APP LAUNCH")
+
       // create a new empty record on a fresh app start
       createNewAttendanceRecord(timestamp)
     }
-
-    console.log(attendanceStore.currentAttendanceRecord.items)
   }, [attendanceStore])
 
   const renderAttendanceItem = ({ item }: { item: AttendanceItem }) => {
@@ -117,7 +124,7 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
       <View>
         <FlatList<AttendanceItem>
           contentContainerStyle={$contentContainer}
-          data={attendanceStore.currentAttendanceRecord.items}
+          data={attendanceStore.currentAttendanceRecord?.items}
           renderItem={renderAttendanceItem}
           ListEmptyComponent={
             isLoading ? (

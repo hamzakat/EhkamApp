@@ -1,19 +1,77 @@
-import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
-import { AttendanceRecordModel } from "./AttendanceRecord"
+import { ApiResponse } from "apisauce"
+import { flow, getRoot, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+import { GeneralApiProblem, getGeneralApiProblem } from "../services/api/apiProblem"
+import { AttendanceRecordModel, AttendanceRecordSnapshotOut } from "./AttendanceRecord"
+import { withRequest } from "./helpers/withRequest"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 
-/**
- * Model description here for TypeScript hints.
- */
+const RecordsQueueItemModel = types.model({
+  attendanceRecord: AttendanceRecordModel,
+  problem: types.frozen(),
+})
+
 export const AttendanceStoreModel = types
   .model("AttendanceStore")
   .props({
     attendanceRecords: types.optional(types.array(AttendanceRecordModel), []),
     currentAttendanceRecord: types.maybeNull(AttendanceRecordModel),
+    recordsOfflineQueue: types.optional(types.array(RecordsQueueItemModel), []),
   })
+  .extend(withRequest)
   .actions(withSetPropAction)
   .views((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
-  .actions((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
+  .actions((self) => {
+    const root = getRoot(self)
+    const sendAttendanceRecord = flow(function* (attendanceRecord: AttendanceRecordSnapshotOut) {
+      // @ts-ignore
+      const currentTeacherObj = root.currentUserStore.user
+
+      // do POST request for session
+      const req: ApiResponse<any> = yield self.request({
+        method: "POST",
+        url: `/items/attendance`,
+        data: {
+          students: attendanceRecord.items,
+          class_id: currentTeacherObj.class_id,
+          timestamp: attendanceRecord.timestamp,
+        },
+      })
+      if (!req.ok) {
+        const problem: void | GeneralApiProblem = getGeneralApiProblem(req)
+        if (problem) {
+          __DEV__ && console.tron.error(`Bad data: ${problem}\n${req.data}`, problem)
+          __DEV__ &&
+            console.log("Problem from AttendanceStoreModel.sendAttendanceRecord():", problem)
+
+          // if network is offline -> add to queue
+          self.recordsOfflineQueue.push(RecordsQueueItemModel.create({ attendanceRecord, problem }))
+        }
+      } else {
+        // get server id and apply it to the props
+
+        const id = req.data.data.id
+        attendanceRecord.id = id
+
+        const updatedItems = attendanceRecord.items.map((item) => {
+          item.attendance_id = id
+          return item
+        })
+        attendanceRecord.items = updatedItems
+
+        self.attendanceRecords.push(attendanceRecord)
+      }
+    })
+
+    return { sendAttendanceRecord }
+  }) // eslint-disable-line @typescript-eslint/no-unused-vars
+  .actions((self) => {
+    const dequeue = flow(function* () {
+      // for each item in the offline queue
+      // do post request
+      // if successful ->  set the id to the id recieved from the OK response & remvove item from sessionOfflineQueue
+    })
+    return { dequeue }
+  })
 
 export interface AttendanceStore extends Instance<typeof AttendanceStoreModel> {}
 export interface AttendanceStoreSnapshotOut extends SnapshotOut<typeof AttendanceStoreModel> {}

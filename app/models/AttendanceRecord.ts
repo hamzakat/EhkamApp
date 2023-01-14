@@ -8,6 +8,8 @@ import { withSetPropAction } from "./helpers/withSetPropAction"
 export const AttendanceRecordModel = types
   .model("AttendanceRecord")
   .props({
+    _id: types.identifier, // local tree id
+    id: types.optional(types.string, ""), // server id
     items: types.optional(types.array(AttendanceItemModel), []),
     timestamp: types.string,
   })
