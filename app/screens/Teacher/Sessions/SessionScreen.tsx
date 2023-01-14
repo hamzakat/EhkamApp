@@ -39,7 +39,7 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
         notes: getSnapshot(sessionStore.currentSessionNotes),
         student_id: sessionStore.selectedStudent?.id,
         type: sessionStore.selectedSessionType,
-        timestamp: new Date(Date.now()).toString(),
+        timestamp: new Date().toISOString(),
       })
       console.log(session)
 
