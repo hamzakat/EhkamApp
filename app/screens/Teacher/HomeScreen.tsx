@@ -9,9 +9,6 @@ import { colors, spacing } from "../../theme"
 import { useHeader } from "../../utils/useHeader" // @demo remove-current-line
 import { useSafeAreaInsetsStyle } from "../../utils/useSafeAreaInsetsStyle"
 
-const welcomeLogo = require("../../../assets/images/logo.png")
-const welcomeFace = require("../../../assets/images/welcome-face.png")
-
 interface HomeScreenProps extends TeacherTabScreenProps<"Home"> {}
 
 export const HomeScreen: FC<HomeScreenProps> = observer(function WelcomeScreen(_props) {
@@ -32,14 +29,13 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function WelcomeScreen(_
       <View style={$topContainer}>
         <Text testID="welcome-heading" style={$welcomeHeading} text="الترويسة" preset="heading" />
         <Text text="مرحباً" preset="subheading" />
-        <Image style={$welcomeFace} source={welcomeFace} resizeMode="contain" />
       </View>
 
       <View style={[$bottomContainer, $bottomContainerInsets]}>
         <Button
           testID="next-screen-button"
           preset="reversed"
-          text="Let's go"
+          text="زر تجربة"
           onPress={async function () {
             await currentUserStore.fetchCurrentUser()
           }}
