@@ -64,7 +64,7 @@ export const VerseItem = (props: VerseItemProps) => {
       <View style={{ flex: 1, margin: spacing.small }}>
         <Text
           text={props.verseText}
-          weight="semiBold"
+          weight="medium"
           size="lg"
           style={{ color: colors.ehkamGrey }}
         />
