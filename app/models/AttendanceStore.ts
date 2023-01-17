@@ -4,6 +4,7 @@ import { GeneralApiProblem, getGeneralApiProblem } from "../services/api/apiProb
 import { AttendanceRecordModel, AttendanceRecordSnapshotOut } from "./AttendanceRecord"
 import { withRequest } from "./helpers/withRequest"
 import { withSetPropAction } from "./helpers/withSetPropAction"
+import { UserSnapshotOut } from "./User"
 
 const RecordsQueueItemModel = types.model({
   attendanceRecord: AttendanceRecordModel,
@@ -22,16 +23,15 @@ export const AttendanceStoreModel = types
   .views((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
   .actions((self) => {
     const root = getRoot(self)
+    // @ts-ignore
+    const currentTeacherObj = root.currentUserStore.user as UserSnapshotOut
     const sendAttendanceRecord = flow(function* (attendanceRecord: AttendanceRecordSnapshotOut) {
-      // @ts-ignore
-      const currentTeacherObj = root.currentUserStore.user
-
       // do POST request for session
       const req: ApiResponse<any> = yield self.request({
         method: "POST",
         url: `/items/attendance`,
         data: {
-          students: attendanceRecord.items,
+          items: attendanceRecord.items,
           class_id: currentTeacherObj.class_id,
           timestamp: attendanceRecord.timestamp,
         },
@@ -61,8 +61,31 @@ export const AttendanceStoreModel = types
         self.attendanceRecords.push(attendanceRecord)
       }
     })
-
-    return { sendAttendanceRecord }
+    const fetchAttendanceRecords = flow(function* () {
+      const req: ApiResponse<any> = yield self.request({
+        method: "GET",
+        url: `/items/attendance?filter[class_id][_eq]=${currentTeacherObj.class_id}&fields=id,timestamp,items.student_id,items.present`,
+      })
+      if (!req.ok) {
+        const problem: void | GeneralApiProblem = getGeneralApiProblem(req)
+        if (problem) {
+          __DEV__ && console.tron.error(`Bad data: ${problem}\n${req.data}`, problem)
+          __DEV__ &&
+            console.log("Problem from AttendanceStoreModel.fetchAttendanceRecords():", problem)
+        }
+      } else {
+        const attendanceRecords = req.data.data.map((record) => {
+          return AttendanceRecordModel.create({
+            _id: record.id,
+            id: record.id,
+            timestamp: record.timestamp,
+            items: record.items,
+          })
+        })
+        self.attendanceRecords = attendanceRecords
+      }
+    })
+    return { sendAttendanceRecord, fetchAttendanceRecords }
   }) // eslint-disable-line @typescript-eslint/no-unused-vars
   .actions((self) => {
     const dequeue = flow(function* () {
