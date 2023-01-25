@@ -8,17 +8,17 @@ import {
   AttendanceScreen,
   HomeScreen,
   MessagesScreen,
-  StudentsScreen,
   SessionStackScreen,
   SessionStackParamList,
 } from "../screens/Teacher"
+import { StudentStackParamList, StudentStackScreen } from "../screens/Teacher/Students/StudentStack"
 
 import { colors, spacing, typography } from "../theme"
 import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
 
 export type TeacherTabParamList = {
   Home: undefined
-  Students: undefined
+  Students: NavigatorScreenParams<StudentStackParamList>
   Sessions: NavigatorScreenParams<SessionStackParamList>
   Attendance: undefined
   Messages: undefined
@@ -106,7 +106,7 @@ export function TeacherNavigator() {
       />
       <Tab.Screen
         name="Students"
-        component={StudentsScreen}
+        component={StudentStackScreen}
         options={{
           tabBarLabel: "Students",
           tabBarIcon: ({ focused }) => (

@@ -15,8 +15,6 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function WelcomeScreen(_
   // const { navigation } = _props
   const { authenticationStore, currentUserStore } = useStores()
 
-  console.log(currentUserStore.user.first_name)
-
   useHeader({
     rightTx: "common.logOut",
     onRightPress: authenticationStore.logOut,

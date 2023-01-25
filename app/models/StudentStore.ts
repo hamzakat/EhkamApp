@@ -53,7 +53,7 @@ export const StudentStoreModel = types
     const fetchStudents = flow(function* () {
       const res: ApiResponse<any> = yield self.request({
         method: "GET",
-        url: `/users?filter[role][_eq]=${Config.DIRECTUS_STUDENT_ROLE_ID}&fields=id,first_name,last_name,avatar,email,s_birthdate,s_edu_grade,s_edu_school,city,location,s_blood,s_health_issues,s_parent_job,s_social_issues,class_id,school_id`,
+        url: `/users?filter[role][_eq]=${Config.DIRECTUS_STUDENT_ROLE_ID}&fields=id,date_created,first_name,last_name,avatar,email,s_birthdate,s_edu_grade,s_edu_school,city,location,s_blood,s_health_issues,s_parent_job,s_social_issues,class_id,school_id`,
       })
 
       if (!res.ok) {
@@ -69,14 +69,9 @@ export const StudentStoreModel = types
 
         const students: StudentSnapshotIn[] = rawData.map((raw) => ({
           ...raw,
-          avatar_image: null,
         }))
 
         self.setProp("students", students)
-
-        __DEV__ && self.students.forEach((s) => console.log(s))
-
-        // yield self.fetchStudentsAvatars()
       } catch (e) {
         if (__DEV__) {
           console.tron.error(`Bad data: ${e.message}\n${res}`, e.stack)

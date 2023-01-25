@@ -25,7 +25,7 @@ export const CurrentUserStoreModel = types
         if (problem) {
           console.tron.error(`Bad data: ${problem}\n${res.data}`, problem)
           console.log("Problem from UserModel.fetchCurrentUser():", problem)
-          // return problem
+          return
         }
       }
       try {

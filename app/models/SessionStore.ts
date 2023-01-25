@@ -69,18 +69,16 @@ export const SessionStoreModel = types
   })
   .actions((self) => {
     const root = getRoot(self)
-    const sendSession = flow(function* (session: Session) {
-      // @ts-ignore
-      const currentTeacherObj = root.currentUserStore.user
 
+    const sendSession = flow(function* (session: Session) {
       // do POST request for session
       const req: ApiResponse<any> = yield self.request({
         method: "POST",
         url: `/items/sessions`,
         data: {
           ...session,
-          teacher_id: currentTeacherObj.id,
-          class_id: currentTeacherObj.class_id,
+          teacher_id: root.currentUserStore.user.id,
+          class_id: root.currentUserStore.user.class_id,
         },
       })
       if (!req.ok) {
@@ -106,8 +104,61 @@ export const SessionStoreModel = types
         self.sessions.push(session)
       }
     })
+    const fetchSessions = flow(function* () {
+      // do POST request for session
+      const res: ApiResponse<any> = yield self.request({
+        method: "GET",
+        url: `/items/sessions?filter[class_id][_eq]=${root.currentUserStore.user.class_id}&fields=*,notes.*`,
+      })
 
-    return { sendSession }
+      if (!res.ok) {
+        const problem: void | GeneralApiProblem = getGeneralApiProblem(res)
+        if (problem) {
+          __DEV__ && console.tron.error(`Bad data: ${problem}\n${res.data}`, problem)
+          __DEV__ && console.log("Problem from SessionModel.fetchSessions():", problem)
+        }
+      } else {
+        try {
+          const sessions = res.data.data.map((session) => {
+            return SessionModel.create({
+              _id: session._id,
+              id: session.id,
+              student_id: session.student_id,
+              type: session.type,
+              start_page: session.start_page,
+              start_chapter: session.start_chapter,
+              start_verse: session.start_verse,
+              end_page: session.end_page,
+              end_chapter: session.end_chapter,
+              end_verse: session.end_verse,
+              notes: session.notes?.map((note) => {
+                return SessionNoteModel.create({
+                  _id: note?._id,
+                  id: note?.id,
+                  verse_number: note?.verse_number,
+                  chapter_number: note?.chapter_number,
+                  page_number: note?.page_number,
+                  tajweed: note?.tajweed,
+                  pronunciation: note?.pronunciation,
+                  memorization: note?.memorization,
+                  text: note?.text,
+                  session_id: note?.session_id,
+                })
+              }),
+              timestamp: session.timestamp,
+            })
+          })
+          self.sessions = sessions
+        } catch (e) {
+          if (__DEV__) {
+            console.tron.error(`Bad data: ${e.message}\n${res}`, e.stack)
+            __DEV__ && console.log("Error from StudentModel.fetchSessions():", e)
+          }
+        }
+      }
+    })
+
+    return { sendSession, fetchSessions }
   }) // eslint-disable-line @typescript-eslint/no-unused-vars
   .actions((self) => {
     const dequeue = flow(function* () {

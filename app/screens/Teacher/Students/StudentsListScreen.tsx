@@ -21,16 +21,18 @@ import {
   ListItem,
   SearchBar,
   DrawerLayoutScreen,
-} from "../../components"
-import { useStores } from "../../models"
-import { colors, spacing } from "../../theme"
+} from "../../../components"
+import { useStores } from "../../../models"
+import { colors, spacing } from "../../../theme"
 import { FlatList } from "react-native-gesture-handler"
-import { Student } from "../../models/Student"
-import { delay } from "../../utils/delay"
+import { Student } from "../../../models/Student"
+import { delay } from "../../../utils/delay"
 import MultiSlider from "@ptomasroos/react-native-multi-slider"
-import CustomLabel from "../../components/Slider/CustomLabel"
-import { TeacherTabScreenProps } from "../../navigators/TeacherNavigator"
+import CustomLabel from "../../../components/Slider/CustomLabel"
+
 import { useNavigation } from "@react-navigation/native"
+import { StudentStackScreenProps } from "./StudentStack"
+import { NativeStackNavigationHelpers } from "@react-navigation/native-stack/lib/typescript/src/types"
 
 interface SortOptions {
   sortType: "alphabet" | "attendence" | "reciting" | "registration"
@@ -49,13 +51,13 @@ interface FilterOptions {
   atJuz?: number
 }
 
-export const StudentsScreen: FC<TeacherTabScreenProps<"Students">> = observer(
-  function StudentsScreen() {
+export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = observer(
+  function StudentsListScreen() {
     // Pull in one of our MST stores
-    const { studentStore } = useStores()
+    const { studentStore, sessionStore, attendanceStore } = useStores()
 
     // Pull in navigation via hook
-    const navigation = useNavigation()
+    const navigation: NativeStackNavigationHelpers = useNavigation()
 
     const [isLoading, setIsLoading] = useState(false)
     const [searchBarFocused, setSearchBarFocused] = useState(false)
@@ -73,34 +75,46 @@ export const StudentsScreen: FC<TeacherTabScreenProps<"Students">> = observer(
 
     // initially, kick off a background refresh without the refreshing UI
     useEffect(() => {
-      ;(async function load() {
-        setIsLoading(true)
-        await studentStore.fetchStudents()
-        setIsLoading(false)
-      })()
-
       const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () =>
         searchBarRef.current.blur(),
       )
+      loadStores()
       return () => {
         keyboardDidHideListener.remove()
       }
-    }, [studentStore])
+    }, [studentStore, attendanceStore, sessionStore])
 
     const manualRefresh = async () => {
       setRefreshing(true)
-      console.log("refreshing...")
+      __DEV__ && console.log("refreshing...")
 
-      await Promise.all([studentStore.fetchStudents(), delay(750)])
+      // simulate a longer refresh, if the refresh is too fast for UX
+      await Promise.all([loadStores(), delay(750)])
       setRefreshing(false)
     }
 
+    const openStudentProfile = (studentId: string) => {
+      navigation.navigate("StudentProfile", { studentId })
+    }
+
+    const loadStores = () => {
+      ;(async function load() {
+        setIsLoading(true)
+        await studentStore.fetchStudents()
+        await sessionStore.fetchSessions()
+        await attendanceStore.fetchAttendanceRecords()
+        __DEV__ && console.log("Loading stores from Students List Screen")
+
+        setIsLoading(false)
+      })()
+    }
     const renderSearchItem = ({ item }: { item: Student }) => {
       if (searchPhrase === "") {
         return (
           <StudentCard
             key={item.id}
             student={item}
+            onPress={() => openStudentProfile(item.id)}
             additionalComponent={
               <View
                 style={{
@@ -124,7 +138,9 @@ export const StudentsScreen: FC<TeacherTabScreenProps<"Students">> = observer(
       }
       // filter of the name
       if (item.fullname.includes(searchPhrase.trim().replace(/\s/g, ""))) {
-        return <StudentCard key={item.id} student={item} />
+        return (
+          <StudentCard key={item.id} student={item} onPress={() => openStudentProfile(item.id)} />
+        )
       }
     }
 
@@ -310,11 +326,7 @@ const SortSettings = function ({
             text="ترتيب بحسب"
           />
         </View>
-        <Icon
-          onPress={() => setShowSortSettings(false)}
-          style={{ width: 8 }}
-          icon="leftArrowCyan"
-        />
+        <Icon onPress={() => setShowSortSettings(false)} style={{ width: 8 }} icon="leftArrow" />
       </View>
       <View style={{ margin: spacing.medium }}>
         <RadioToggle
@@ -453,11 +465,7 @@ const FilterSettings = function ({
             text="إظهار الطلاب بحسب"
           />
         </View>
-        <Icon
-          onPress={() => setShowFilterSettings(false)}
-          style={{ width: 8 }}
-          icon="leftArrowCyan"
-        />
+        <Icon onPress={() => setShowFilterSettings(false)} style={{ width: 8 }} icon="leftArrow" />
       </View>
       <View style={{ margin: spacing.medium }}>
         <RadioToggle

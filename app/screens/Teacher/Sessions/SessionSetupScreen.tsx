@@ -14,6 +14,7 @@ import {
 import { spacing, colors } from "../../../theme"
 import ModalSelector from "react-native-modal-selector"
 import { SessionStackScreenProps, VersesListItem } from "./SessionStack"
+import { useStores } from "../../../models"
 
 export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = observer(
   function SessionSetupScreen({ navigation }) {

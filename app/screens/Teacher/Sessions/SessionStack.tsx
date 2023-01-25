@@ -10,10 +10,10 @@ import { SessionTypeScreen } from "./SessionTypeScreen"
 
 export interface VersesListItem {
   type: "chapterTitle" | "verse"
-  pageNumber?: string
+  pageNumber?: number
   chapterNumber?: string
-  chapterTitle: string
-  verseNumber?: string
+  chapterTitle: number
+  verseNumber?: number
   verseText?: string
 }
 

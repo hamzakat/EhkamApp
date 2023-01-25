@@ -43,7 +43,7 @@ export const NoDrawerLayoutScreen: React.FC<React.PropsWithChildren<NoDrawerLayo
 
       RightActionComponent: props.backBtn ? (
         <Icon
-          icon="leftArrowCyan"
+          icon="leftArrow"
           style={{ width: 10, marginStart: spacing.large, marginEnd: spacing.medium }}
           onPress={() => props.navigation.goBack()}
         />

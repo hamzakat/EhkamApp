@@ -9,9 +9,9 @@ export const SessionNoteModel = types
   .props({
     _id: types.identifier,
     id: types.optional(types.string, ""),
-    verse_number: types.string,
-    chapter_number: types.string,
-    page_number: types.string,
+    verse_number: types.number,
+    chapter_number: types.number,
+    page_number: types.number,
     tajweed: types.optional(types.boolean, false),
     pronunciation: types.optional(types.boolean, false),
     memorization: types.optional(types.boolean, false),

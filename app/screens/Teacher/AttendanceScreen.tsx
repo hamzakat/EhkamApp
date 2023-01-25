@@ -45,25 +45,23 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
     )
   }
   useEffect(() => {
+    loadStores()
+  }, [studentStore, attendanceStore])
+
+  const loadStores = () => {
     ;(async function load() {
-      setIsLoading(true)
       await studentStore.fetchStudents()
-      setIsLoading(false)
+      await attendanceStore.fetchAttendanceRecords()
+      __DEV__ && console.log("Loading stores from Attendance Screen")
     })()
-  }, [studentStore])
+  }
 
   useEffect(() => {
     // check today's date
     const timestamp = new Date().toISOString()
     const todayDate = timestamp.substring(0, 10) // yyyy-mm-dd
 
-    // TODO: fetch attendance records from the server and update the store
-    //
-    // ;(async function load() {
-    //   setIsLoading(true)
-    //   await attendanceStore.fetchAttendanceRecords()
-    //   setIsLoading(false)
-    // })()
+    loadStores()
 
     const currentAttendanceRecord: AttendanceRecord = attendanceStore.currentAttendanceRecord
 

@@ -64,9 +64,9 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
             verseText={item.verseText}
             onTouchEnd={() =>
               navigation.navigate("SessionNote", {
-                pageNumber: item.pageNumber,
-                chpaterNumber: item.chapterNumber,
-                verseNumber: item.verseNumber,
+                pageNumber: parseInt(item.pageNumber),
+                chpaterNumber: parseInt(item.chapterNumber),
+                verseNumber: parseInt(item.verseNumber),
                 verseText: item.verseText,
               })
             }

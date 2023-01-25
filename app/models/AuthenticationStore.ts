@@ -116,7 +116,8 @@ export const AuthenticationStoreModel = types
 
           // get user info after the successful login
           // @ts-ignore
-          yield rootStore.currentUserStore.fetchCurrentUser()
+
+          rootStore.currentUserStore.fetchCurrentUser()
 
           return { kind: "ok" }
         } catch (e) {

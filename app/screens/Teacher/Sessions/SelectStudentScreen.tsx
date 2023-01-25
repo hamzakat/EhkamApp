@@ -42,13 +42,16 @@ export const SelectStudentScreen: FC<SessionStackScreenProps<"SelectStudent">> =
     const [searchBarFocused, setSearchBarFocused] = useState(false)
     const [searchPhrase, setSearchPhrase] = useState("")
 
-    // initially, kick off a background refresh without the refreshing UI
-    useEffect(() => {
+    const loadStores = () => {
       ;(async function load() {
-        setIsLoading(true)
         await studentStore.fetchStudents()
-        setIsLoading(false)
+        await sessionStore.fetchSessions()
+        __DEV__ && console.log("Loading stores from Select Student Screen")
       })()
+    }
+
+    useEffect(() => {
+      loadStores()
 
       const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () =>
         searchBarRef.current.blur(),

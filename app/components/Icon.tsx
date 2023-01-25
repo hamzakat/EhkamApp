@@ -120,7 +120,7 @@ export const iconRegistry = {
   sortPeach: require("../../assets/icons/ehkam/sort-peach.png"),
   filterCyan: require("../../assets/icons/ehkam/filter-cyan.png"),
   filterPeach: require("../../assets/icons/ehkam/filter-peach.png"),
-  leftArrowCyan: require("../../assets/icons/ehkam/left-arrow-cyan.png"),
+  leftArrow: require("../../assets/icons/ehkam/left-arrow-cyan.png"),
   downArrowsGrey: require("../../assets/icons/ehkam/down-grey.png"),
   upArrowsGrey: require("../../assets/icons/ehkam/up-grey.png"),
   menuCyan: require("../../assets/icons/ehkam/menu-cyan.png"),
@@ -131,6 +131,8 @@ export const iconRegistry = {
   commentBlock: require("../../assets/icons/ehkam/comment-block.png"),
   checkPeach: require("../../assets/icons/ehkam/check-peach.png"),
   record: require("../../assets/icons/ehkam/record.png"),
+  records: require("../../assets/icons/ehkam/records.png"),
+  checked: require("../../assets/icons/ehkam/checked.png"),
 }
 
 const $imageStyle: ImageStyle = {

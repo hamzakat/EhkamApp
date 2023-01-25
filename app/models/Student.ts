@@ -1,6 +1,12 @@
-import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+import { ApiResponse } from "apisauce"
+import { flow, getRoot, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+import { ApiUserResponse } from "../services/api"
+import { GeneralApiProblem, getGeneralApiProblem } from "../services/api/apiProblem"
+import { AttendanceStore } from "./AttendanceStore"
 import { withRequest } from "./helpers/withRequest"
 import { withSetPropAction } from "./helpers/withSetPropAction"
+import { Session } from "./Session"
+import { SessionStore } from "./SessionStore"
 
 /**
  * Model description here for TypeScript hints.
@@ -11,11 +17,12 @@ export const StudentModel = types
   .props({
     // basic info
     id: types.identifier,
+    date_created: types.maybeNull(types.string),
     first_name: types.maybeNull(types.string),
     last_name: types.maybeNull(types.string),
     email: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
-    avatar_image: types.maybeNull(types.frozen()),
+    // avatar_image: types.maybeNull(types.frozen()),
     s_birthdate: types.maybeNull(types.string),
     s_edu_grade: types.maybeNull(types.string),
     s_edu_school: types.maybeNull(types.string),
@@ -50,15 +57,67 @@ export const StudentModel = types
       }
       return self.first_name
     },
-    // get lastNewSession() {
-    //   return
-    // },
-    // get lastRepeatSession() {
-    //   // access sessionStore using rootStore
-    //   // starting from the end of the sessionStore (assuming it is sorted ascendantly based on the creation date)
-    //   // search for the first hit where student.id == self.id
-    //   return
-    // },
+    get lastNewSession() {
+      const sessionStore: SessionStore = getRoot(self).sessionStore
+      const studentSessions = sessionStore.sessions.filter((session: Session) => {
+        return session.student_id === self.id && session.type === "new"
+      })
+
+      const numberOfSessions = studentSessions.length
+      if (numberOfSessions > 0) {
+        studentSessions.sort(
+          (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+        )
+        return studentSessions[numberOfSessions - 1]
+      } else return undefined
+    },
+
+    get lastRepeatSession() {
+      const sessionStore: SessionStore = getRoot(self).sessionStore
+      const studentSessions = sessionStore.sessions.filter((session: Session) => {
+        return session.student_id === self.id && session.type === "repeat"
+      })
+
+      const numberOfSessions = studentSessions.length
+      if (numberOfSessions > 0) {
+        studentSessions.sort(
+          (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+        )
+        return studentSessions[numberOfSessions - 1]
+      } else return undefined
+    },
+    get attendanceDays() {
+      const attendanceStore: AttendanceStore = getRoot(self).attendanceStore
+      let daysPresent = 0
+      let daysAbsent = 0
+      attendanceStore.attendanceRecords.forEach((record) => {
+        const student = record.items.find((item) => item.student_id === self.id)
+        if (student?.present) daysPresent++
+        else daysAbsent++
+      })
+      const rate =
+        daysAbsent > 0 || daysPresent > 0
+          ? Math.trunc((daysPresent * 100) / (daysAbsent + daysPresent))
+          : 0
+      return { daysPresent, daysAbsent, rate }
+    },
+    get attendanceRecords() {
+      const attendanceStore: AttendanceStore = getRoot(self).attendanceStore
+      const studentAttendanceRecords = attendanceStore.attendanceRecords.reduce((acc, record) => {
+        const item = record.items.find((item) => self.id === item.student_id)
+        if (item) {
+          acc.push({
+            timestamp: record.timestamp.substring(0, 10),
+            present: item.present,
+          })
+        }
+        return acc
+      }, [] as { timestamp: string; present: boolean }[])
+      studentAttendanceRecords.sort(
+        (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      )
+      return studentAttendanceRecords
+    },
   })) // eslint-disable-line @typescript-eslint/no-unused-vars
   .actions((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
 

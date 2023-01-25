@@ -4,9 +4,11 @@ import React from "react"
 import { View } from "react-native"
 import { Student } from "../models/Student"
 import { colors, spacing } from "../theme"
-import { AutoImage } from "./AutoImage"
+import FastImage from "react-native-fast-image"
 import { Card } from "./Card"
 import { Text } from "./Text"
+import Config from "../config"
+import { useStores } from "../models"
 
 export interface StudentCardProps {
   student: Student
@@ -25,7 +27,8 @@ export const StudentCard = observer(function StudentCard({
   onPress,
   preset,
 }: StudentCardProps) {
-  const studentImg = require("../../assets/images/boy.jpeg")
+  const { authenticationStore } = useStores()
+  const imgUrl = `${Config.API_URL}/assets/${student.avatar}?width=200&height=200&quality=80`
 
   return (
     <Card
@@ -43,7 +46,7 @@ export const StudentCard = observer(function StudentCard({
       verticalAlignment="center"
       onPress={onPress}
       LeftComponent={
-        <AutoImage
+        <FastImage
           style={
             preset === "selected"
               ? {
@@ -60,7 +63,14 @@ export const StudentCard = observer(function StudentCard({
                   height: 100,
                 }
           }
-          source={studentImg}
+          defaultSource={require("../../assets/images/avatar-placeholder.jpeg")}
+          source={{
+            uri: imgUrl,
+            headers: { Authorization: `Bearer ${authenticationStore.accessToken}` },
+            priority: FastImage.priority.high,
+          }}
+          resizeMode={FastImage.resizeMode.contain}
+          fallback={true}
         />
       }
       RightComponent={additionalComponent}
