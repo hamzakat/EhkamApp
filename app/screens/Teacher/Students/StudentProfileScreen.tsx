@@ -93,7 +93,7 @@ export const StudentProfileScreen: FC<StudentStackScreenProps<"StudentProfile">>
                 priority: FastImage.priority.high,
               }}
               resizeMode={FastImage.resizeMode.contain}
-              onError={() => console.log("NOIMAGE")}
+              onError={() => __DEV__ && console.log("NOIMAGE")}
             />
           </View>
           {/* Delete Button + Name + ID */}
@@ -127,7 +127,7 @@ export const StudentProfileScreen: FC<StudentStackScreenProps<"StudentProfile">>
                 }}
                 size="xs"
               >
-                013
+                {currentStudent.inclass_id}
               </Text>
             </View>
             <Text

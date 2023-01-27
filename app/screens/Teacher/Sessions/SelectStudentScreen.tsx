@@ -76,11 +76,59 @@ export const SelectStudentScreen: FC<SessionStackScreenProps<"SelectStudent">> =
 
     const renderSearchItem = ({ item }: { item: Student }) => {
       if (searchPhrase === "") {
-        return <StudentCard key={item.id} student={item} onPress={() => selectStudent(item)} />
+        return (
+          <StudentCard
+            key={item.id}
+            student={item}
+            onPress={() => selectStudent(item)}
+            additionalComponent={
+              <View
+                style={{
+                  backgroundColor: colors.ehkamCyan,
+                  width: 25,
+                  height: 25,
+                  borderRadius: 25,
+                  justifyContent: "space-around",
+                  alignItems: "center",
+                  paddingVertical: spacing.tiny,
+                  marginHorizontal: spacing.small,
+                }}
+              >
+                <Text weight="bold" style={{ color: colors.background }} size="xxs">
+                  {item.inclass_id}
+                </Text>
+              </View>
+            }
+          />
+        )
       }
       // filter of the name
       if (item.fullname.includes(searchPhrase.trim().replace(/\s/g, ""))) {
-        return <StudentCard key={item.id} student={item} onPress={() => selectStudent(item)} />
+        return (
+          <StudentCard
+            key={item.id}
+            student={item}
+            onPress={() => selectStudent(item)}
+            additionalComponent={
+              <View
+                style={{
+                  backgroundColor: colors.ehkamCyan,
+                  width: 25,
+                  height: 25,
+                  borderRadius: 25,
+                  justifyContent: "space-around",
+                  alignItems: "center",
+                  paddingVertical: spacing.tiny,
+                  marginHorizontal: spacing.small,
+                }}
+              >
+                <Text weight="bold" style={{ color: colors.background }} size="xxs">
+                  {item.inclass_id}
+                </Text>
+              </View>
+            }
+          />
+        )
       }
     }
 

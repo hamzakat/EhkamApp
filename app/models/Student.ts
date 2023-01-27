@@ -17,6 +17,7 @@ export const StudentModel = types
   .props({
     // basic info
     id: types.identifier,
+    inclass_id: types.maybeNull(types.number),
     date_created: types.maybeNull(types.string),
     first_name: types.maybeNull(types.string),
     last_name: types.maybeNull(types.string),

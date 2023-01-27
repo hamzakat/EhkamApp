@@ -25,7 +25,7 @@ import {
 import { useStores } from "../../../models"
 import { colors, spacing } from "../../../theme"
 import { FlatList } from "react-native-gesture-handler"
-import { Student } from "../../../models/Student"
+import { Student, StudentSnapshotIn } from "../../../models/Student"
 import { delay } from "../../../utils/delay"
 import MultiSlider from "@ptomasroos/react-native-multi-slider"
 import CustomLabel from "../../../components/Slider/CustomLabel"
@@ -108,7 +108,7 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
         setIsLoading(false)
       })()
     }
-    const renderSearchItem = ({ item }: { item: Student }) => {
+    const renderSearchItem = ({ item }: { item: StudentSnapshotIn }) => {
       if (searchPhrase === "") {
         return (
           <StudentCard
@@ -129,7 +129,7 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
                 }}
               >
                 <Text weight="bold" style={{ color: colors.background }} size="xxs">
-                  013
+                  {item.inclass_id}
                 </Text>
               </View>
             }

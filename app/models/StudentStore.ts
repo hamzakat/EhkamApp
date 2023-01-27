@@ -1,5 +1,5 @@
 import { ApiResponse } from "apisauce"
-import { Instance, SnapshotIn, SnapshotOut, types, flow } from "mobx-state-tree"
+import { Instance, SnapshotIn, SnapshotOut, types, flow, getRoot } from "mobx-state-tree"
 import Config from "../config"
 import { GeneralApiProblem, getGeneralApiProblem } from "../services/api/apiProblem"
 import { withRequest } from "./helpers/withRequest"
@@ -50,10 +50,11 @@ export const StudentStoreModel = types
     return { fetchStudentsAvatars }
   })
   .actions((self) => {
+    const root = getRoot(self)
     const fetchStudents = flow(function* () {
       const res: ApiResponse<any> = yield self.request({
         method: "GET",
-        url: `/users?filter[role][_eq]=${Config.DIRECTUS_STUDENT_ROLE_ID}&fields=id,date_created,first_name,last_name,avatar,email,s_birthdate,s_edu_grade,s_edu_school,city,location,s_blood,s_health_issues,s_parent_job,s_social_issues,class_id,school_id`,
+        url: `/users?filter[role][_eq]=${Config.DIRECTUS_STUDENT_ROLE_ID}&deep[class_student][_filter][class_id][_eq]=${root.currentUserStore.user.class_id}&fields=id,date_created,first_name,last_name,avatar,email,s_birthdate,s_edu_grade,s_edu_school,city,location,s_blood,s_health_issues,s_parent_job,s_social_issues,class_id,school_id,class_student.inclass_id`,
       })
 
       if (!res.ok) {
@@ -66,9 +67,11 @@ export const StudentStoreModel = types
       }
       try {
         const rawData = res.data.data
-
         const students: StudentSnapshotIn[] = rawData.map((raw) => ({
           ...raw,
+
+          // class_student is an array of the classes in which the student registerd
+          inclass_id: raw.class_student[0]?.inclass_id,
         }))
 
         self.setProp("students", students)
