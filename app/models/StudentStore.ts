@@ -23,7 +23,7 @@ export const StudentStoreModel = types
     const fetchStudents = flow(function* () {
       const res: ApiResponse<any> = yield self.request({
         method: "GET",
-        url: `/users?filter[role][_eq]=${Config.DIRECTUS_STUDENT_ROLE_ID}&deep[class_student][_filter][class_id][_eq]=${root.currentUserStore.user.class_id}&fields=id,date_created,first_name,last_name,avatar,email,s_birthdate,s_edu_grade,s_edu_school,city,location,s_blood,s_health_issues,s_parent_job,s_social_issues,class_id,school_id,class_student.inclass_id,s_previous_memo`,
+        url: `/users?filter[role][_eq]=${Config.DIRECTUS_STUDENT_ROLE_ID}&filter[class_student][class_id][_eq]=${root.currentUserStore.user.class_id}&fields=id,date_created,first_name,last_name,avatar,email,s_birthdate,s_edu_grade,s_edu_school,city,location,s_blood,s_health_issues,s_parent_job,s_social_issues,school_id,class_student.inclass_id,class_student.class_id,s_previous_memo`,
       })
 
       if (!res.ok) {
@@ -41,6 +41,7 @@ export const StudentStoreModel = types
 
           // class_student is an array of the classes in which the student registerd
           inclass_id: raw.class_student[0]?.inclass_id,
+          class_id: raw.class_student[0]?.class_id,
         }))
 
         self.setProp("students", students)

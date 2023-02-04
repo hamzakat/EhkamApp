@@ -37,9 +37,10 @@ export const CurrentUserStoreModel = types
           title: res.data.data.title,
           location: res.data.data.location,
           description: res.data.data.description,
-          class_id: res.data.data.class_id,
+          class_id: res.data.data.t_class_id[0], // NOTE: teacher might be assigned to more class. this version get the 1st class id only
           school_id: res.data.data.school_id,
         }
+
         self.user = UserModel.create(userData)
       } catch (e) {
         if (__DEV__) {
