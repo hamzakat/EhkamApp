@@ -6,3 +6,11 @@ export const getChapterTitle = (chapterNumber: number): string => {
     return chaptersIndex[chapterNumber].titleAr
   } else return undefined
 }
+
+export const getJuzNumber = (pageNumber: number): number => {
+  if (pageNumber > 0 && pageNumber <= 604) {
+    // TODO: add Juz number to each page data in muhsaf.json in order to use it for fetching Juz number using page number
+    const muhsaf: any[] = require("../../assets/data/quranjson/muhsaf.json")
+    return muhsaf[pageNumber].juzNumber
+  } else return undefined
+}

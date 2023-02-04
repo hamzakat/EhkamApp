@@ -390,13 +390,23 @@ export const StudentProfileScreen: FC<StudentStackScreenProps<"StudentProfile">>
             {selectedTab === "educational" && (
               <>
                 <InfoGridRow
-                  info="لايوجد"
+                  info={
+                    currentStudent.s_previous_memo === null || currentStudent.s_previous_memo === 0
+                      ? "لايوجد"
+                      : currentStudent.s_previous_memo.toString() + " أجزاء"
+                  }
                   label="المحفوظ السابق"
                   labelFlexValue={0.4}
                   infoFlexValue={0.6}
                 />
                 <InfoGridRow
-                  info={"5" + " أجزاء"}
+                  info={
+                    currentStudent.s_previous_memo === null || currentStudent.currentMemo === 0
+                      ? "لايوجد"
+                      : currentStudent.currentMemo > 30
+                      ? "30 جزء"
+                      : currentStudent.currentMemo.toString() + " أجزاء"
+                  }
                   label="المحفوظ حالياً"
                   labelFlexValue={0.4}
                   infoFlexValue={0.6}

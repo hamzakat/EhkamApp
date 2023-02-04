@@ -17,44 +17,13 @@ export const StudentStoreModel = types
   })
   .actions(withSetPropAction)
   .views((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
-  .actions((self) => {
-    const fetchStudentsAvatars = flow(function* () {
-      // UNCOMPLETED
-      self.students.forEach(async (student) => {
-        if (student.avatar) {
-          const res: ApiResponse<any> = await self.request({
-            method: "GET",
-            responseType: "json",
-            forcedJSONParsing: false,
-            silentJSONParsing: false,
-            url: `/assets/${student.avatar}?${Config.AVATAR_QUERY_PRESETS}`,
-          })
-          if (!res.ok) {
-            const problem: void | GeneralApiProblem = getGeneralApiProblem(res)
-            if (problem) {
-              __DEV__ && console.tron.error(`Bad data: ${problem}\n${res.data}`, problem)
-              __DEV__ && console.log("Problem from StudentModel.fetchStudentsAvatar():", problem)
-              return
-            }
-          }
 
-          try {
-            // TODO: fetch blob/image and store it
-          } catch (e) {
-            console.log(e)
-          }
-        }
-      })
-    })
-
-    return { fetchStudentsAvatars }
-  })
   .actions((self) => {
     const root = getRoot(self)
     const fetchStudents = flow(function* () {
       const res: ApiResponse<any> = yield self.request({
         method: "GET",
-        url: `/users?filter[role][_eq]=${Config.DIRECTUS_STUDENT_ROLE_ID}&deep[class_student][_filter][class_id][_eq]=${root.currentUserStore.user.class_id}&fields=id,date_created,first_name,last_name,avatar,email,s_birthdate,s_edu_grade,s_edu_school,city,location,s_blood,s_health_issues,s_parent_job,s_social_issues,class_id,school_id,class_student.inclass_id`,
+        url: `/users?filter[role][_eq]=${Config.DIRECTUS_STUDENT_ROLE_ID}&deep[class_student][_filter][class_id][_eq]=${root.currentUserStore.user.class_id}&fields=id,date_created,first_name,last_name,avatar,email,s_birthdate,s_edu_grade,s_edu_school,city,location,s_blood,s_health_issues,s_parent_job,s_social_issues,class_id,school_id,class_student.inclass_id,s_previous_memo`,
       })
 
       if (!res.ok) {

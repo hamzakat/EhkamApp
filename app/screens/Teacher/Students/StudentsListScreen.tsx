@@ -21,11 +21,13 @@ import {
   ListItem,
   SearchBar,
   DrawerLayoutScreen,
+  TextField,
+  ModalSelect,
 } from "../../../components"
 import { useStores } from "../../../models"
 import { colors, spacing } from "../../../theme"
 import { FlatList } from "react-native-gesture-handler"
-import { Student, StudentSnapshotIn } from "../../../models/Student"
+import { Student, StudentModel, StudentSnapshotIn } from "../../../models/Student"
 import { delay } from "../../../utils/delay"
 import MultiSlider from "@ptomasroos/react-native-multi-slider"
 import CustomLabel from "../../../components/Slider/CustomLabel"
@@ -33,6 +35,8 @@ import CustomLabel from "../../../components/Slider/CustomLabel"
 import { useNavigation } from "@react-navigation/native"
 import { StudentStackScreenProps } from "./StudentStack"
 import { NativeStackNavigationHelpers } from "@react-navigation/native-stack/lib/typescript/src/types"
+import { getJuzNumber } from "../../../utils/quranInfo"
+import ModalSelector from "react-native-modal-selector"
 
 interface SortOptions {
   sortType: "alphabet" | "attendence" | "reciting" | "registration"
@@ -44,7 +48,7 @@ interface FilterOptions {
     | "all"
     | "missed-last-session"
     | "good-attendence"
-    | "good-reciting"
+    | "good-sessions"
     | "at-juz"
     | "total-hifz"
   totalHifz?: number
@@ -71,6 +75,12 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
       atJuz: 30,
       totalHifz: 1,
     })
+
+    const [filterJuz, setFilterJuz] = useState({ key: 1, label: "1" })
+    useEffect(() => {
+      setFilter({ ...filter, atJuz: filterJuz.key })
+    }, [filterJuz])
+
     const searchBarRef = useRef(undefined)
 
     // initially, kick off a background refresh without the refreshing UI
@@ -143,6 +153,48 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
         )
       }
     }
+    const filteredData = studentStore.students.filter((student: Student) => {
+      if (filter.filterType === "all") return true
+      if (filter.filterType === "missed-last-session" && student.missedLastSession) return true
+      if (filter.filterType === "good-attendence" && student.attendanceDays.rate > 80) return true
+      if (filter.filterType === "good-sessions" && student.recitingRate > 80) return true
+      if (
+        filter.filterType === "at-juz" &&
+        getJuzNumber(
+          student.lastNewSession.end_page === 604
+            ? student.lastNewSession.end_page
+            : student.lastNewSession.end_page + 1, // get the next page
+        ) === filter.atJuz
+      )
+        return true
+      if (
+        filter.filterType === "total-hifz" &&
+        (student.currentMemo + student.s_previous_memo > 30
+          ? filter.totalHifz === 30
+          : student.currentMemo + student.s_previous_memo === filter.totalHifz)
+      )
+        return true
+      return false
+    })
+
+    // const sortedData = filteredData.sort((a, b) => {
+    //   if (sort.sortType === "alphabet") {
+    //     if (sort.order === "asc") return a.fullname.localeCompare(b.fullname);
+    //     return b.fullname.localeCompare(a.fullname);
+    //   }
+    //   if (sort.sortType === "attendence") {
+    //     if (sort.order === "asc") return a.attendence_rate - b.attendence_rate;
+    //     return b.attendence_rate - a.attendence_rate;
+    //   }
+    //   if (sort.sortType === "reciting") {
+    //     if (sort.order === "asc") return a.reciting_rate - b.reciting_rate;
+    //     return b.reciting_rate - a.reciting_rate;
+    //   }
+    //   if (sort.sortType === "registration") {
+    //     if (sort.order === "asc") return a.inclass_id - b.inclass_id;
+    //     return b.inclass_id - a.inclass_id;
+    //   }
+    // });
 
     return (
       <DrawerLayoutScreen title="الطلاب" backBtn={false} navigation={navigation}>
@@ -163,7 +215,7 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
                   />
                 }
                 contentContainerStyle={$contentContainer}
-                data={studentStore.students}
+                data={filteredData}
                 refreshing={refreshing}
                 onRefresh={manualRefresh}
                 refreshControl={
@@ -179,6 +231,7 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
                       buttonOnPress={manualRefresh}
                       ImageProps={{ resizeMode: "contain" }}
                       heading="القائمة فارغة"
+                      HeadingTextProps={{ style: { color: colors.ehkamDarkGrey } }}
                       content=""
                       button="تحديث القائمة"
                       ButtonProps={{ preset: "reversed" }}
@@ -221,6 +274,8 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
             setShowFilterSettings={setShowFilterSettings}
             setFilter={setFilter}
             filter={filter}
+            filterJuz={filterJuz}
+            setFilterJuz={setFilterJuz}
           />
         )}
       </DrawerLayoutScreen>
@@ -437,12 +492,20 @@ const FilterSettings = function ({
   filter,
   setFilter,
   setShowFilterSettings,
+  filterJuz,
+  setFilterJuz,
 }: {
   filter: FilterOptions
   setFilter: any
   setShowFilterSettings: any
+  filterJuz: any
+  setFilterJuz: any
 }) {
   const [tempFilter, setTempFilter] = useState<FilterOptions>(filter)
+  const juzList = []
+  for (let index = 1; index <= 30; index++) {
+    juzList.push({ key: index, label: index.toString() })
+  }
 
   return (
     <View style={[$contentContainer, {}]}>
@@ -485,49 +548,77 @@ const FilterSettings = function ({
         />
         <RadioToggle
           label="الملتزمون بالتسميع"
-          selected={tempFilter.filterType === "good-reciting"}
-          onPress={() => setTempFilter({ ...tempFilter, filterType: "good-reciting" })}
+          selected={tempFilter.filterType === "good-sessions"}
+          onPress={() => setTempFilter({ ...tempFilter, filterType: "good-sessions" })}
         />
-        <RadioToggle
-          label="طلاب في الجزء"
-          selected={tempFilter.filterType === "at-juz"}
-          onPress={() => setTempFilter({ ...tempFilter, filterType: "at-juz" })}
-        />
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View style={{ flex: 0.5 }}>
+            <RadioToggle
+              label="طلاب في الجزء"
+              selected={tempFilter.filterType === "at-juz"}
+              onPress={() => setTempFilter({ ...tempFilter, filterType: "at-juz" })}
+            />
+          </View>
+          <View style={{ flex: 0.5, paddingBottom: spacing.small }}>
+            <ModalSelect
+              options={juzList}
+              selectedKey={filterJuz.key}
+              selectedOpt={filterJuz.label}
+              onChange={setFilterJuz}
+              placeholder=""
+              disabled={tempFilter.filterType !== "at-juz"}
+              containerStyle={{ alignSelf: "flex-start" }}
+            />
+          </View>
+        </View>
 
-        <View style={{ justifyContent: "center", alignItems: "center", marginTop: spacing.medium }}>
-          <Text
+        <View style={{ justifyContent: "center" }}>
+          {/* <Text
             size="sm"
             weight="book"
             style={{
               color: colors.ehkamGrey,
             }}
             text={"طلاب يحفظون أجزاء عدد"}
+          /> */}
+          <RadioToggle
+            label="طلاب يحفظون أجزاء عدد"
+            selected={tempFilter.filterType === "total-hifz"}
+            onPress={() => setTempFilter({ ...tempFilter, filterType: "total-hifz" })}
           />
-          <MultiSlider
-            min={1}
-            max={30}
-            step={1}
-            containerStyle={{ marginTop: spacing.medium }}
-            markerStyle={{ backgroundColor: colors.ehkamCyan }}
-            selectedStyle={{ backgroundColor: colors.ehkamCyan }}
-            unselectedStyle={{ backgroundColor: colors.ehkamDarkGrey }}
-            isMarkersSeparated={true}
-            values={[tempFilter.totalHifz]}
-            sliderLength={270}
-            onValuesChange={(values) => setTempFilter({ ...tempFilter, totalHifz: values[0] })}
-            enableLabel
-            customLabel={CustomLabel}
-          />
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            paddingHorizontal: spacing.medium,
-          }}
-        >
-          <Text size="xs" style={{ color: colors.ehkamDarkGrey }} text="1"></Text>
-          <Text size="xs" style={{ color: colors.ehkamDarkGrey }} text="30"></Text>
+          {tempFilter.filterType === "total-hifz" && (
+            <>
+              <View style={{ alignItems: "center" }}>
+                <MultiSlider
+                  min={1}
+                  max={30}
+                  step={1}
+                  containerStyle={{ marginTop: spacing.small }}
+                  markerStyle={{ backgroundColor: colors.ehkamCyan }}
+                  selectedStyle={{ backgroundColor: colors.ehkamCyan }}
+                  unselectedStyle={{ backgroundColor: colors.ehkamDarkGrey }}
+                  isMarkersSeparated={true}
+                  values={[tempFilter.totalHifz]}
+                  sliderLength={270}
+                  onValuesChange={(values) =>
+                    setTempFilter({ ...tempFilter, totalHifz: values[0] })
+                  }
+                  enableLabel
+                  customLabel={CustomLabel}
+                />
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  paddingHorizontal: spacing.medium,
+                }}
+              >
+                <Text size="xs" style={{ color: colors.ehkamDarkGrey }} text="1"></Text>
+                <Text size="xs" style={{ color: colors.ehkamDarkGrey }} text="30"></Text>
+              </View>
+            </>
+          )}
         </View>
       </View>
 

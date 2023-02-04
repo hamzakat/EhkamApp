@@ -15,6 +15,9 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function WelcomeScreen(_
   // const { navigation } = _props
   const { authenticationStore, currentUserStore } = useStores()
 
+  // console.log("ATTENDANCE QUEUE")
+  // attendanceStore.recordsOfflineQueue.forEach((i) => console.log(i.attendanceRecord.toJSON()))
+
   useHeader({
     rightTx: "common.logOut",
     onRightPress: authenticationStore.logOut,
