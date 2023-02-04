@@ -21,13 +21,12 @@ import {
   ListItem,
   SearchBar,
   DrawerLayoutScreen,
-  TextField,
   ModalSelect,
 } from "../../../components"
 import { useStores } from "../../../models"
 import { colors, spacing } from "../../../theme"
 import { FlatList } from "react-native-gesture-handler"
-import { Student, StudentModel, StudentSnapshotIn } from "../../../models/Student"
+import { Student, StudentSnapshotIn } from "../../../models/Student"
 import { delay } from "../../../utils/delay"
 import MultiSlider from "@ptomasroos/react-native-multi-slider"
 import CustomLabel from "../../../components/Slider/CustomLabel"
@@ -36,7 +35,6 @@ import { useNavigation } from "@react-navigation/native"
 import { StudentStackScreenProps } from "./StudentStack"
 import { NativeStackNavigationHelpers } from "@react-navigation/native-stack/lib/typescript/src/types"
 import { getJuzNumber } from "../../../utils/quranInfo"
-import ModalSelector from "react-native-modal-selector"
 
 interface SortOptions {
   sortType: "alphabet" | "attendence" | "reciting" | "registration"
@@ -58,7 +56,7 @@ interface FilterOptions {
 export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = observer(
   function StudentsListScreen() {
     // Pull in one of our MST stores
-    const { studentStore, sessionStore, attendanceStore } = useStores()
+    const { studentStore, sessionStore, attendanceStore, settingStore } = useStores()
 
     // Pull in navigation via hook
     const navigation: NativeStackNavigationHelpers = useNavigation()
@@ -113,6 +111,7 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
         await studentStore.fetchStudents()
         await sessionStore.fetchSessions()
         await attendanceStore.fetchAttendanceRecords()
+        await settingStore.fetchSchoolSettings()
         __DEV__ && console.log("Loading stores from Students List Screen")
 
         setIsLoading(false)
@@ -156,8 +155,13 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
     const filteredData = studentStore.students.filter((student: Student) => {
       if (filter.filterType === "all") return true
       if (filter.filterType === "missed-last-session" && student.missedLastSession) return true
-      if (filter.filterType === "good-attendence" && student.attendanceDays.rate > 80) return true
-      if (filter.filterType === "good-sessions" && student.recitingRate > 80) return true
+      if (
+        filter.filterType === "good-attendence" &&
+        student.attendanceDays.rate > settingStore.attendance_rate
+      )
+        return true
+      if (filter.filterType === "good-sessions" && student.recitingRate > settingStore.session_rate)
+        return true
       if (
         filter.filterType === "at-juz" &&
         getJuzNumber(

@@ -179,7 +179,6 @@ export const StudentModel = types
         const missedSessions = daysPresent - numberOfSessions
         if (missedSessions > 0) {
           rate = (missedSessions * 100) / daysPresent
-          console.log(rate)
 
           return rate
         } else return 100 // daysPresent =< numberOfSessions

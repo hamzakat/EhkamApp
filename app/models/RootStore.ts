@@ -4,6 +4,7 @@ import { CurrentUserStoreModel } from "./CurrentUser"
 import { StudentStoreModel } from "./StudentStore"
 import { SessionStoreModel } from "./SessionStore"
 import { AttendanceStoreModel } from "./AttendanceStore"
+import { SettingStoreModel } from "./SettingStore"
 /**
  * A RootStore model.
  */
@@ -13,6 +14,7 @@ export const RootStoreModel = types.model("RootStore").props({
   studentStore: types.optional(StudentStoreModel, {} as any),
   sessionStore: types.optional(SessionStoreModel, {} as any),
   attendanceStore: types.optional(AttendanceStoreModel, {} as any),
+  settingStore: types.optional(SettingStoreModel, {} as any),
 })
 
 /**
