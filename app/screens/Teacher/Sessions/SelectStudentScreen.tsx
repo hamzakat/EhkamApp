@@ -28,6 +28,7 @@ import { useNavigation } from "@react-navigation/native"
 import { NativeStackNavigationHelpers } from "@react-navigation/native-stack/lib/typescript/src/types"
 import { SessionStackScreenProps } from "./SessionStack"
 import { getSnapshot } from "mobx-state-tree"
+import { values } from "mobx"
 
 export const SelectStudentScreen: FC<SessionStackScreenProps<"SelectStudent">> = observer(
   function SelectStudentScreen() {
@@ -42,6 +43,10 @@ export const SelectStudentScreen: FC<SessionStackScreenProps<"SelectStudent">> =
     const [searchBarFocused, setSearchBarFocused] = useState(false)
     const [searchPhrase, setSearchPhrase] = useState("")
 
+    const [searchID, setSearchID] = useState("")
+    useEffect(() => {
+      console.log(searchID)
+    }, [searchID])
     const loadStores = () => {
       ;(async function load() {
         await studentStore.fetchStudents()
@@ -75,35 +80,64 @@ export const SelectStudentScreen: FC<SessionStackScreenProps<"SelectStudent">> =
     }
 
     const renderSearchItem = ({ item }: { item: Student }) => {
-      if (searchPhrase === "") {
-        return (
-          <StudentCard
-            key={item.id}
-            student={item}
-            onPress={() => selectStudent(item)}
-            additionalComponent={
-              <View
-                style={{
-                  backgroundColor: colors.ehkamCyan,
-                  width: 25,
-                  height: 25,
-                  borderRadius: 25,
-                  justifyContent: "space-around",
-                  alignItems: "center",
-                  paddingVertical: spacing.tiny,
-                  marginHorizontal: spacing.small,
-                }}
-              >
-                <Text weight="bold" style={{ color: colors.background }} size="xxs">
-                  {item.inclass_id}
-                </Text>
-              </View>
-            }
-          />
-        )
+      if (searchID === "") {
+        if (searchPhrase === "") {
+          return (
+            <StudentCard
+              key={item.id}
+              student={item}
+              onPress={() => selectStudent(item)}
+              additionalComponent={
+                <View
+                  style={{
+                    backgroundColor: colors.ehkamCyan,
+                    width: 25,
+                    height: 25,
+                    borderRadius: 25,
+                    justifyContent: "space-around",
+                    alignItems: "center",
+                    paddingVertical: spacing.tiny,
+                    marginHorizontal: spacing.small,
+                  }}
+                >
+                  <Text weight="bold" style={{ color: colors.background }} size="xxs">
+                    {item.inclass_id}
+                  </Text>
+                </View>
+              }
+            />
+          )
+        }
+        // filter of the name
+        if (item.fullname.includes(searchPhrase.trim().replace(/\s/g, ""))) {
+          return (
+            <StudentCard
+              key={item.id}
+              student={item}
+              onPress={() => selectStudent(item)}
+              additionalComponent={
+                <View
+                  style={{
+                    backgroundColor: colors.ehkamCyan,
+                    width: 25,
+                    height: 25,
+                    borderRadius: 25,
+                    justifyContent: "space-around",
+                    alignItems: "center",
+                    paddingVertical: spacing.tiny,
+                    marginHorizontal: spacing.small,
+                  }}
+                >
+                  <Text weight="bold" style={{ color: colors.background }} size="xxs">
+                    {item.inclass_id}
+                  </Text>
+                </View>
+              }
+            />
+          )
+        }
       }
-      // filter of the name
-      if (item.fullname.includes(searchPhrase.trim().replace(/\s/g, ""))) {
+      if (item.inclass_id.toString() === searchID) {
         return (
           <StudentCard
             key={item.id}
@@ -153,6 +187,7 @@ export const SelectStudentScreen: FC<SessionStackScreenProps<"SelectStudent">> =
                     setSearchBarFocused={setSearchBarFocused}
                     setSearchPhrase={setSearchPhrase}
                     searchBarRef={searchBarRef}
+                    setSearchID={setSearchID}
                   />
                 </View>
               }
@@ -194,6 +229,7 @@ const SearchArea = function ({
   searchBarFocused,
   setSearchPhrase,
   setSearchBarFocused,
+  setSearchID,
 }) {
   return (
     <View
@@ -217,6 +253,8 @@ const SearchArea = function ({
           placeholder="الرقم..."
           LabelTextProps={{ weight: "book" }}
           placeholderTextColor={colors.ehkamGrey}
+          onChangeText={(value) => setSearchID(value)}
+          keyboardType="number-pad"
         />
         <SearchBar
           ref={searchBarRef}
