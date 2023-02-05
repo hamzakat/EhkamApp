@@ -15,6 +15,8 @@ import { spacing, colors } from "../../../theme"
 import ModalSelector from "react-native-modal-selector"
 import { SessionStackScreenProps, VersesListItem } from "./SessionStack"
 import { useStores } from "../../../models"
+import { Student } from "../../../models/Student"
+import { Session } from "../../../models/Session"
 
 export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = observer(
   function SessionSetupScreen({ navigation }) {
@@ -35,6 +37,18 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
 
     const [versesInStartPage, setVersesInStartPage] = useState([])
     const [versesInEndPage, setVersesInEndPage] = useState([])
+
+    /* for sessions of type "new", get the student's last checkpoints automatically */
+    const { sessionStore } = useStores()
+    useEffect(() => {
+      if (sessionStore.selectedSessionType === "new") {
+        console.log("Auto")
+        const selectedStudent: Student = sessionStore.selectedStudent
+        const lastNewSession: Session = selectedStudent.lastNewSession
+        if (lastNewSession !== undefined && lastNewSession.end_page !== 604)
+          setStartPage((lastNewSession.end_page + 1).toString())
+      }
+    }, [])
 
     useEffect(() => {
       if (validPageNumber(startPage)) {
