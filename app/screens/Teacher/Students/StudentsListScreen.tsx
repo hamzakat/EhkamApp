@@ -181,24 +181,26 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
       return false
     })
 
-    // const sortedData = filteredData.sort((a, b) => {
-    //   if (sort.sortType === "alphabet") {
-    //     if (sort.order === "asc") return a.fullname.localeCompare(b.fullname);
-    //     return b.fullname.localeCompare(a.fullname);
-    //   }
-    //   if (sort.sortType === "attendence") {
-    //     if (sort.order === "asc") return a.attendence_rate - b.attendence_rate;
-    //     return b.attendence_rate - a.attendence_rate;
-    //   }
-    //   if (sort.sortType === "reciting") {
-    //     if (sort.order === "asc") return a.reciting_rate - b.reciting_rate;
-    //     return b.reciting_rate - a.reciting_rate;
-    //   }
-    //   if (sort.sortType === "registration") {
-    //     if (sort.order === "asc") return a.inclass_id - b.inclass_id;
-    //     return b.inclass_id - a.inclass_id;
-    //   }
-    // });
+    const sortedData = filteredData.sort((a: Student, b: Student) => {
+      if (sort.sortType === "alphabet") {
+        if (sort.order === "asc") return a.fullname.localeCompare(b.fullname)
+        return b.fullname.localeCompare(a.fullname)
+      }
+      if (sort.sortType === "attendence") {
+        if (sort.order === "asc") return a.attendanceDays.rate - b.attendanceDays.rate
+        return b.attendanceDays.rate - a.attendanceDays.rate
+      }
+      if (sort.sortType === "reciting") {
+        if (sort.order === "asc") return a.recitingRate - b.recitingRate
+        return b.recitingRate - a.recitingRate
+      }
+      if (sort.sortType === "registration") {
+        if (sort.order === "asc")
+          return new Date(a.date_created).getTime() - new Date(b.date_created).getTime()
+
+        return new Date(b.date_created).getTime() - new Date(a.date_created).getTime()
+      }
+    })
 
     return (
       <DrawerLayoutScreen title="الطلاب" backBtn={false} navigation={navigation}>
@@ -219,7 +221,7 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
                   />
                 }
                 contentContainerStyle={$contentContainer}
-                data={filteredData}
+                data={sortedData}
                 refreshing={refreshing}
                 onRefresh={manualRefresh}
                 refreshControl={
