@@ -12,7 +12,7 @@ export interface VersesListItem {
   type: "chapterTitle" | "verse"
   pageNumber?: number
   chapterNumber?: string
-  chapterTitle: number
+  chapterTitle: string
   verseNumber?: number
   verseText?: string
 }
