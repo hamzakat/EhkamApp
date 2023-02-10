@@ -163,7 +163,7 @@ const DrawerContent = ({ drawerInsets, teacherName, schoolName, navigation }) =>
             size="md"
             onPress={() => navigation.navigate("Sync")}
           >
-            مزامنة الجلسات
+            مزامنة السجلات
           </Text>
         </View>
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.medium }}>

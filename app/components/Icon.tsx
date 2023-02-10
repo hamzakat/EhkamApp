@@ -139,6 +139,7 @@ export const iconRegistry = {
   qurtasIcon: require("../../assets/icons/ehkam/qurtas-icon.png"),
   share: require("../../assets/icons/ehkam/share.png"),
   sync: require("../../assets/icons/ehkam/sync.png"),
+  outbox: require("../../assets/icons/ehkam/outbox.png"),
 
   drawerProfileCircle: require("../../assets/icons/ehkam/drawer-profile-circle.png"),
 }

@@ -17,6 +17,8 @@ const NoteQueueItemModel = types.model({
   problem: types.frozen(),
 })
 
+export interface SessionQueueItem extends Instance<typeof SessionQueueItemModel> {}
+
 export const SessionStoreModel = types
   .model("SessionStore")
   .extend(withRequest)

@@ -10,6 +10,8 @@ const RecordsQueueItemModel = types.model({
   problem: types.frozen(),
 })
 
+export interface RecordsQueueItem extends Instance<typeof RecordsQueueItemModel> {}
+
 export const AttendanceStoreModel = types
   .model("AttendanceStore")
   .props({
