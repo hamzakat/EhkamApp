@@ -44,7 +44,7 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
       if (sessionStore.selectedSessionType === "new") {
         console.log("Auto")
         const selectedStudent: Student = sessionStore.selectedStudent
-        const lastNewSession: Session = selectedStudent.lastNewSession
+        const lastNewSession: Session = selectedStudent?.lastNewSession
         if (lastNewSession !== undefined && lastNewSession.end_page !== 604)
           setStartPage((lastNewSession.end_page + 1).toString())
       }
