@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import { View, Text, Platform, Dimensions } from "react-native"
+import { View, Platform, Dimensions } from "react-native"
 import React, { useRef, useState } from "react"
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout"
 import { Screen, ScreenProps } from "./Screen"
@@ -7,6 +7,8 @@ import { useHeader } from "../utils/useHeader"
 import { Icon } from "./Icon"
 import { colors, spacing } from "../theme"
 import { useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
+import { Text } from "./Text"
+import { useStores } from "../models"
 
 interface DrawerLayoutScreenProps {
   navigation?: any
@@ -20,6 +22,8 @@ interface DrawerLayoutScreenProps {
 export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutScreenProps>> = (
   props: DrawerLayoutScreenProps,
 ) => {
+  const { currentUserStore } = useStores()
+
   const $drawerInsets = useSafeAreaInsetsStyle(["top"])
 
   const drawerRef = useRef<DrawerLayout>(null)
@@ -29,6 +33,14 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
       setDrawerOpen(true)
       drawerRef.current?.openDrawer()
     } else {
+      setDrawerOpen(false)
+      drawerRef.current?.closeDrawer()
+    }
+  }
+
+  // TODO: close drawer on blur?
+  const closeDrawer = () => {
+    if (drawerOpen) {
       setDrawerOpen(false)
       drawerRef.current?.closeDrawer()
     }
@@ -89,7 +101,14 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
       drawerPosition={"right"}
       drawerBackgroundColor={colors.palette.neutral100}
       overlayColor={colors.palette.overlay20}
-      renderNavigationView={() => <DrawerContent drawerInsets={$drawerInsets} />}
+      renderNavigationView={() => (
+        <DrawerContent
+          drawerInsets={$drawerInsets}
+          teacherName={currentUserStore.user.fullname}
+          schoolName={currentUserStore.user.school_name}
+          navigation={props.navigation}
+        />
+      )}
     >
       <Screen safeAreaEdges={["top", "bottom"]} style={{ flex: 1 }} {...props.ScreenProps}>
         {props.children}
@@ -98,10 +117,76 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
   )
 }
 
-const DrawerContent = ({ drawerInsets }) => {
+const DrawerContent = ({ drawerInsets, teacherName, schoolName, navigation }) => {
   return (
     <View style={[{ flex: 1 }, drawerInsets]}>
-      <Text>اسم الاستاذ</Text>
+      {/* teacher's name + school name */}
+      <View style={{ flexDirection: "row", marginStart: spacing.extraSmall, alignItems: "center" }}>
+        <Icon icon="drawerProfileCircle" />
+        <View style={{ paddingVertical: spacing.small }}>
+          <Text weight="semiBold" style={{ color: colors.ehkamPeach }}>
+            {teacherName}
+          </Text>
+          <Text weight="book" size="xxs" style={{ color: colors.ehkamCyan }}>
+            {schoolName}
+          </Text>
+        </View>
+      </View>
+
+      {/* navigation list */}
+      <View style={{ marginTop: spacing.extraLarge, marginHorizontal: spacing.large }}>
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.medium }}>
+          <Icon icon="notificationBell" size={22} color={colors.ehkamCyan} />
+          <Text
+            weight="semiBold"
+            style={{ color: colors.ehkamGrey, marginStart: spacing.small }}
+            size="md"
+          >
+            الاشعارات
+          </Text>
+        </View>
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.medium }}>
+          <Icon icon="pieChart" size={22} color={colors.ehkamCyan} />
+          <Text
+            weight="semiBold"
+            style={{ color: colors.ehkamGrey, marginStart: spacing.small }}
+            size="md"
+          >
+            الاحصائيات
+          </Text>
+        </View>
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.medium }}>
+          <Icon icon="sync" size={22} color={colors.ehkamCyan} />
+          <Text
+            weight="semiBold"
+            style={{ color: colors.ehkamGrey, marginStart: spacing.small }}
+            size="md"
+            onPress={() => navigation.navigate("Sync")}
+          >
+            مزامنة الجلسات
+          </Text>
+        </View>
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.medium }}>
+          <Icon icon="qurtasIcon" size={22} color={colors.ehkamCyan} />
+          <Text
+            weight="semiBold"
+            style={{ color: colors.ehkamGrey, marginStart: spacing.small }}
+            size="md"
+          >
+            الشركة المطورة
+          </Text>
+        </View>
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.medium }}>
+          <Icon icon="share" size={22} color={colors.ehkamCyan} />
+          <Text
+            weight="semiBold"
+            style={{ color: colors.ehkamGrey, marginStart: spacing.small }}
+            size="md"
+          >
+            مشاركة التطبيق
+          </Text>
+        </View>
+      </View>
     </View>
   )
 }

@@ -18,7 +18,10 @@ export const CurrentUserStoreModel = types
   .views((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
   .actions((self) => {
     const fetchCurrentUser = flow(function* () {
-      const res: ApiResponse<any> = yield self.request({ method: "GET", url: "/users/me" })
+      const res: ApiResponse<any> = yield self.request({
+        method: "GET",
+        url: "/users/me?fields=id,first_name,last_name,role,title,location,description,t_class_id,school_id,school_id.name,school_id.id",
+      })
 
       if (!res.ok) {
         const problem: void | GeneralApiProblem = getGeneralApiProblem(res)
@@ -29,16 +32,18 @@ export const CurrentUserStoreModel = types
         }
       }
       try {
-        const userData: ApiUserResponse = {
-          id: res.data.data.id,
-          first_name: res.data.data.first_name,
-          last_name: res.data.data.last_name,
-          role: res.data.data.role,
-          title: res.data.data.title,
-          location: res.data.data.location,
-          description: res.data.data.description,
-          class_id: res.data.data.t_class_id[0], // NOTE: teacher might be assigned to more class. this version get the 1st class id only
-          school_id: res.data.data.school_id,
+        const rawData: ApiUserResponse = res.data.data
+        const userData = {
+          id: rawData.id,
+          first_name: rawData.first_name,
+          last_name: rawData.last_name,
+          role: rawData.role,
+          title: rawData.title,
+          location: rawData.location,
+          description: rawData.description,
+          class_id: rawData.t_class_id[0], // NOTE: teacher might be assigned to more class. this version get the 1st class id only
+          school_id: rawData.school_id.id,
+          school_name: rawData.school_id.name,
         }
 
         self.user = UserModel.create(userData)

@@ -17,8 +17,11 @@ export interface ApiUserResponse {
   title: string
   location: string
   description: string
-  class_id: string
-  school_id: string
+  t_class_id: string[]
+  school_id: {
+    id: string
+    name: string
+  }
 }
 /**
  * The options used to configure apisauce.

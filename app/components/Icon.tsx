@@ -133,6 +133,14 @@ export const iconRegistry = {
   record: require("../../assets/icons/ehkam/record.png"),
   records: require("../../assets/icons/ehkam/records.png"),
   checked: require("../../assets/icons/ehkam/checked.png"),
+
+  notificationBell: require("../../assets/icons/ehkam/notification-bell.png"),
+  pieChart: require("../../assets/icons/ehkam/pie-chart.png"),
+  qurtasIcon: require("../../assets/icons/ehkam/qurtas-icon.png"),
+  share: require("../../assets/icons/ehkam/share.png"),
+  sync: require("../../assets/icons/ehkam/sync.png"),
+
+  drawerProfileCircle: require("../../assets/icons/ehkam/drawer-profile-circle.png"),
 }
 
 const $imageStyle: ImageStyle = {

@@ -15,9 +15,17 @@ export const UserModel = types
     role: types.maybeNull(types.string),
     class_id: types.maybeNull(types.string),
     school_id: types.maybeNull(types.string),
+    school_name: types.maybeNull(types.string),
   })
   .actions(withSetPropAction)
-  .views((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
+  .views((self) => ({
+    get fullname() {
+      if (self.last_name) {
+        return self.first_name + " " + self.last_name
+      }
+      return self.first_name
+    },
+  })) // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface User extends Instance<typeof UserModel> {}
 export interface UserSnapshotOut extends SnapshotOut<typeof UserModel> {}
