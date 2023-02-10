@@ -88,7 +88,7 @@ export const SessionNoteScreen: FC<SessionStackScreenProps<"SessionNote">> = obs
           preset="peach"
           buttonText="الرجوع"
         />
-        <ScrollView
+        <View
           style={{
             alignContent: "center",
             paddingHorizontal: spacing.large,
@@ -210,7 +210,7 @@ export const SessionNoteScreen: FC<SessionStackScreenProps<"SessionNote">> = obs
               <Text text="حفظ" weight="bold" size="md" style={{ color: colors.background }} />
             </Button>
           </View>
-        </ScrollView>
+        </View>
       </NoDrawerLayoutScreen>
     )
   },

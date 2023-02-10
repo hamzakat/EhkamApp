@@ -11,6 +11,7 @@ interface NoDrawerLayoutScreenProps {
   title: string // TODO: use React Navigation title route option
   backBtn?: boolean
   children: React.ReactNode
+  preset?: "scroll" | "auto" | "fixed"
   Icon?: React.ReactElement<any, string | React.JSXElementConstructor<any>>
 }
 
@@ -52,7 +53,11 @@ export const NoDrawerLayoutScreen: React.FC<React.PropsWithChildren<NoDrawerLayo
     [],
   )
   return (
-    <Screen safeAreaEdges={["top", "bottom"]} style={{ flex: 1 }} preset="fixed">
+    <Screen
+      safeAreaEdges={["top", "bottom"]}
+      style={{ flex: 1 }}
+      preset={!!props.preset ? props.preset : "auto"}
+    >
       {props.children}
     </Screen>
   )
