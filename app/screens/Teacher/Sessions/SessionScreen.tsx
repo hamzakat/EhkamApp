@@ -1,9 +1,9 @@
 /* eslint-disable react-native/no-inline-styles */
 import { observer } from "mobx-react-lite"
-import { View } from "react-native"
+import { Alert, View } from "react-native"
 import { Button, DrawerLayoutScreen, Text, VerseItem, WarningDialog } from "../../../components"
 
-import React, { FC, useState } from "react"
+import React, { FC, useEffect, useState } from "react"
 import { SessionStackScreenProps, VersesListItem } from "./SessionStack"
 import { FlatList } from "react-native-gesture-handler"
 import { colors, spacing } from "../../../theme"
@@ -24,9 +24,42 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
     const [confirmationDialogVisible, setConfirmationDialogVisible] = useState(false)
     const [doneDialogVisible, setDoneDialogVisible] = useState(false)
     const [repeatDialogVisible, setRepeatDialogVisible] = useState(false)
+    const [done, setDone] = useState(false)
+
+    React.useEffect(
+      // Preventing accidental back button press: https://reactnavigation.org/docs/preventing-going-back/
+      () =>
+        navigation.addListener("beforeRemove", (e) => {
+          if (done) {
+            // If we don't have unsaved changes, then we don't need to do anything
+            return
+          }
+
+          // Prevent default behavior of leaving the screen
+          e.preventDefault()
+
+          // Prompt the user before leaving the screen
+
+          Alert.alert(
+            "هل تريد الرجوع؟",
+            "لم يتم إنهاء الجلسة بعد. هل أنت متأكد من رغبتك في إلغاء الجلسة والرجوع؟",
+            [
+              { text: "متابعة الجلسة", style: "cancel", onPress: () => {} },
+              {
+                text: "الرجوع",
+                style: "destructive",
+                // If the user confirmed, then we dispatch the action we blocked earlier
+                // This will continue the action that had triggered the removal of the screen
+                onPress: () => navigation.dispatch(e.data.action),
+              },
+            ],
+          )
+        }),
+      [navigation, done],
+    )
 
     const sendSession = () => {
-      console.log(11)
+      setDone(true)
 
       const session: Session = SessionModel.create({
         _id: uuidv4(),
@@ -41,7 +74,6 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
         type: sessionStore.selectedSessionType,
         timestamp: new Date().toISOString(),
       })
-      console.log(session)
 
       sessionStore.setProp("currentSessionNotes", [])
       sessionStore.setProp("selectedStudent", undefined)
