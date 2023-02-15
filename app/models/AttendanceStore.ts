@@ -1,5 +1,13 @@
 import { ApiResponse } from "apisauce"
-import { flow, getRoot, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+import {
+  flow,
+  getRoot,
+  getSnapshot,
+  Instance,
+  SnapshotIn,
+  SnapshotOut,
+  types,
+} from "mobx-state-tree"
 import { GeneralApiProblem, getGeneralApiProblem } from "../services/api/apiProblem"
 import { AttendanceRecordModel, AttendanceRecordSnapshotOut } from "./AttendanceRecord"
 import { withRequest } from "./helpers/withRequest"
@@ -26,7 +34,7 @@ export const AttendanceStoreModel = types
     const root = getRoot(self)
 
     const sendAttendanceRecord = flow(function* (attendanceRecord: AttendanceRecordSnapshotOut) {
-      // do POST request for session
+      // do POST request for attendance record
       const req: ApiResponse<any> = yield self.request({
         method: "POST",
         url: `/items/attendance`,
@@ -90,13 +98,27 @@ export const AttendanceStoreModel = types
         self.attendanceRecords = attendanceRecords
       }
     })
+
     return { sendAttendanceRecord, fetchAttendanceRecords }
   }) // eslint-disable-line @typescript-eslint/no-unused-vars
   .actions((self) => {
     const dequeue = flow(function* () {
-      // for each item in the offline queue
+      // for each item in the sessionOfflineQueue
       // do post request
       // if successful ->  set the id to the id recieved from the OK response & remvove item from sessionOfflineQueue
+
+      const payload: AttendanceRecordSnapshotOut[] = self.recordsOfflineQueue.map((queueItem) => {
+        return getSnapshot(queueItem.attendanceRecord)
+      })
+
+      self.recordsOfflineQueue.replace([])
+      payload.forEach(async (record) => {
+        try {
+          await self.sendAttendanceRecord(record)
+        } catch (error) {
+          __DEV__ && console.log("Error from AttendanceStore.dequeue", error)
+        }
+      })
     })
     return { dequeue }
   })

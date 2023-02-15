@@ -1,22 +1,42 @@
 /* eslint-disable react-native/no-inline-styles */
 import { useNavigation } from "@react-navigation/native"
 import { observer } from "mobx-react-lite"
-import React, { FC } from "react"
-import { View } from "react-native"
-import { FlatList } from "react-native-gesture-handler"
-import { DrawerLayoutScreen, Icon, NoDrawerLayoutScreen, Text } from "../components"
+import React, { FC, useState } from "react"
+import { View, ToastAndroid, ActivityIndicator } from "react-native"
+import { Button, Icon, NoDrawerLayoutScreen, Text } from "../components"
 import { useStores } from "../models"
-import { RecordsQueueItem } from "../models/AttendanceStore"
-import { SessionQueueItem } from "../models/SessionStore"
 import { AppStackScreenProps } from "../navigators"
 import { colors, spacing } from "../theme"
+import { useNetInfo } from "@react-native-community/netinfo"
+import { delay } from "../utils/delay"
 
 interface SyncScreenProps extends AppStackScreenProps<"Sync"> {}
 
 export const SyncScreen: FC<SyncScreenProps> = observer(function SyncScreen(_props) {
   const navigation = useNavigation()
   const { sessionStore, attendanceStore } = useStores()
+  const netInfo = useNetInfo()
 
+  const [sending, setSending] = useState(false)
+
+  const sendAttendanceItems = async () => {
+    if (netInfo.isInternetReachable) {
+      setSending(true)
+      await Promise.all([attendanceStore.dequeue(), delay(12000)])
+      setSending(false)
+    } else {
+      ToastAndroid.show("غير متصّل بالانترنت", ToastAndroid.SHORT)
+    }
+  }
+  const sendSessionItems = async () => {
+    if (netInfo.isInternetReachable) {
+      setSending(true)
+      await Promise.all([sessionStore.dequeue(), delay(12000)])
+      setSending(false)
+    } else {
+      ToastAndroid.show("غير متصّل بالانترنت", ToastAndroid.SHORT)
+    }
+  }
   return (
     <NoDrawerLayoutScreen
       Icon={<Icon icon="sync" containerStyle={{ marginHorizontal: spacing.medium }} />}
@@ -32,89 +52,163 @@ export const SyncScreen: FC<SyncScreenProps> = observer(function SyncScreen(_pro
           paddingBottom: spacing.large,
         }}
       >
-        <Text
-          weight="book"
-          style={{ color: colors.ehkamRed, textAlign: "center", marginBottom: spacing.small }}
-          size="xxs"
-        >
-          هذه الجلسات غير مرفوعة ! اضغط لمزامنتها وتحديث البيانات
-        </Text>
-        <View
-          style={{
-            flexDirection: "row",
-            borderBottomWidth: 0.5,
-            borderBottomColor: colors.ehkamGrey,
-            marginVertical: spacing.small,
-            paddingBottom: spacing.tiny,
-          }}
-        >
-          <Text
-            text="سجلات حضور"
-            weight="bold"
-            size="sm"
-            style={{ color: colors.ehkamGrey, marginStart: spacing.small }}
-          />
-        </View>
+        {sending ? (
+          <ActivityIndicator size="large" color={colors.ehkamCyan} />
+        ) : (
+          <>
+            {attendanceStore.recordsOfflineQueue.length > 0 ||
+            sessionStore.sessionOfflineQueue.length > 0 ? (
+              <>
+                <Text
+                  weight="semiBold"
+                  style={{
+                    color: colors.ehkamRed,
+                    textAlign: "center",
+                    marginBottom: spacing.small,
+                  }}
+                  size="xxs"
+                >
+                  هذه السجلّات غير مرفوعة ! اضغط على زر الرّفع {"\n"}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text
+                  weight="semiBold"
+                  style={{
+                    color: colors.ehkamCyan,
+                    textAlign: "center",
+                    marginBottom: spacing.small,
+                  }}
+                  size="xs"
+                >
+                  لا يوجد سجلّات تحتاج للرفع{"\n"}
+                </Text>
+              </>
+            )}
 
-        <View
-          style={{
-            alignContent: "center",
-            paddingHorizontal: spacing.small,
-            paddingBottom: spacing.large,
-            paddingTop: spacing.tiny,
-          }}
-        >
-          {attendanceStore.recordsOfflineQueue.map((item, i) => (
-            <ListItem
-              key={i}
-              recordType="attendance"
-              date={
-                item.attendanceRecord.timestamp.substring(0, 10) +
-                " الساعة " +
-                item.attendanceRecord.timestamp.substring(11, 16)
-              }
-            />
-          ))}
-        </View>
+            {attendanceStore.recordsOfflineQueue.length > 0 && (
+              <>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    borderBottomWidth: 0.5,
+                    borderBottomColor: colors.ehkamGrey,
+                    marginVertical: spacing.small,
+                    paddingBottom: spacing.tiny,
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text
+                    text="سجلات حضور"
+                    weight="bold"
+                    size="sm"
+                    style={{ color: colors.ehkamGrey, marginStart: spacing.small }}
+                  />
+                  <Text
+                    weight="bold"
+                    size="sm"
+                    style={{
+                      borderWidth: 1.3,
+                      borderColor: colors.ehkamCyan,
+                      borderRadius: 10,
+                      paddingVertical: spacing.tiny,
+                      paddingHorizontal: spacing.small,
+                      marginEnd: spacing.small,
+                      color: colors.ehkamCyan,
+                    }}
+                    onPress={sendAttendanceItems}
+                  >
+                    رفع
+                  </Text>
+                </View>
 
-        <View
-          style={{
-            flexDirection: "row",
-            borderBottomWidth: 0.5,
-            borderBottomColor: colors.ehkamGrey,
-            marginBottom: spacing.small,
-            marginTop: spacing.medium,
-            paddingBottom: spacing.tiny,
-          }}
-        >
-          <Text
-            text="جلسات تسميع"
-            weight="bold"
-            size="sm"
-            style={{ color: colors.ehkamGrey, marginStart: spacing.small }}
-          />
-        </View>
+                <View
+                  style={{
+                    alignContent: "center",
+                    paddingHorizontal: spacing.small,
+                    paddingBottom: spacing.large,
+                    paddingTop: spacing.tiny,
+                  }}
+                >
+                  {attendanceStore.recordsOfflineQueue.map((item, i) => (
+                    <ListItem
+                      key={i}
+                      recordType="attendance"
+                      date={
+                        item.attendanceRecord.timestamp.substring(0, 10) +
+                        " الساعة " +
+                        item.attendanceRecord.timestamp.substring(11, 16)
+                      }
+                    />
+                  ))}
+                </View>
+              </>
+            )}
+            {sessionStore.sessionOfflineQueue.length > 0 && (
+              <>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    borderBottomWidth: 0.5,
+                    borderBottomColor: colors.ehkamGrey,
+                    marginBottom: spacing.small,
+                    marginTop: spacing.medium,
+                    paddingBottom: spacing.tiny,
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text
+                    text="جلسات تسميع"
+                    weight="bold"
+                    size="sm"
+                    style={{ color: colors.ehkamGrey, marginStart: spacing.small }}
+                  />
+                  <Text
+                    weight="bold"
+                    size="sm"
+                    style={{
+                      borderWidth: 1.3,
+                      borderColor: colors.ehkamCyan,
+                      borderRadius: 10,
+                      paddingVertical: spacing.tiny,
+                      paddingHorizontal: spacing.small,
+                      marginEnd: spacing.small,
+                      color: colors.ehkamCyan,
+                    }}
+                    onPress={sendSessionItems}
+                  >
+                    رفع
+                  </Text>
+                </View>
 
-        <View
-          style={{
-            alignContent: "center",
-            paddingHorizontal: spacing.small,
-            paddingBottom: spacing.large,
-            paddingTop: spacing.tiny,
-          }}
-        >
-          {sessionStore.sessionOfflineQueue.map((item, i) => (
-            <ListItem
-              key={i}
-              recordType="attendance"
-              date={
-                item.session.timestamp.substring(0, 10) +
-                " الساعة " +
-                item.session.timestamp.substring(11, 16)
-              }
-            />
-          ))}
-        </View>
+                <View
+                  style={{
+                    alignContent: "center",
+                    paddingHorizontal: spacing.small,
+                    paddingBottom: spacing.large,
+                    paddingTop: spacing.tiny,
+                  }}
+                >
+                  {sessionStore.sessionOfflineQueue.map((item, i) => (
+                    <ListItem
+                      key={i}
+                      recordType="session"
+                      date={
+                        item.session.timestamp.substring(0, 10) +
+                        " الساعة " +
+                        item.session.timestamp.substring(11, 16)
+                      }
+                      studentName={item.session.studentName}
+                    />
+                  ))}
+                </View>
+              </>
+            )}
+          </>
+        )}
       </View>
     </NoDrawerLayoutScreen>
   )
@@ -123,6 +217,7 @@ export const SyncScreen: FC<SyncScreenProps> = observer(function SyncScreen(_pro
 export interface ListItemProps {
   date: string
   recordType: "session" | "attendance"
+  studentName?: string
   onTouchEnd?: () => void
 }
 
@@ -167,6 +262,12 @@ const ListItem = (props: ListItemProps) => {
         {/* <Text weight="book" size="xs" style={{ color: colors.ehkamGrey }}>
           نوع السجل: {props.recordType === "session" ? "جلسة" : "حضور"}
         </Text> */}
+        {props.recordType === "session" && (
+          <Text weight="book" size="xs" style={{ color: colors.ehkamGrey }}>
+            اسم الطالب: {props.studentName}
+          </Text>
+        )}
+
         <Text weight="book" size="xs" style={{ color: colors.ehkamGrey }}>
           {props.date}
         </Text>

@@ -1,6 +1,7 @@
-import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+import { getRoot, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
 import { SessionNoteModel } from "./SessionNote"
 import { withSetPropAction } from "./helpers/withSetPropAction"
+import { Student } from "./Student"
 
 /**
  * Model description here for TypeScript hints.
@@ -22,7 +23,15 @@ export const SessionModel = types
     timestamp: types.string,
   })
   .actions(withSetPropAction)
-  .views((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
+  .views((self) => ({
+    get studentName() {
+      const root = getRoot(self)
+      const student: Student = root.studentStore.students.find(
+        (student) => student.id === self.student_id,
+      )
+      return student.fullname
+    },
+  })) // eslint-disable-line @typescript-eslint/no-unused-vars
   .actions((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface Session extends Instance<typeof SessionModel> {}

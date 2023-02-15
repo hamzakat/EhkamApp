@@ -83,3 +83,5 @@ web-build/
 
 # Configurations
 !env.js
+android/app/src/main/assets/*
+android/app/src/main/res/*

@@ -1,9 +1,18 @@
 import { ApiResponse } from "apisauce"
-import { flow, Instance, SnapshotIn, SnapshotOut, types, getRoot } from "mobx-state-tree"
+import {
+  flow,
+  Instance,
+  SnapshotIn,
+  SnapshotOut,
+  types,
+  getRoot,
+  clone,
+  getSnapshot,
+} from "mobx-state-tree"
 import { GeneralApiProblem, getGeneralApiProblem } from "../services/api/apiProblem"
 import { withRequest } from "./helpers/withRequest"
 import { withSetPropAction } from "./helpers/withSetPropAction"
-import { Session, SessionModel } from "./Session"
+import { Session, SessionModel, SessionSnapshotOut } from "./Session"
 import { SessionNoteModel } from "./SessionNote"
 import { StudentModel } from "./Student"
 
@@ -88,12 +97,13 @@ export const SessionStoreModel = types
         if (problem) {
           __DEV__ && console.tron.error(`Bad data: ${problem}\n${req.data}`, problem)
           __DEV__ && console.log("Problem from SessionModel.sendSession():", problem)
-
+          __DEV__ && console.log(req)
           // if network is offline -> add to queue
           self.sessionOfflineQueue.push(SessionQueueItemModel.create({ session, problem }))
         }
       } else {
         // get server id and apply it
+
         const id = req.data.data.id
         session.setProp("id", id)
 
@@ -102,7 +112,6 @@ export const SessionStoreModel = types
           return note
         })
         session.setProp("notes", updatedNotes)
-
         self.sessions.push(session)
       }
     })
@@ -167,6 +176,19 @@ export const SessionStoreModel = types
       // for each item in the sessionOfflineQueue
       // do post request
       // if successful ->  set the id to the id recieved from the OK response & remvove item from sessionOfflineQueue
+
+      const payload: SessionSnapshotOut[] = self.sessionOfflineQueue.map((queueItem) => {
+        return getSnapshot(queueItem.session)
+      })
+
+      self.sessionOfflineQueue.replace([])
+      payload.forEach(async (session) => {
+        try {
+          await self.sendSession(SessionModel.create(session))
+        } catch (error) {
+          __DEV__ && console.log("Error from SessionStore.dequeue", error)
+        }
+      })
     })
     return { dequeue }
   })
