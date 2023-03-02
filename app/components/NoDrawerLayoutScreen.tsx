@@ -13,6 +13,7 @@ interface NoDrawerLayoutScreenProps {
   children: React.ReactNode
   preset?: "scroll" | "auto" | "fixed"
   Icon?: React.ReactElement<any, string | React.JSXElementConstructor<any>>
+  safeAreaEdge?: string[]
 }
 
 export const NoDrawerLayoutScreen: React.FC<React.PropsWithChildren<NoDrawerLayoutScreenProps>> = (
@@ -54,7 +55,7 @@ export const NoDrawerLayoutScreen: React.FC<React.PropsWithChildren<NoDrawerLayo
   )
   return (
     <Screen
-      safeAreaEdges={["top", "bottom"]}
+      safeAreaEdges={!!props.safeAreaEdge ? props.safeAreaEdge : ["top", "bottom"]}
       style={{ flex: 1 }}
       preset={!!props.preset ? props.preset : "auto"}
     >

@@ -21,6 +21,7 @@ import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
 import { useStores } from "../models"
 import { TeacherNavigator, TeacherTabParamList } from "./TeacherNavigator"
 import { SyncScreen } from "../screens/SyncScreen"
+import { AboutScreen } from "../screens/AboutScreen"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -39,6 +40,7 @@ export type AppStackParamList = {
   Login: undefined
   Teacher: NavigatorScreenParams<TeacherTabParamList>
   Sync: undefined
+  About: undefined
 }
 
 /**
@@ -70,6 +72,7 @@ const AppStack = observer(function AppStack() {
         <>
           <Stack.Screen name="Teacher" component={TeacherNavigator} />
           <Stack.Screen name="Sync" component={SyncScreen} />
+          <Stack.Screen name="About" component={AboutScreen} />
         </>
       ) : (
         <>

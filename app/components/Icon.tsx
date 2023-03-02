@@ -142,6 +142,12 @@ export const iconRegistry = {
   outbox: require("../../assets/icons/ehkam/outbox.png"),
 
   drawerProfileCircle: require("../../assets/icons/ehkam/drawer-profile-circle.png"),
+
+  wp: require("../../assets/icons/ehkam/wp.png"),
+  tg: require("../../assets/icons/ehkam/tg.png"),
+  fb: require("../../assets/icons/ehkam/fb.png"),
+  behance: require("../../assets/icons/ehkam/behance.png"),
+  globe: require("../../assets/icons/ehkam/globe.png"),
 }
 
 const $imageStyle: ImageStyle = {

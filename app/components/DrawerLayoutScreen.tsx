@@ -172,6 +172,7 @@ const DrawerContent = ({ drawerInsets, teacherName, schoolName, navigation }) =>
             weight="semiBold"
             style={{ color: colors.ehkamGrey, marginStart: spacing.small }}
             size="md"
+            onPress={() => navigation.navigate("About")}
           >
             الشركة المطورة
           </Text>
