@@ -20,7 +20,7 @@ export const CurrentUserStoreModel = types
     const fetchCurrentUser = flow(function* () {
       const res: ApiResponse<any> = yield self.request({
         method: "GET",
-        url: "/users/me?fields=id,first_name,last_name,role,title,location,description,t_class_id,school_id,school_id.name,school_id.id",
+        url: "/users/me?fields=id,first_name,last_name,role,title,location,description,school_id.name,school_id.id",
       })
 
       if (!res.ok) {
@@ -41,10 +41,28 @@ export const CurrentUserStoreModel = types
           title: rawData.title,
           location: rawData.location,
           description: rawData.description,
-          class_id: rawData.t_class_id[0], // NOTE: teacher might be assigned to more class. this version get the 1st class id only
           school_id: rawData.school_id.id,
+          class_id: null,
           school_name: rawData.school_id.name,
         }
+
+        const classTeacherRes: ApiResponse<any> = yield self.request({
+          method: "GET",
+          url: `/items/teachers?filter[user_id][_eq]=${userData.id}&fields=classes,id`,
+        })
+
+        if (!classTeacherRes.ok) {
+          const problem: void | GeneralApiProblem = getGeneralApiProblem(res)
+          if (problem) {
+            console.tron.error(`Bad data: ${problem}\n${classTeacherRes.data}`, problem)
+            console.log("Problem from UserModel.fetchCurrentUser():", problem)
+            return
+          }
+        }
+
+        const classTeacherData = classTeacherRes.data.data
+
+        userData.class_id = classTeacherData[0].classes[0] // NOTE: teacher might be assigned to more class. this version get the 1st class id only
 
         self.user = UserModel.create(userData)
       } catch (e) {

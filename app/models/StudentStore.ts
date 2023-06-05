@@ -23,7 +23,7 @@ export const StudentStoreModel = types
     const fetchStudents = flow(function* () {
       const res: ApiResponse<any> = yield self.request({
         method: "GET",
-        url: `/users?filter[role][_eq]=${Config.DIRECTUS_STUDENT_ROLE_ID}&filter[class_student][class_id][_eq]=${root.currentUserStore.user.class_id}&fields=id,date_created,first_name,last_name,avatar,email,s_birthdate,s_edu_grade,s_edu_school,city,location,s_blood,s_health_issues,s_parent_job,s_social_issues,school_id,class_student.inclass_id,class_student.class_id,s_previous_memo`,
+        url: `/items/students?filter[class_id][_eq]=${root.currentUserStore.user.class_id}&fields=id,date_created,user_id.first_name,user_id.last_name,user_id.avatar,user_id.email,user_id.school_id,user_id.location,birthdate,edu_grade,edu_school,city,blood,health_issues,parent_job,social_issues,inclass_id,previous_memo`,
       })
 
       if (!res.ok) {
@@ -36,12 +36,29 @@ export const StudentStoreModel = types
       }
       try {
         const rawData = res.data.data
-        const students: StudentSnapshotIn[] = rawData.map((raw) => ({
-          ...raw,
+        console.log(rawData)
 
-          // class_student is an array of the classes in which the student registerd
-          inclass_id: raw.class_student[0]?.inclass_id,
-          class_id: raw.class_student[0]?.class_id,
+        const students: StudentSnapshotIn[] = rawData.map((raw) => ({
+          id: raw.id,
+          class_id: raw.class_id,
+          date_created: raw.date_created,
+          birthdate: raw.birthdate,
+          edu_grade: raw.edu_grade,
+          edu_school: raw.edu_school,
+          city: raw.city,
+          blood: raw.blood,
+          health_issues: raw.health_issues,
+          parent_job: raw.parent_job,
+          social_issues: raw.social_issues,
+          inclass_id: raw.inclass_id,
+          previous_memo: raw.previous_memo,
+
+          first_name: raw.user_id.first_name,
+          last_name: raw.user_id.last_name,
+          avatar: raw.user_id.avatar,
+          email: raw.user_id.email,
+          school_id: raw.user_id.school_id,
+          location: raw.user_id.location,
         }))
 
         self.setProp("students", students)

@@ -88,7 +88,6 @@ export const SessionStoreModel = types
         url: `/items/sessions`,
         data: {
           ...session,
-          teacher_id: root.currentUserStore.user.id,
           class_id: root.currentUserStore.user.class_id,
         },
       })

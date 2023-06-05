@@ -16,32 +16,32 @@ export const StudentModel = types
   .model("Student")
   .extend(withRequest)
   .props({
-    // basic info
+    // basic info from directus_user
     id: types.identifier,
-    inclass_id: types.maybeNull(types.number),
     date_created: types.maybeNull(types.string),
     first_name: types.maybeNull(types.string),
     last_name: types.maybeNull(types.string),
     email: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
     // avatar_image: types.maybeNull(types.frozen()),
-    s_birthdate: types.maybeNull(types.string),
-    s_edu_grade: types.maybeNull(types.string),
-    s_edu_school: types.maybeNull(types.string),
-    city: types.maybeNull(types.string),
+    school_id: types.maybeNull(types.string),
+
     location: types.maybeNull(types.string),
-    s_blood: types.maybeNull(types.string),
-    s_health_issues: types.maybeNull(types.string),
-    s_parent_job: types.maybeNull(types.string),
-    s_social_issues: types.maybeNull(types.string),
+
+    inclass_id: types.maybeNull(types.number),
+    class_id: types.maybeNull(types.string),
+    birthdate: types.maybeNull(types.string),
+    edu_grade: types.maybeNull(types.string),
+    edu_school: types.maybeNull(types.string),
+    city: types.maybeNull(types.string),
+    blood: types.maybeNull(types.string),
+    health_issues: types.maybeNull(types.string),
+    parent_job: types.maybeNull(types.string),
+    social_issues: types.maybeNull(types.string),
 
     // educational level
-    s_previous_memo: types.optional(types.number, 0),
+    previous_memo: types.maybeNull(types.number, 0),
     memo: types.optional(types.number, 0),
-
-    // other info
-    class_id: types.maybeNull(types.string),
-    school_id: types.maybeNull(types.string),
   })
   .actions(withSetPropAction)
   .views((self) => ({
@@ -77,7 +77,7 @@ export const StudentModel = types
     },
 
     get age() {
-      return self.s_birthdate // TODO: do the math
+      return self.birthdate // TODO: do the math
     },
 
     get fullname() {
