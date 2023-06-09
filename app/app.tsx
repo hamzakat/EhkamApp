@@ -22,6 +22,7 @@ import * as storage from "./utils/storage"
 import { customFontsToLoad } from "./theme"
 import { setupReactotron } from "./services/reactotron"
 import Config from "./config"
+import { GestureHandlerRootView } from "react-native-gesture-handler"
 
 // Set up Reactotron, which is a free desktop app for inspecting and debugging
 // React Native apps. Learn more here: https://github.com/infinitered/reactotron
@@ -103,15 +104,18 @@ function App(props: AppProps) {
 
   // otherwise, we're ready to render the app
   return (
-    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-      <ErrorBoundary catchErrors={Config.catchErrors}>
-        <AppNavigator
-          linking={linking}
-          initialState={initialNavigationState}
-          onStateChange={onNavigationStateChange}
-        />
-      </ErrorBoundary>
-    </SafeAreaProvider>
+    // eslint-disable-next-line react-native/no-inline-styles
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <ErrorBoundary catchErrors={Config.catchErrors}>
+          <AppNavigator
+            linking={linking}
+            initialState={initialNavigationState}
+            onStateChange={onNavigationStateChange}
+          />
+        </ErrorBoundary>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   )
 }
 

@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
-import { View, Platform, Dimensions } from "react-native"
-import React, { useRef, useState } from "react"
+import { View, Platform, Dimensions, BackHandler } from "react-native"
+import React, { useEffect, useRef, useState } from "react"
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout"
 import { Screen, ScreenProps } from "./Screen"
 import { useHeader } from "../utils/useHeader"
@@ -9,6 +9,7 @@ import { colors, spacing } from "../theme"
 import { useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
 import { Text } from "./Text"
 import { useStores } from "../models"
+import { useNavigation } from "@react-navigation/native"
 
 interface DrawerLayoutScreenProps {
   navigation?: any
@@ -28,23 +29,27 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
 
   const drawerRef = useRef<DrawerLayout>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const toggleDrawer = () => {
-    if (!drawerOpen) {
-      setDrawerOpen(true)
+  const navigation = useNavigation()
+
+  const openDrawer = () => {
+    if (!drawerRef.current.state.drawerOpened) {
       drawerRef.current?.openDrawer()
-    } else {
-      setDrawerOpen(false)
-      drawerRef.current?.closeDrawer()
+      setDrawerOpen(true)
     }
   }
 
-  // TODO: close drawer on blur?
   const closeDrawer = () => {
-    if (drawerOpen) {
-      setDrawerOpen(false)
-      drawerRef.current?.closeDrawer()
-    }
+    drawerRef.current?.closeDrawer()
+    setDrawerOpen(false)
+
+    return true // Return true to indicate that the event has been handled
   }
+
+  useEffect(() => {
+    BackHandler.addEventListener("hardwareBackPress", closeDrawer)
+    navigation.addListener("blur", closeDrawer) // close drawer when we switch the screen
+  }, [drawerOpen])
+
   useHeader(
     {
       title: props.title,
@@ -78,7 +83,7 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
               : colors.ehkamCyan
           }
           style={{ width: 20, marginStart: spacing.large, marginEnd: spacing.medium }}
-          onPress={toggleDrawer}
+          onPress={openDrawer}
         />
       ),
 
@@ -93,10 +98,14 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
     },
     [drawerOpen],
   )
+
   return (
     <DrawerLayout
       ref={drawerRef}
-      drawerWidth={Platform.select({ default: 326, web: Dimensions.get("screen").width * 0.3 })}
+      drawerWidth={Platform.select({
+        default: Dimensions.get("screen").width * 0.75,
+        web: Dimensions.get("screen").width * 0.3,
+      })}
       drawerType={"front"}
       drawerPosition={"right"}
       drawerBackgroundColor={colors.palette.neutral100}
@@ -109,8 +118,14 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
           navigation={props.navigation}
         />
       )}
+      onDrawerClose={() => setDrawerOpen(false)}
+      onDrawerOpen={() => setDrawerOpen(true)}
     >
-      <Screen safeAreaEdges={["top", "bottom"]} style={{ flex: 1 }} {...props.ScreenProps}>
+      <Screen
+        safeAreaEdges={["bottom"]}
+        style={{ flex: 1, marginTop: spacing.small }}
+        {...props.ScreenProps}
+      >
         {props.children}
       </Screen>
     </DrawerLayout>
@@ -135,7 +150,7 @@ const DrawerContent = ({ drawerInsets, teacherName, schoolName, navigation }) =>
 
       {/* navigation list */}
       <View style={{ marginTop: spacing.extraLarge, marginHorizontal: spacing.large }}>
-        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.medium }}>
+        {/* <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.medium }}>
           <Icon icon="notificationBell" size={22} color={colors.ehkamCyan} />
           <Text
             weight="semiBold"
@@ -154,7 +169,7 @@ const DrawerContent = ({ drawerInsets, teacherName, schoolName, navigation }) =>
           >
             الاحصائيات
           </Text>
-        </View>
+        </View> */}
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.medium }}>
           <Icon icon="sync" size={22} color={colors.ehkamCyan} />
           <Text
