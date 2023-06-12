@@ -173,9 +173,9 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
         return true
       if (
         filter.filterType === "total-hifz" &&
-        (student.currentMemo + student.s_previous_memo > 30
+        (student.currentMemo + student.previous_memo > 30
           ? filter.totalHifz === 30
-          : student.currentMemo + student.s_previous_memo === filter.totalHifz)
+          : student.currentMemo + student.previous_memo === filter.totalHifz)
       )
         return true
       return false
@@ -251,7 +251,8 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
                 }
               />
             </TouchableWithoutFeedback>
-            <View
+
+            {/* <View
               style={{
                 paddingHorizontal: spacing.large,
                 marginBottom: spacing.medium,
@@ -269,7 +270,7 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
                   // got to add student screen
                 }}
               />
-            </View>
+            </View> */}
           </View>
         )}
         {showSortSettings && (

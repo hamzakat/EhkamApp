@@ -10,6 +10,7 @@ import { useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
 import { Text } from "./Text"
 import { useStores } from "../models"
 import { useNavigation } from "@react-navigation/native"
+import { useBackButtonHandler } from "../navigators"
 
 interface DrawerLayoutScreenProps {
   navigation?: any
@@ -18,12 +19,13 @@ interface DrawerLayoutScreenProps {
   transparent?: boolean
   children: React.ReactNode
   ScreenProps?: ScreenProps
+  element?: React.ReactElement
 }
 
 export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutScreenProps>> = (
   props: DrawerLayoutScreenProps,
 ) => {
-  const { currentUserStore } = useStores()
+  const { authenticationStore, currentUserStore } = useStores()
 
   const $drawerInsets = useSafeAreaInsetsStyle(["top"])
 
@@ -46,7 +48,16 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
   }
 
   useEffect(() => {
-    BackHandler.addEventListener("hardwareBackPress", closeDrawer)
+    if (drawerOpen) {
+      // add event listener when drawer is open
+      BackHandler.addEventListener("hardwareBackPress", closeDrawer)
+    } else {
+      // otherwise, go back if that's possible
+      BackHandler.addEventListener("hardwareBackPress", () => {
+        if (navigation.canGoBack()) navigation.goBack()
+        return true
+      })
+    }
     navigation.addListener("blur", closeDrawer) // close drawer when we switch the screen
   }, [drawerOpen])
 
@@ -87,7 +98,9 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
         />
       ),
 
-      RightActionComponent: props.backBtn ? (
+      RightActionComponent: props.element ? (
+        props.element
+      ) : props.backBtn ? (
         <Icon
           icon="leftArrow"
           color={props.transparent ? colors.background : colors.ehkamCyan}
@@ -115,6 +128,7 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
           drawerInsets={$drawerInsets}
           teacherName={currentUserStore.user.fullname}
           schoolName={currentUserStore.user.school_name}
+          logout={authenticationStore.logOut}
           navigation={props.navigation}
         />
       )}
@@ -132,7 +146,7 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
   )
 }
 
-const DrawerContent = ({ drawerInsets, teacherName, schoolName, navigation }) => {
+const DrawerContent = ({ drawerInsets, teacherName, schoolName, navigation, logout }) => {
   return (
     <View style={[{ flex: 1 }, drawerInsets]}>
       {/* teacher's name + school name */}
@@ -149,7 +163,14 @@ const DrawerContent = ({ drawerInsets, teacherName, schoolName, navigation }) =>
       </View>
 
       {/* navigation list */}
-      <View style={{ marginTop: spacing.extraLarge, marginHorizontal: spacing.large }}>
+      <View
+        style={{
+          marginTop: spacing.extraLarge,
+          marginHorizontal: spacing.large,
+          flex: 1,
+          maxHeight: Dimensions.get("screen").height * 0.55,
+        }}
+      >
         {/* <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.medium }}>
           <Icon icon="notificationBell" size={22} color={colors.ehkamCyan} />
           <Text
@@ -200,6 +221,23 @@ const DrawerContent = ({ drawerInsets, teacherName, schoolName, navigation }) =>
             size="md"
           >
             مشاركة التطبيق
+          </Text>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginTop: "auto",
+          }}
+        >
+          <Icon icon="exit" size={22} color={colors.ehkamRed} />
+          <Text
+            weight="semiBold"
+            style={{ color: colors.ehkamGrey, marginStart: spacing.small }}
+            size="md"
+            onPress={logout}
+          >
+            تسجيل خروج
           </Text>
         </View>
       </View>

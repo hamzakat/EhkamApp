@@ -53,8 +53,10 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
     useEffect(() => {
       if (validPageNumber(startPage)) {
         const chapterNumbers = Object.keys(muhsaf[startPage])
-        const chaptersModalList = chapterNumbers.map((chapterNumber) => {
-          return { key: parseInt(chapterNumber), label: muhsaf[startPage][chapterNumber].titleAr }
+
+        chapterNumbers.pop() // workaround: remove the latest key "juzNumber"
+        const chaptersModalList = chapterNumbers.map((k) => {
+          return { key: parseInt(k), label: muhsaf[startPage][k].titleAr }
         })
 
         setChaptersInStartPage(chaptersModalList)
@@ -89,8 +91,9 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
     useEffect(() => {
       if (validPagesRange()) {
         const chapterNumbers = Object.keys(muhsaf[endPage])
-        const chaptersModalList = chapterNumbers.map((chapterNumber) => {
-          return { key: parseInt(chapterNumber), label: muhsaf[endPage][chapterNumber].titleAr }
+        chapterNumbers.pop() // workaround: remove the latest key "juzNumber"
+        const chaptersModalList = chapterNumbers.map((k) => {
+          return { key: parseInt(k), label: muhsaf[endPage][k].titleAr }
         })
 
         setChaptersInEndPage(chaptersModalList)
@@ -197,8 +200,8 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
                 const verseNumber = parseInt(verse.verseNumber)
                 if (verseNumber <= endVerse.key) {
                   versesList.push({
-                    pageNumber: pageNumber.toString(),
-                    verseNumber: verse.verseNumber,
+                    pageNumber: pageNumber,
+                    verseNumber: parseInt(verse.verseNumber),
                     verseText: verse.text,
                     chapterTitle: chapterTitle,
                     chapterNumber: chapterNumber,
@@ -210,8 +213,8 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
               // for other pages, add all text content
               chapterObj.text.forEach((verse: { verseNumber: string; text: string }) => {
                 versesList.push({
-                  pageNumber: pageNumber.toString(),
-                  verseNumber: verse.verseNumber,
+                  pageNumber: pageNumber,
+                  verseNumber: parseInt(verse.verseNumber),
                   verseText: verse.text,
                   chapterTitle: chapterTitle,
                   chapterNumber: chapterNumber,

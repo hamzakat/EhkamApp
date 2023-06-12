@@ -37,15 +37,7 @@ export function StudentStackScreen() {
         }
         component={StudentsListScreen}
       />
-      <StudentStack.Screen
-        name="StudentProfile"
-        options={{
-          headerTransparent: true,
-          // statusBarTranslucent: true,
-          // statusBarStyle: "auto",
-        }}
-        component={StudentProfileScreen}
-      />
+      <StudentStack.Screen name="StudentProfile" component={StudentProfileScreen} />
     </StudentStack.Navigator>
   )
 }

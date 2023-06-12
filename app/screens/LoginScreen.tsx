@@ -1,12 +1,23 @@
+/* eslint-disable react-native/no-inline-styles */
 import { observer } from "mobx-react-lite"
 import React, { FC, useEffect, useMemo, useRef, useState } from "react"
-import { TextInput, TextStyle, ViewStyle } from "react-native"
-import { Button, Icon, Screen, Text, TextField, TextFieldAccessoryProps } from "../components"
+import { TextInput, View, ViewStyle } from "react-native"
+import {
+  AutoImage,
+  Button,
+  Icon,
+  Screen,
+  Text,
+  TextField,
+  TextFieldAccessoryProps,
+} from "../components"
 import { useStores } from "../models"
 import { AppStackScreenProps } from "../navigators"
 import { colors, spacing } from "../theme"
 
 interface LoginScreenProps extends AppStackScreenProps<"Login"> {}
+
+const headerImg = require("../../assets/images/login-header.jpg")
 
 export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_props) {
   const authPasswordInput = useRef<TextInput>()
@@ -27,8 +38,8 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
   useEffect(() => {
     // Here is where you could fetch credientials from keychain or storage
     // and pre-fill the form fields.
-    setAuthEmail("devteacher@example.com")
-    setAuthPassword("d1r3ctu5")
+    __DEV__ && setAuthEmail("superusermhk@gmail.com")
+    __DEV__ && setAuthPassword("d1r3ctu5!")
   }, [])
 
   const errors: typeof validationErrors = isSubmitted ? validationErrors : ({} as any)
@@ -83,80 +94,88 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
   }, [])
 
   return (
-    <Screen
-      preset="auto"
-      contentContainerStyle={$screenContentContainer}
-      safeAreaEdges={["top", "bottom"]}
-    >
-      <Text testID="login-heading" tx="loginScreen.signIn" preset="heading" style={$signIn} />
-      <Text tx="loginScreen.enterDetails" preset="subheading" style={$enterDetails} />
-      {attemptsCount > 2 && <Text tx="loginScreen.hint" size="sm" weight="light" style={$hint} />}
+    <Screen preset="auto" safeAreaEdges={["top", "bottom"]}>
+      <AutoImage
+        source={headerImg}
+        style={{
+          alignSelf: "center",
+          width: "100%",
+          height: 300,
+          paddingHorizontal: 0,
+          paddingBottom: spacing.large,
+          top: 1,
+        }}
+        resizeMethod="auto"
+        resizeMode="cover"
+      />
+      <View style={{ paddingVertical: spacing.large, paddingHorizontal: spacing.large }}>
+        <TextField
+          value={authEmail}
+          onChangeText={setAuthEmail}
+          containerStyle={$textField}
+          inputWrapperStyle={$inputWrapper}
+          style={{ color: colors.ehkamDarkGrey }}
+          LabelTextProps={{ style: { color: colors.ehkamPeach }, size: "xs" }}
+          autoCapitalize="none"
+          autoComplete="email"
+          autoCorrect={false}
+          keyboardType="email-address"
+          label="البريد الالكتروني"
+          // placeholder="ادخل بريدك الالكتروني"
+          helper={errors?.authEmail}
+          HelperTextProps={{ style: { color: colors.ehkamPeach }, size: "xxs", weight: "light" }}
+          status={errors?.authEmail ? "error" : undefined}
+          onSubmitEditing={() => authPasswordInput.current?.focus()}
+        />
 
-      <TextField
-        value={authEmail}
-        onChangeText={setAuthEmail}
-        containerStyle={$textField}
-        autoCapitalize="none"
-        autoComplete="email"
-        autoCorrect={false}
-        keyboardType="email-address"
-        labelTx="loginScreen.emailFieldLabel"
-        placeholderTx="loginScreen.emailFieldPlaceholder"
-        helper={errors?.authEmail}
-        status={errors?.authEmail ? "error" : undefined}
-        onSubmitEditing={() => authPasswordInput.current?.focus()}
-      />
-
-      <TextField
-        ref={authPasswordInput}
-        value={authPassword}
-        onChangeText={setAuthPassword}
-        containerStyle={$textField}
-        autoCapitalize="none"
-        autoComplete="password"
-        autoCorrect={false}
-        secureTextEntry={isAuthPasswordHidden}
-        labelTx="loginScreen.passwordFieldLabel"
-        placeholderTx="loginScreen.passwordFieldPlaceholder"
-        helper={errors?.authPassword}
-        status={errors?.authPassword ? "error" : undefined}
-        onSubmitEditing={loginSubmit}
-        RightAccessory={PasswordRightAccessory}
-      />
-      <Text>{loginError}</Text>
-      <Button
-        testID="login-button"
-        tx="loginScreen.tapToSignIn"
-        style={$tapButton}
-        preset="reversed"
-        onPress={loginSubmit}
-      />
+        <TextField
+          ref={authPasswordInput}
+          value={authPassword}
+          onChangeText={setAuthPassword}
+          containerStyle={$textField}
+          inputWrapperStyle={$inputWrapper}
+          style={{ color: colors.ehkamDarkGrey }}
+          LabelTextProps={{ style: { color: colors.ehkamPeach }, size: "xs" }}
+          autoCapitalize="none"
+          autoComplete="password"
+          autoCorrect={false}
+          secureTextEntry={isAuthPasswordHidden}
+          label="كلمة المرور"
+          // placeholder="أدخل كلمة المرور"
+          helper={errors?.authPassword}
+          HelperTextProps={{ style: { color: colors.ehkamPeach }, size: "xxs", weight: "light" }}
+          status={errors?.authPassword ? "error" : undefined}
+          onSubmitEditing={loginSubmit}
+          RightAccessory={PasswordRightAccessory}
+        />
+        {loginError && (
+          <Text
+            weight="bold"
+            size="xxs"
+            style={{ color: colors.ehkamRed, textAlign: "center", marginBottom: spacing.small }}
+          >
+            {loginError}
+          </Text>
+        )}
+        <Button
+          testID="login-button"
+          text="تسجيل الدخول"
+          preset="reversed"
+          style={{ backgroundColor: colors.ehkamPeach, borderRadius: spacing.small }}
+          onPress={loginSubmit}
+        />
+      </View>
     </Screen>
   )
 })
 
-const $screenContentContainer: ViewStyle = {
-  paddingVertical: spacing.huge,
-  paddingHorizontal: spacing.large,
-}
-
-const $signIn: TextStyle = {
-  marginBottom: spacing.small,
-}
-
-const $enterDetails: TextStyle = {
-  marginBottom: spacing.large,
-}
-
-const $hint: TextStyle = {
-  color: colors.tint,
+const $textField: ViewStyle = {
   marginBottom: spacing.medium,
 }
 
-const $textField: ViewStyle = {
-  marginBottom: spacing.large,
-}
-
-const $tapButton: ViewStyle = {
-  marginTop: spacing.extraSmall,
+const $inputWrapper = {
+  borderRadius: spacing.small,
+  borderColor: colors.ehkamPeach,
+  borderWidth: 1,
+  backgroundColor: colors.background,
 }

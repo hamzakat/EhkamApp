@@ -1,9 +1,10 @@
 import React, { FC } from "react"
 import { observer } from "mobx-react-lite"
-import { ViewStyle } from "react-native"
+import { View, ViewStyle } from "react-native"
 import { StackScreenProps } from "@react-navigation/stack"
 import { AppStackScreenProps } from "../../navigators"
 import { Screen, Text } from "../../components"
+import { colors, spacing } from "../../theme"
 // import { useNavigation } from "@react-navigation/native"
 // import { useStores } from "../models"
 
@@ -24,8 +25,17 @@ export const MessagesScreen: FC<StackScreenProps<AppStackScreenProps, "Messages"
     // Pull in navigation via hook
     // const navigation = useNavigation()
     return (
-      <Screen safeAreaEdges={["top", "left"]} style={$root} preset="scroll">
-        <Text text="messages" />
+      <Screen
+        contentContainerStyle={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        safeAreaEdges={["top", "left"]}
+        preset="scroll"
+      >
+        <Text
+          style={{ textAlign: "center", color: colors.ehkamPeach, paddingVertical: spacing.small }}
+          text="💬  قريباً..."
+          weight="medium"
+          size="xxl"
+        />
       </Screen>
     )
   },

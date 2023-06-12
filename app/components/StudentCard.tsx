@@ -10,6 +10,7 @@ import { Text } from "./Text"
 import Config from "../config"
 import { useStores } from "../models"
 
+const avatarPlaceholder = require("../../assets/images/avatar-placeholder.jpeg")
 export interface StudentCardProps {
   student: Student
   additionalComponent?: React.ReactElement
@@ -63,7 +64,7 @@ export const StudentCard = observer(function StudentCard({
                   height: 100,
                 }
           }
-          defaultSource={require("../../assets/images/avatar-placeholder.jpeg")}
+          defaultSource={avatarPlaceholder}
           source={{
             uri: imgUrl,
             headers: { Authorization: `Bearer ${authenticationStore.accessToken}` },

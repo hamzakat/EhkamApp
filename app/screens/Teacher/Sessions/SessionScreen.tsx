@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import { observer } from "mobx-react-lite"
-import { Alert, View } from "react-native"
+import { Alert, View, Dimensions } from "react-native"
 import { Button, DrawerLayoutScreen, Text, VerseItem, WarningDialog } from "../../../components"
 
 import React, { FC, useEffect, useState } from "react"
@@ -13,6 +13,10 @@ import "react-native-get-random-values"
 import { v4 as uuidv4 } from "uuid"
 import { getSnapshot } from "mobx-state-tree"
 import { TwoButtonsDialog } from "../../../components/"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
+
+const windowHeight = Dimensions.get("window").height
+const ayatListHeight = windowHeight * 0.65
 
 export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
   function SessionScreen({ navigation, route }) {
@@ -25,7 +29,7 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
     const [doneDialogVisible, setDoneDialogVisible] = useState(false)
     const [repeatDialogVisible, setRepeatDialogVisible] = useState(false)
     const [done, setDone] = useState(false)
-
+    const { bottom } = useSafeAreaInsets()
     React.useEffect(
       // Preventing accidental back button press: https://reactnavigation.org/docs/preventing-going-back/
       () =>
@@ -168,7 +172,7 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
           }}
           text="تم حفظ جلسة التسميع والإضافة إلى تقدم بالطالب علمياً بنجاح"
         />
-        <View style={{ maxHeight: 550 }}>
+        <View style={{ maxHeight: ayatListHeight }}>
           <FlatList
             data={versesList}
             renderItem={renderItem}
@@ -186,7 +190,7 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
             justifyContent: "space-between",
             marginTop: spacing.tiny,
             paddingHorizontal: spacing.large,
-            marginBottom: spacing.large,
+            marginBottom: bottom,
           }}
         >
           <Button

@@ -122,10 +122,8 @@ export function TeacherNavigator() {
 
 const $tabBar: ViewStyle = {
   backgroundColor: colors.background,
-  borderTopWidth: 0.5,
-  borderLeftWidth: 0.5,
-  borderRightWidth: 0.5,
-  borderColor: colors.border,
+  borderTopWidth: 0,
+  borderColor: colors.background,
   borderTopEndRadius: 20,
   borderTopStartRadius: 20,
   shadowColor: colors.shadow,

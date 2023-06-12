@@ -13,9 +13,14 @@ export const CurrentUserStoreModel = types
   .props({
     user: types.optional(UserModel, {}),
     notifications: types.optional(types.array(NotificationItemModel), []),
+    entered: types.optional(types.boolean, false),
   })
   .actions(withSetPropAction)
-  .views((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
+  .views((self) => ({
+    get isEntered() {
+      return self.entered
+    },
+  })) // eslint-disable-line @typescript-eslint/no-unused-vars
   .actions((self) => {
     const fetchCurrentUser = flow(function* () {
       const res: ApiResponse<any> = yield self.request({

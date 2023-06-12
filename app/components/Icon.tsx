@@ -121,6 +121,7 @@ export const iconRegistry = {
   filterCyan: require("../../assets/icons/ehkam/filter-cyan.png"),
   filterPeach: require("../../assets/icons/ehkam/filter-peach.png"),
   leftArrow: require("../../assets/icons/ehkam/left-arrow-cyan.png"),
+  leftStickArrow: require("../../assets/icons/ehkam/left-stick-arrow.png"),
   downArrowsGrey: require("../../assets/icons/ehkam/down-grey.png"),
   upArrowsGrey: require("../../assets/icons/ehkam/up-grey.png"),
   menuCyan: require("../../assets/icons/ehkam/menu-cyan.png"),
@@ -140,6 +141,7 @@ export const iconRegistry = {
   share: require("../../assets/icons/ehkam/share.png"),
   sync: require("../../assets/icons/ehkam/sync.png"),
   outbox: require("../../assets/icons/ehkam/outbox.png"),
+  exit: require("../../assets/icons/ehkam/exit.png"),
 
   drawerProfileCircle: require("../../assets/icons/ehkam/drawer-profile-circle.png"),
 

@@ -22,6 +22,8 @@ import { useStores } from "../models"
 import { TeacherNavigator, TeacherTabParamList } from "./TeacherNavigator"
 import { SyncScreen } from "../screens/SyncScreen"
 import { AboutScreen } from "../screens/AboutScreen"
+import { WelcomeScreen } from "../screens/WelcomeScreen"
+import { EnterScreen } from "../screens/EnterScreen"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -37,10 +39,12 @@ import { AboutScreen } from "../screens/AboutScreen"
  *   https://reactnavigation.org/docs/typescript/#organizing-types
  */
 export type AppStackParamList = {
+  Welcome: undefined
   Login: undefined
   Teacher: NavigatorScreenParams<TeacherTabParamList>
   Sync: undefined
   About: undefined
+  Enter: undefined
 }
 
 /**
@@ -60,22 +64,30 @@ const Stack = createNativeStackNavigator<AppStackParamList>()
 const AppStack = observer(function AppStack() {
   const {
     authenticationStore: { isAuthenticated },
+    currentUserStore: { isEntered },
   } = useStores()
 
   // @demo remove-block-end
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false }}
-      initialRouteName={isAuthenticated ? "Teacher" : "Login"} // @demo remove-current-line
+      initialRouteName={isAuthenticated ? "Enter" : "Welcome"} // @demo remove-current-line
     >
       {isAuthenticated ? (
         <>
-          <Stack.Screen name="Teacher" component={TeacherNavigator} />
-          <Stack.Screen name="Sync" component={SyncScreen} />
-          <Stack.Screen name="About" component={AboutScreen} />
+          {isEntered ? (
+            <>
+              <Stack.Screen name="Teacher" component={TeacherNavigator} />
+              <Stack.Screen name="Sync" component={SyncScreen} />
+              <Stack.Screen name="About" component={AboutScreen} />
+            </>
+          ) : (
+            <Stack.Screen name="Enter" component={EnterScreen} />
+          )}
         </>
       ) : (
         <>
+          <Stack.Screen name="Welcome" component={WelcomeScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
         </>
       )}

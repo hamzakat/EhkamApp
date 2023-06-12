@@ -18,7 +18,7 @@ export const SessionTypeScreen: FC<SessionStackScreenProps<"SessionType">> = obs
           contentContainerStyle={{
             alignContent: "center",
             paddingHorizontal: spacing.large,
-            paddingBottom: spacing.large,
+            paddingBottom: spacing.massive,
           }}
         >
           {sessionStore.selectedStudent && (

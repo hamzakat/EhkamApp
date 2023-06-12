@@ -20,15 +20,15 @@ export const AuthenticationStoreModel = types
     get validationErrors() {
       return {
         authEmail: (function () {
-          if (self.authEmail.length === 0) return "can't be blank"
-          if (self.authEmail.length < 6) return "must be at least 6 characters"
+          if (self.authEmail.length === 0) return "رجاء أدخل البريد الالكتروني"
+          if (self.authEmail.length < 6) return "يجب أن يكون مؤلفاً من 6 أحرف فمافوق"
           if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(self.authEmail))
-            return "must be a valid email address"
+            return "تأكد من كتابة البريد الالكتروني بشكل صحيح"
           return ""
         })(),
         authPassword: (function () {
-          if (self.authPassword.length === 0) return "can't be blank"
-          if (self.authPassword.length < 6) return "must be at least 6 characters"
+          if (self.authPassword.length === 0) return "رجاء أدخل كلمة المرور"
+          if (self.authPassword.length < 6) return "يجب أن يكون مؤلفاً من 6 أحرف فمافوق"
           return ""
         })(),
       }

@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { FC, useEffect, useState } from "react"
-import { View } from "react-native"
+import { View, Dimensions } from "react-native"
 import { observer } from "mobx-react-lite"
 import { AutoImage, Button, DrawerLayoutScreen, Icon, Text } from "../../../components"
 import { StudentStackScreenProps } from "./StudentStack"
@@ -12,10 +12,15 @@ import { getChapterTitle } from "../../../utils/quranInfo"
 import { UserModel } from "../../../models/User"
 import FastImage from "react-native-fast-image"
 import Config from "../../../config"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 
+const windowHeight = Dimensions.get("window").height
+const avatarPlaceholder = require("../../../../assets/images/avatar-placeholder.jpeg")
 export const StudentProfileScreen: FC<StudentStackScreenProps<"StudentProfile">> = observer(
   function StudentProfileScreen({ navigation, route }) {
-    const headerImg = require("../../../../assets/images/student-profile-header.png")
+    // const headerImg = require("../../../../assets/images/student-profile-header.png")
+
+    const studentInfoHeight = windowHeight * 0.42
 
     const studentId = route.params.studentId
     const { studentStore, authenticationStore, sessionStore, attendanceStore } = useStores()
@@ -45,14 +50,15 @@ export const StudentProfileScreen: FC<StudentStackScreenProps<"StudentProfile">>
       })()
     }
     return (
-      <DrawerLayoutScreen backBtn={true} navigation={navigation} title={""} transparent={true}>
+      <DrawerLayoutScreen backBtn={true} navigation={navigation} title={""} transparent={false}>
         <View
           style={{
             justifyContent: "space-around",
             marginBottom: spacing.large,
           }}
         >
-          <View>
+          {/* bg picture */}
+          {/* <View>
             <AutoImage
               source={headerImg}
               style={{
@@ -61,37 +67,25 @@ export const StudentProfileScreen: FC<StudentStackScreenProps<"StudentProfile">>
                 borderBottomRightRadius: 20,
                 width: "100%",
                 height: 200,
+                top: -15,
               }}
               resizeMethod="auto"
               resizeMode="cover"
             />
-          </View>
-          <View>
-            {/* <AutoImage
-              source={studentImg}
-              style={{
-                position: "absolute",
-                borderRadius: 100,
-                width: 152,
-                height: 152,
-                left: 120,
-                top: -100,
-              }}
-            /> */}
+          </View> */}
+          <View style={{ justifyContent: "center", alignItems: "center" }}>
             <FastImage
               style={{
-                position: "absolute",
-                borderRadius: 100,
+                borderRadius: (152 + 152) / 2,
                 width: 152,
                 height: 152,
-                left: 120,
-                top: -100,
               }}
               source={{
                 uri: imgUrl,
                 headers: { Authorization: `Bearer ${authenticationStore.accessToken}` },
                 priority: FastImage.priority.high,
               }}
+              defaultSource={avatarPlaceholder}
               resizeMode={FastImage.resizeMode.contain}
               onError={() => __DEV__ && console.log("NOIMAGE")}
             />
@@ -100,10 +94,10 @@ export const StudentProfileScreen: FC<StudentStackScreenProps<"StudentProfile">>
           <View
             style={{
               flexDirection: "row",
-              marginTop: spacing.massive,
+              marginTop: spacing.large,
               alignContent: "center",
               paddingHorizontal: spacing.large,
-              justifyContent: "space-between",
+              justifyContent: "center",
             }}
           >
             <View
@@ -130,31 +124,19 @@ export const StudentProfileScreen: FC<StudentStackScreenProps<"StudentProfile">>
                 {currentStudent.inclass_id}
               </Text>
             </View>
-            <Text
-              size="xl"
-              weight="bold"
-              style={{
-                color: colors.ehkamGrey,
-                textAlignVertical: "center",
-                marginTop: spacing.tiny,
-              }}
-            >
-              {currentStudent.fullname}
-            </Text>
-            <View style={{ alignSelf: "center" }}>
-              <TouchableOpacity
+
+            <View>
+              <Text
+                size="xl"
+                weight="bold"
                 style={{
-                  backgroundColor: colors.ehkamRed,
-                  width: 36,
-                  height: 36,
-                  borderRadius: spacing.extraSmall,
-                  alignItems: "center",
-                  justifyContent: "center",
+                  color: colors.ehkamGrey,
+                  textAlignVertical: "center",
+                  marginTop: spacing.tiny,
                 }}
-                // onPress={}
               >
-                <Icon icon="trash" color={colors.background} size={spacing.large} />
-              </TouchableOpacity>
+                {currentStudent.fullname}
+              </Text>
             </View>
           </View>
           {/* Tab Switch */}
@@ -217,19 +199,20 @@ export const StudentProfileScreen: FC<StudentStackScreenProps<"StudentProfile">>
               marginBottom: spacing.massive,
               paddingBottom: spacing.large,
             }}
+            style={{ maxHeight: studentInfoHeight }}
           >
             {/* بيانات الطالب */}
             {selectedTab === "personal" && (
               <>
                 <InfoGridRow info={currentStudent.age} label="العمر" />
-                <InfoGridRow info={currentStudent.s_edu_grade} label="الصف" />
-                <InfoGridRow info={currentStudent.s_edu_school} label="المدرسة" />
+                <InfoGridRow info={currentStudent.edu_grade} label="الصف" />
+                <InfoGridRow info={currentStudent.edu_school} label="المدرسة" />
                 <InfoGridRow info={currentStudent.city} label="المحافظة" />
                 <InfoGridRow info={currentStudent.location} label="السكن" />
-                <InfoGridRow info={currentStudent.s_blood} label="زمرة الدم" />
-                <InfoGridRow info={currentStudent.s_health_issues} label="ملاحظات صحية" />
-                <InfoGridRow info={currentStudent.s_parent_job} label="مهنة الوالد" />
-                <InfoGridRow info={currentStudent.s_social_issues} label="ملاحظات اجتماعية" />
+                <InfoGridRow info={currentStudent.blood} label="زمرة الدم" />
+                <InfoGridRow info={currentStudent.health_issues} label="ملاحظات صحية" />
+                <InfoGridRow info={currentStudent.parent_job} label="مهنة الوالد" />
+                <InfoGridRow info={currentStudent.social_issues} label="ملاحظات اجتماعية" />
               </>
             )}
 
@@ -283,13 +266,16 @@ export const StudentProfileScreen: FC<StudentStackScreenProps<"StudentProfile">>
                         />
                       </View>
                     </View>
-                    {currentStudent.attendanceRecords.map((item, i) => (
-                      <InfoGridRow
-                        key={i}
-                        info={item.timestamp}
-                        label={item.present ? "حاضر" : "عائب"}
-                      />
-                    ))}
+                    {currentStudent.attendanceRecords.map((item, i) => {
+                      const attendanceDate = new Date(item.timestamp * 1000)
+                      return (
+                        <InfoGridRow
+                          key={i}
+                          info={item.timestamp}
+                          label={item.present ? "حاضر" : "عائب"}
+                        />
+                      )
+                    })}
                   </>
                 ) : (
                   <>
@@ -380,7 +366,7 @@ export const StudentProfileScreen: FC<StudentStackScreenProps<"StudentProfile">>
                     <InfoGridRow info="الملاحظة" label="التاريخ" />
                     <InfoGridRow info="المشاركة في المراجعة لأصدقائه" label="31/5/2022" />
 
-                    <AddButton text="إضافة ملاحظة سلوكية" />
+                    {/* <AddButton text="إضافة ملاحظة سلوكية" /> */}
                   </>
                 )}
               </>
@@ -391,9 +377,9 @@ export const StudentProfileScreen: FC<StudentStackScreenProps<"StudentProfile">>
               <>
                 <InfoGridRow
                   info={
-                    currentStudent.s_previous_memo === null || currentStudent.s_previous_memo === 0
+                    currentStudent.previous_memo === null || currentStudent.previous_memo === 0
                       ? "لايوجد"
-                      : currentStudent.s_previous_memo.toString() + " أجزاء"
+                      : currentStudent.previous_memo.toString() + " أجزاء"
                   }
                   label="المحفوظ السابق"
                   labelFlexValue={0.4}
@@ -401,7 +387,7 @@ export const StudentProfileScreen: FC<StudentStackScreenProps<"StudentProfile">>
                 />
                 <InfoGridRow
                   info={
-                    currentStudent.s_previous_memo === null || currentStudent.currentMemo === 0
+                    currentStudent.previous_memo === null || currentStudent.currentMemo === 0
                       ? "لايوجد"
                       : currentStudent.currentMemo > 30
                       ? "30 جزء"

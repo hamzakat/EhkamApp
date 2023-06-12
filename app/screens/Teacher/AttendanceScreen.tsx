@@ -59,32 +59,31 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
   useEffect(() => {
     // check today's date
     const timestamp = new Date().toISOString()
-    const todayDate = timestamp.substring(0, 10) // yyyy-mm-dd
+    // const todayDate = timestamp.substring(0, 10) // yyyy-mm-dd
 
     loadStores()
 
-    const currentAttendanceRecord: AttendanceRecord = attendanceStore.currentAttendanceRecord
+    // const currentAttendanceRecord: AttendanceRecord = attendanceStore.currentAttendanceRecord
 
     // eslint-disable-next-line no-extra-boolean-cast
-    if (!!currentAttendanceRecord) {
-      // check if it's a new day
-      if (currentAttendanceRecord?.timestamp.substring(0, 10) !== todayDate) {
-        __DEV__ && console.log("NEW DAY")
-        if (currentAttendanceRecord.items.length > 0) {
-          // push the old record to the store (if it holds items) AND send the old record to the server
-          attendanceStore.sendAttendanceRecord(getSnapshot(currentAttendanceRecord))
-        }
+    // if (!!currentAttendanceRecord) {
+    //   // check if it's a new day
+    //   if (currentAttendanceRecord?.timestamp.substring(0, 10) !== todayDate) {
+    //     __DEV__ && console.log("NEW DAY")
+    //     if (currentAttendanceRecord.items.length > 0) {
+    //       // push the old record to the store (if it holds items) AND send the old record to the server
+    //       attendanceStore.sendAttendanceRecord(getSnapshot(currentAttendanceRecord))
+    //     }
 
-        // create a new empty record on new day
-        createNewAttendanceRecord(timestamp)
-      }
-    } else {
-      __DEV__ && console.log("FRESH APP LAUNCH")
+    //     // create a new empty record on new day
+    //     createNewAttendanceRecord(timestamp)
+    //   }
+    // } else {
+    __DEV__ && console.log("FRESH APP LAUNCH")
 
-      // create a new empty record on a fresh app start
-      createNewAttendanceRecord(timestamp)
-    }
-  }, [attendanceStore])
+    // create a new empty record on a fresh app start
+    createNewAttendanceRecord(timestamp)
+  }, [])
 
   const renderAttendanceItem = ({ item }: { item: AttendanceItem }) => {
     const student = studentStore.students.find((student) => student.id === item.student_id)

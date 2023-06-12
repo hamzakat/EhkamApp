@@ -17,7 +17,6 @@ export interface ApiUserResponse {
   title: string
   location: string
   description: string
-  t_class_id: string[]
   school_id: {
     id: string
     name: string
