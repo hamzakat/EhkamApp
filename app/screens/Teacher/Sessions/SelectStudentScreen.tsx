@@ -3,11 +3,13 @@ import React, { FC, useEffect, useRef, useState } from "react"
 import { observer } from "mobx-react-lite"
 import {
   ActivityIndicator,
+  Dimensions,
   Keyboard,
   RefreshControl,
   TouchableWithoutFeedback,
   View,
   ViewStyle,
+  FlatList,
 } from "react-native"
 
 import {
@@ -20,7 +22,7 @@ import {
 } from "../../../components"
 import { useStores } from "../../../models"
 import { colors, spacing } from "../../../theme"
-import { FlatList } from "react-native-gesture-handler"
+// import { FlatList } from "react-native-gesture-handler"
 import { Student } from "../../../models/Student"
 import { delay } from "../../../utils/delay"
 
@@ -280,8 +282,10 @@ const $addStudentButton: ViewStyle = {
   backgroundColor: colors.ehkamPeach,
   borderRadius: 20,
 }
+
 const $contentContainer: ViewStyle = {
   alignContent: "center",
   paddingHorizontal: spacing.large,
-  paddingBottom: spacing.large,
+  marginTop: spacing.small,
+  paddingBottom: Dimensions.get("screen").height * 0.2,
 }

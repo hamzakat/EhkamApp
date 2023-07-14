@@ -28,6 +28,7 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
   const { authenticationStore, currentUserStore } = useStores()
 
   const $drawerInsets = useSafeAreaInsetsStyle(["top"])
+  const $screenInsets = useSafeAreaInsetsStyle(["top", "bottom"])
 
   const drawerRef = useRef<DrawerLayout>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -137,7 +138,9 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
     >
       <Screen
         safeAreaEdges={["bottom"]}
-        style={{ flex: 1, marginTop: spacing.small }}
+        style={{
+          flex: 1,
+        }}
         {...props.ScreenProps}
       >
         {props.children}

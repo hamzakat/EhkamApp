@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { FC, useEffect, useState } from "react"
 import { Observer, observer } from "mobx-react-lite"
-import { ActivityIndicator, FlatList, View, ViewStyle } from "react-native"
+import { ActivityIndicator, Dimensions, FlatList, View, ViewStyle } from "react-native"
 import { DrawerLayoutScreen, EmptyState, StudentCard, Toggle } from "../../components"
 import { TeacherTabScreenProps } from "../../navigators/TeacherNavigator"
 import { useNavigation } from "@react-navigation/native"
@@ -123,6 +123,8 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
           contentContainerStyle={$contentContainer}
           data={attendanceStore.currentAttendanceRecord?.items}
           renderItem={renderAttendanceItem}
+          onRefresh={manualRefresh}
+          refreshing={refreshing}
           ListEmptyComponent={
             isLoading ? (
               <ActivityIndicator />
@@ -152,7 +154,8 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
 const $contentContainer: ViewStyle = {
   alignContent: "center",
   paddingHorizontal: spacing.large,
-  paddingBottom: spacing.large,
+  marginTop: spacing.small,
+  paddingBottom: Dimensions.get("screen").height * 0.2,
 }
 
 const AttendanceCard = function AttendanceCard({

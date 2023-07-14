@@ -177,7 +177,8 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen(_pro
       ScreenProps={{
         contentContainerStyle: {
           paddingHorizontal: spacing.large,
-          paddingBottom: 80,
+          paddingBottom: Dimensions.get("screen").height * 0.2,
+          marginTop: spacing.medium,
         },
         preset: "scroll",
         safeAreaEdges: ["bottom"],

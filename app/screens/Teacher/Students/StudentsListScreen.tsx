@@ -9,6 +9,8 @@ import {
   TouchableWithoutFeedback,
   View,
   ViewStyle,
+  FlatList,
+  Dimensions,
 } from "react-native"
 
 import {
@@ -25,7 +27,6 @@ import {
 } from "../../../components"
 import { useStores } from "../../../models"
 import { colors, spacing } from "../../../theme"
-import { FlatList } from "react-native-gesture-handler"
 import { Student, StudentSnapshotIn } from "../../../models/Student"
 import { delay } from "../../../utils/delay"
 import MultiSlider from "@ptomasroos/react-native-multi-slider"
@@ -203,75 +204,78 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
     })
 
     return (
-      <DrawerLayoutScreen title="الطلاب" backBtn={false} navigation={navigation}>
+      <DrawerLayoutScreen
+        title="الطلاب"
+        backBtn={false}
+        navigation={navigation}
+        // ScreenProps={{ preset: "fixed" }}
+      >
         {/* Students list & Search Area */}
         {!(showFilterSettings || showSortSettings) && (
-          <View>
-            <TouchableWithoutFeedback onPress={() => searchBarRef.current.blur()}>
-              <FlatList<Student>
-                /* Search area */
-                ListHeaderComponent={
-                  <SearchArea
-                    searchFocused={searchBarFocused}
-                    setSearchBarFocused={setSearchBarFocused}
-                    setSearchPhrase={setSearchPhrase}
-                    searchBarRef={searchBarRef}
-                    setShowSortSettings={setShowSortSettings}
-                    setShowFilterSettings={setShowFilterSettings}
+          <TouchableWithoutFeedback onPressIn={() => searchBarRef.current.blur()}>
+            <FlatList<Student>
+              /* Search area */
+              ListHeaderComponent={
+                <SearchArea
+                  searchFocused={searchBarFocused}
+                  setSearchBarFocused={setSearchBarFocused}
+                  setSearchPhrase={setSearchPhrase}
+                  searchBarRef={searchBarRef}
+                  setShowSortSettings={setShowSortSettings}
+                  setShowFilterSettings={setShowFilterSettings}
+                />
+              }
+              contentContainerStyle={$contentContainer}
+              data={sortedData}
+              refreshing={refreshing}
+              onRefresh={manualRefresh}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={() => manualRefresh()} />
+              }
+              renderItem={renderSearchItem}
+              ListEmptyComponent={
+                isLoading ? (
+                  <ActivityIndicator />
+                ) : (
+                  <EmptyState
+                    preset="generic"
+                    buttonOnPress={manualRefresh}
+                    ImageProps={{ resizeMode: "contain" }}
+                    heading="القائمة فارغة"
+                    HeadingTextProps={{ style: { color: colors.ehkamDarkGrey } }}
+                    content=""
+                    button="تحديث القائمة"
+                    ButtonProps={{ preset: "reversed" }}
+                    buttonStyle={{
+                      backgroundColor: colors.ehkamPeach,
+                      borderRadius: 20,
+                    }}
+                    imageSource={{}}
                   />
-                }
-                contentContainerStyle={$contentContainer}
-                data={sortedData}
-                refreshing={refreshing}
-                onRefresh={manualRefresh}
-                refreshControl={
-                  <RefreshControl refreshing={refreshing} onRefresh={() => manualRefresh()} />
-                }
-                renderItem={renderSearchItem}
-                ListEmptyComponent={
-                  isLoading ? (
-                    <ActivityIndicator />
-                  ) : (
-                    <EmptyState
-                      preset="generic"
-                      buttonOnPress={manualRefresh}
-                      ImageProps={{ resizeMode: "contain" }}
-                      heading="القائمة فارغة"
-                      HeadingTextProps={{ style: { color: colors.ehkamDarkGrey } }}
-                      content=""
-                      button="تحديث القائمة"
-                      ButtonProps={{ preset: "reversed" }}
-                      buttonStyle={{
-                        backgroundColor: colors.ehkamPeach,
-                        borderRadius: 20,
-                      }}
-                      imageSource={{}}
-                    />
-                  )
-                }
-              />
-            </TouchableWithoutFeedback>
+                )
+              }
+            />
+          </TouchableWithoutFeedback>
 
-            {/* <View
-              style={{
-                paddingHorizontal: spacing.large,
-                marginBottom: spacing.medium,
-                justifyContent: "space-around",
-              }}
-            >
-              <Button
-                preset="reversed"
-                text="إضافة طالب"
-                style={{
-                  backgroundColor: colors.ehkamPeach,
-                  borderRadius: 20,
-                }}
-                onPress={async function () {
-                  // got to add student screen
-                }}
-              />
-            </View> */}
-          </View>
+          // <View
+          //   style={{
+          //     paddingHorizontal: spacing.large,
+          //     marginBottom: spacing.medium,
+          //     justifyContent: "space-around",
+          //   }}
+          // >
+          //   <Button
+          //     preset="reversed"
+          //     text="إضافة طالب"
+          //     style={{
+          //       backgroundColor: colors.ehkamPeach,
+          //       borderRadius: 20,
+          //     }}
+          //     onPress={async function () {
+          //       // got to add student screen
+          //     }}
+          //   />
+          // </View>
         )}
         {showSortSettings && (
           <SortSettings setShowSortSettings={setShowSortSettings} setSort={setSort} sort={sort} />
@@ -688,5 +692,6 @@ const $searchIcon: ImageStyle = {
 const $contentContainer: ViewStyle = {
   alignContent: "center",
   paddingHorizontal: spacing.large,
-  paddingBottom: spacing.large,
+  marginTop: spacing.small,
+  paddingBottom: Dimensions.get("screen").height * 0.2,
 }
