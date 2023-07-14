@@ -16,6 +16,12 @@ React Native Metro
 yarn android
 ```
 
+If the emulator doesn't work properly:
+
+1. Wipe data of the AVD emulator from the Android Studio AVD list
+2. Run .\gradlew clean inside `android` directory
+3. Fo back to the project directory and run `yarn android`
+
 Expo
 
 ```
