@@ -25,7 +25,7 @@ interface DrawerLayoutScreenProps {
 export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutScreenProps>> = (
   props: DrawerLayoutScreenProps,
 ) => {
-  const { authenticationStore, currentUserStore } = useStores()
+  const { authenticationStore, currentUserStore, sessionStore, attendanceStore } = useStores()
 
   const $drawerInsets = useSafeAreaInsetsStyle(["top"])
   const $screenInsets = useSafeAreaInsetsStyle(["top", "bottom"])
@@ -84,20 +84,21 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
       },
       backgroundColor: props.transparent ? colors.transparent : colors.background,
 
-      LeftActionComponent: (
-        <Icon
-          icon="menuCyan"
-          color={
-            props.transparent
-              ? drawerOpen
-                ? colors.ehkamCyan
-                : colors.background
-              : colors.ehkamCyan
-          }
-          style={{ width: 20, marginStart: spacing.large, marginEnd: spacing.medium }}
-          onPress={openDrawer}
-        />
-      ),
+      LeftActionComponent:
+        sessionStore.sessionOfflineQueue.length > 0 ||
+        attendanceStore.recordsOfflineQueue.length > 0 ? (
+          <Icon
+            icon="menuCyanNotif"
+            style={{ width: 25, marginStart: spacing.large, marginEnd: spacing.medium }}
+            onPress={openDrawer}
+          />
+        ) : (
+          <Icon
+            icon="menuCyan"
+            style={{ width: 25, marginStart: spacing.large, marginEnd: spacing.medium }}
+            onPress={openDrawer}
+          />
+        ),
 
       RightActionComponent: props.element ? (
         props.element
@@ -131,6 +132,10 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
           schoolName={currentUserStore.user.school_name}
           logout={authenticationStore.logOut}
           navigation={props.navigation}
+          syncIndicator={
+            sessionStore.sessionOfflineQueue.length > 0 ||
+            attendanceStore.recordsOfflineQueue.length > 0
+          }
         />
       )}
       onDrawerClose={() => setDrawerOpen(false)}
@@ -149,7 +154,14 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
   )
 }
 
-const DrawerContent = ({ drawerInsets, teacherName, schoolName, navigation, logout }) => {
+const DrawerContent = ({
+  drawerInsets,
+  teacherName,
+  schoolName,
+  navigation,
+  logout,
+  syncIndicator,
+}) => {
   return (
     <View style={[{ flex: 1 }, drawerInsets]}>
       {/* teacher's name + school name */}
@@ -195,7 +207,7 @@ const DrawerContent = ({ drawerInsets, teacherName, schoolName, navigation, logo
           </Text>
         </View> */}
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.medium }}>
-          <Icon icon="sync" size={22} color={colors.ehkamCyan} />
+          <Icon icon={syncIndicator ? "syncIndicator" : "sync"} size={22} />
           <Text
             weight="semiBold"
             style={{ color: colors.ehkamGrey, marginStart: spacing.small }}

@@ -125,6 +125,7 @@ export const iconRegistry = {
   downArrowsGrey: require("../../assets/icons/ehkam/down-grey.png"),
   upArrowsGrey: require("../../assets/icons/ehkam/up-grey.png"),
   menuCyan: require("../../assets/icons/ehkam/menu-cyan.png"),
+  menuCyanNotif: require("../../assets/icons/ehkam/menu-cyan-notif.png"),
   locationCheck: require("../../assets/icons/ehkam/location-check.png"),
   locationPlus: require("../../assets/icons/ehkam/location-plus.png"),
   trash: require("../../assets/icons/ehkam/trash.png"),
@@ -140,6 +141,7 @@ export const iconRegistry = {
   qurtasIcon: require("../../assets/icons/ehkam/qurtas-icon.png"),
   share: require("../../assets/icons/ehkam/share.png"),
   sync: require("../../assets/icons/ehkam/sync.png"),
+  syncIndicator: require("../../assets/icons/ehkam/sync-indicator.png"),
   outbox: require("../../assets/icons/ehkam/outbox.png"),
   exit: require("../../assets/icons/ehkam/exit.png"),
 
