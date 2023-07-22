@@ -21,6 +21,7 @@ export const SessionModel = types
     end_verse: types.number,
     notes: types.optional(types.array(SessionNoteModel), []),
     timestamp: types.string,
+    grade: types.maybeNull(types.number),
   })
   .actions(withSetPropAction)
   .views((self) => ({

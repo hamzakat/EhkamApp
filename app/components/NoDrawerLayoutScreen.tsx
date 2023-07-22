@@ -5,6 +5,7 @@ import { Screen } from "./Screen"
 import { useHeader } from "../utils/useHeader"
 import { Icon } from "./Icon"
 import { colors, spacing } from "../theme"
+import { ExtendedEdge } from "../utils/useSafeAreaInsetsStyle"
 
 interface NoDrawerLayoutScreenProps {
   navigation?: any
@@ -13,7 +14,7 @@ interface NoDrawerLayoutScreenProps {
   children: React.ReactNode
   preset?: "scroll" | "auto" | "fixed"
   Icon?: React.ReactElement<any, string | React.JSXElementConstructor<any>>
-  safeAreaEdge?: string[]
+  safeAreaEdge?: ExtendedEdge[]
 }
 
 export const NoDrawerLayoutScreen: React.FC<React.PropsWithChildren<NoDrawerLayoutScreenProps>> = (
@@ -55,9 +56,9 @@ export const NoDrawerLayoutScreen: React.FC<React.PropsWithChildren<NoDrawerLayo
   )
   return (
     <Screen
-      safeAreaEdges={!!props.safeAreaEdge ? props.safeAreaEdge : ["top", "bottom"]}
+      safeAreaEdges={props.safeAreaEdge ? props.safeAreaEdge : ["top", "bottom"]}
       style={{ flex: 1 }}
-      preset={!!props.preset ? props.preset : "auto"}
+      preset={props.preset ? props.preset : "auto"}
     >
       {props.children}
     </Screen>

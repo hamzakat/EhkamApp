@@ -2,7 +2,7 @@
 import React, { FC, useState } from "react"
 import { observer } from "mobx-react-lite"
 import { SessionStackScreenProps } from "./SessionStack"
-import { Button, Card, DrawerLayoutScreen, StudentCard, Text, Toggle } from "../../../components"
+import { Button, Card, DrawerLayoutScreen, Text, Toggle } from "../../../components"
 import { View, ScrollView } from "react-native"
 import { colors, spacing } from "../../../theme"
 import { useStores } from "../../../models"
@@ -13,7 +13,7 @@ export const SessionTypeScreen: FC<SessionStackScreenProps<"SessionType">> = obs
     const [sessionType, setSessionType] = useState<"new" | "repeat" | "exam">("new")
 
     return (
-      <DrawerLayoutScreen title="جلسة جديدة" backBtn={true} navigation={navigation}>
+      <DrawerLayoutScreen title="جلسة جديدة" backBtn={false} navigation={navigation}>
         <ScrollView
           contentContainerStyle={{
             alignContent: "center",
@@ -21,9 +21,9 @@ export const SessionTypeScreen: FC<SessionStackScreenProps<"SessionType">> = obs
             paddingBottom: spacing.massive,
           }}
         >
-          {sessionStore.selectedStudent && (
+          {/* {sessionStore.selectedStudent && (
             <StudentCard preset="selected" student={sessionStore.selectedStudent} />
-          )}
+          )} */}
           <View style={{ marginTop: spacing.huge }}>
             <Text
               weight="book"
@@ -203,7 +203,7 @@ export const SessionTypeScreen: FC<SessionStackScreenProps<"SessionType">> = obs
           <View
             style={{
               flexDirection: "row",
-              justifyContent: "space-between",
+              justifyContent: "center",
               marginTop: spacing.extraLarge,
 
               marginBottom: spacing.large,
@@ -211,26 +211,14 @@ export const SessionTypeScreen: FC<SessionStackScreenProps<"SessionType">> = obs
           >
             <Button
               style={{
-                flex: 0.5,
-                marginEnd: spacing.extraSmall,
-                backgroundColor: colors.ehkamGrey,
-                borderWidth: 0,
-                borderRadius: 9,
-              }}
-              onPress={() => navigation.goBack()}
-            >
-              <Text text="تراجع" weight="bold" size="md" style={{ color: colors.background }} />
-            </Button>
-            <Button
-              style={{
-                flex: 0.5,
+                flex: 0.4,
                 backgroundColor: colors.ehkamPeach,
                 borderWidth: 0,
                 borderRadius: 9,
               }}
               onPress={() => {
                 sessionStore.setProp("selectedSessionType", sessionType)
-                navigation.navigate("SessionSetup")
+                navigation.navigate("SelectStudent")
               }}
             >
               <Text text="متابعة" weight="bold" size="md" style={{ color: colors.background }} />

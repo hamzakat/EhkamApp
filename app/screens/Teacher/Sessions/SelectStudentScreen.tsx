@@ -78,7 +78,7 @@ export const SelectStudentScreen: FC<SessionStackScreenProps<"SelectStudent">> =
 
     const selectStudent = (student: Student) => {
       sessionStore.setProp("selectedStudent", getSnapshot(student))
-      navigation.navigate("SessionType")
+      navigation.navigate("SessionSetup")
     }
 
     const renderSearchItem = ({ item }: { item: Student }) => {
@@ -169,7 +169,7 @@ export const SelectStudentScreen: FC<SessionStackScreenProps<"SelectStudent">> =
     }
 
     return (
-      <DrawerLayoutScreen navigation={navigation} title="اختر الطالب" backBtn={false}>
+      <DrawerLayoutScreen navigation={navigation} title="اختر الطالب" backBtn={true}>
         {/* Students list & Search Area */}
 
         <View style={{ justifyContent: "space-between" }}>

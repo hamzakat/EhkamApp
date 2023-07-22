@@ -65,6 +65,7 @@ export function TeacherNavigator() {
             </View>
           ),
         }}
+        initialParams={{ screen: "SessionType" }}
       />
       <Tab.Screen
         name="Attendance"
@@ -120,7 +121,7 @@ export function TeacherNavigator() {
   )
 }
 
-const $tabBar: ViewStyle = {
+export const $tabBar: ViewStyle = {
   backgroundColor: colors.background,
   borderTopWidth: 0,
   borderColor: colors.background,

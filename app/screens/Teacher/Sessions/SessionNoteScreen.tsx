@@ -80,6 +80,7 @@ export const SessionNoteScreen: FC<SessionStackScreenProps<"SessionNote">> = obs
             size={spacing.large}
           />
         }
+        safeAreaEdge={[]}
       >
         <WarningDialog
           text="تأكد من تحديد نوع الخطاً"
@@ -93,7 +94,7 @@ export const SessionNoteScreen: FC<SessionStackScreenProps<"SessionNote">> = obs
             alignContent: "center",
             paddingHorizontal: spacing.large,
             paddingBottom: spacing.large,
-            paddingTop: spacing.tiny,
+            marginTop: spacing.medium,
           }}
         >
           <VerseItem verseNumber={verseNumber} verseText={verseText} />

@@ -1,14 +1,14 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { FC, useEffect, useState } from "react"
 import { observer } from "mobx-react-lite"
-import { ViewStyle, View, ScrollView, TextStyle, KeyboardTypeOptions } from "react-native"
+import { ViewStyle, View, ScrollView, Dimensions } from "react-native"
 import {
   BorderedText,
+  BorderedTextField,
   Button,
   DrawerLayoutScreen,
   Icon,
   Text,
-  TextField,
   WarningDialog,
 } from "../../../components"
 import { spacing, colors } from "../../../theme"
@@ -42,7 +42,7 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
     const { sessionStore } = useStores()
     useEffect(() => {
       if (sessionStore.selectedSessionType === "new") {
-        console.log("Auto")
+        __DEV__ && console.log("Auto")
         const selectedStudent: Student = sessionStore.selectedStudent
         const lastNewSession: Session = selectedStudent?.lastNewSession
         if (lastNewSession !== undefined && lastNewSession.end_page !== 604)
@@ -246,13 +246,7 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
           text="تأكد من صحّة إدخال نقطة البداية والنهاية"
           buttonText="رجوع"
         />
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: spacing.large,
-            justifyContent: "space-around",
-            marginBottom: spacing.large,
-          }}
-        >
+        <ScrollView contentContainerStyle={$contentContainer}>
           <View style={{ marginBottom: spacing.large }}>
             <View
               style={{
@@ -367,7 +361,7 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
             </View>
           </View>
 
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <View style={{ flexDirection: "row", justifyContent: "center" }}>
             <Button
               style={{
                 flex: 0.12,
@@ -381,7 +375,7 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
             >
               <Icon icon="trash" size={20} />
             </Button>
-            <Button
+            {/* <Button
               style={{
                 flex: 0.44,
                 marginEnd: spacing.extraSmall,
@@ -391,10 +385,10 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
               }}
             >
               <Text text="حفظ مؤقت" weight="bold" size="md" style={{ color: colors.background }} />
-            </Button>
+            </Button> */}
             <Button
               style={{
-                flex: 0.44,
+                flex: 0.5,
                 backgroundColor: colors.ehkamPeach,
                 borderWidth: 0,
                 borderRadius: 9,
@@ -490,48 +484,9 @@ const ModalSelect = function ({
   )
 }
 
-const BorderedTextField = ({
-  value,
-  onChangeText,
-  containerStyle,
-  inputWrapperStyle,
-  textStyle,
-  editable,
-  keyboardType,
-}: {
-  value: string
-  onChangeText: (value) => void
-  containerStyle?: ViewStyle
-  inputWrapperStyle?: ViewStyle
-  textStyle?: TextStyle
-  editable: boolean
-  keyboardType: KeyboardTypeOptions
-}) => {
-  return (
-    <TextField
-      selectionColor={colors.ehkamDarkGrey}
-      style={{
-        color: colors.ehkamCyan,
-        textAlign: "center",
-        fontSize: 16,
-        fontFamily: "expoArabicSemiBold",
-        ...textStyle,
-      }}
-      containerStyle={{ flex: 0.4, ...containerStyle }}
-      inputWrapperStyle={{
-        borderWidth: 1,
-        borderRadius: spacing.small,
-        backgroundColor: colors.background,
-        paddingVertical: 0,
-        height: 39,
-        ...inputWrapperStyle,
-      }}
-      editable={editable}
-      textAlignVertical="center"
-      textAlign="center"
-      onChangeText={onChangeText}
-      value={value}
-      keyboardType={keyboardType}
-    />
-  )
+const $contentContainer: ViewStyle = {
+  alignContent: "center",
+  paddingHorizontal: spacing.large,
+  marginTop: spacing.small,
+  paddingBottom: Dimensions.get("screen").height * 0.2,
 }

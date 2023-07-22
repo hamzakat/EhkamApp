@@ -1,7 +1,15 @@
 /* eslint-disable react-native/no-inline-styles */
 import { observer } from "mobx-react-lite"
 import { Alert, View, Dimensions } from "react-native"
-import { Button, DrawerLayoutScreen, Text, VerseItem, WarningDialog } from "../../../components"
+import {
+  Button,
+  DrawerLayoutScreen,
+  Icon,
+  Text,
+  TextField,
+  VerseItem,
+  WarningDialog,
+} from "../../../components"
 
 import React, { FC, useEffect, useState } from "react"
 import { SessionStackScreenProps, VersesListItem } from "./SessionStack"
@@ -14,9 +22,10 @@ import { v4 as uuidv4 } from "uuid"
 import { getSnapshot } from "mobx-state-tree"
 import { TwoButtonsDialog } from "../../../components/"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { Dialog } from "react-native-simple-dialogs"
 
 const windowHeight = Dimensions.get("window").height
-const ayatListHeight = windowHeight * 0.65
+const ayatListHeight = windowHeight * 0.75
 
 export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
   function SessionScreen({ navigation, route }) {
@@ -29,7 +38,11 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
     const [doneDialogVisible, setDoneDialogVisible] = useState(false)
     const [repeatDialogVisible, setRepeatDialogVisible] = useState(false)
     const [done, setDone] = useState(false)
+    const [grade, setGrade] = useState("")
+    const [gradeError, setGradeError] = useState("")
+    const [gradeValid, setGradeValid] = useState(false)
     const { bottom } = useSafeAreaInsets()
+
     React.useEffect(
       // Preventing accidental back button press: https://reactnavigation.org/docs/preventing-going-back/
       () =>
@@ -50,7 +63,7 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
             [
               { text: "متابعة الجلسة", style: "cancel", onPress: () => {} },
               {
-                text: "الرجوع",
+                text: "إلغاء الجلسة والرجوع",
                 style: "destructive",
                 // If the user confirmed, then we dispatch the action we blocked earlier
                 // This will continue the action that had triggered the removal of the screen
@@ -61,6 +74,21 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
         }),
       [navigation, done],
     )
+    const handleInputChange = (text) => {
+      // Validate the input value
+      const numericValue = parseInt(text)
+      if (numericValue >= 0 && numericValue <= 100) {
+        setGradeError("")
+        setGradeValid(true)
+      } else if (text === "") {
+        setGradeError("")
+        setGradeValid(false)
+      } else {
+        setGradeError("ادخل قيمة بين 0 و 100")
+        setGradeValid(false)
+      }
+      setGrade(text)
+    }
 
     const sendSession = () => {
       setDone(true)
@@ -77,6 +105,7 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
         student_id: sessionStore.selectedStudent?.id,
         type: sessionStore.selectedSessionType,
         timestamp: new Date().toISOString(),
+        grade: parseInt(grade),
       })
 
       sessionStore.setProp("currentSessionNotes", [])
@@ -146,13 +175,87 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
     }
     return (
       <DrawerLayoutScreen title="جلسة تسميع جديدة" backBtn={true} navigation={navigation}>
-        <TwoButtonsDialog
+        {/* <TwoButtonsDialog
           peachButtonFn={() => setConfirmationDialogVisible(false)}
           cyanButtonFn={sendSession}
           cancel={() => setConfirmationDialogVisible(false)}
           visible={confirmationDialogVisible}
           text="هل تريد حفظ الجلسة"
-        />
+        /> */}
+
+        {/* Grade dialog */}
+        <Dialog
+          visible={confirmationDialogVisible}
+          onTouchOutside={() => setConfirmationDialogVisible(false)}
+          dialogStyle={{
+            backgroundColor: colors.background,
+            borderRadius: spacing.small,
+          }}
+        >
+          <View>
+            <Icon
+              icon="x"
+              style={{ position: "absolute", top: -12, right: -12, alignSelf: "flex-end" }}
+              color={colors.ehkamDarkGrey}
+              onPress={() => setConfirmationDialogVisible(false)}
+            />
+
+            <Text
+              weight="medium"
+              text={"أدخل تقييم الجلسة"}
+              style={{
+                color: colors.ehkamDarkGrey,
+                textAlign: "center",
+                marginVertical: spacing.medium,
+              }}
+              size="md"
+            />
+            <TextField
+              placeholder="درجة مئوية"
+              keyboardType="number-pad"
+              value={grade}
+              onChangeText={handleInputChange}
+              LeftAccessory={() => <Text style={{ marginHorizontal: spacing.tiny }}>%</Text>}
+              inputWrapperStyle={{
+                alignItems: "center",
+                maxWidth: 150,
+              }}
+              containerStyle={{ alignItems: "center" }}
+            />
+            {gradeError ? (
+              <Text
+                weight="light"
+                size="xs"
+                style={{ color: colors.ehkamRed, marginTop: spacing.small }}
+              >
+                {gradeError}
+              </Text>
+            ) : null}
+            {gradeValid ? (
+              <View
+                style={{
+                  flexDirection: "row",
+                  marginTop: spacing.medium,
+                  justifyContent: "space-around",
+                }}
+              >
+                <Button
+                  text={"حفظ"}
+                  textStyle={{ color: colors.background }}
+                  style={{
+                    borderWidth: 0,
+                    borderRadius: spacing.small,
+                    width: 75,
+                    backgroundColor: colors.ehkamCyan,
+                  }}
+                  onPress={sendSession}
+                />
+              </View>
+            ) : null}
+          </View>
+        </Dialog>
+
+        {/* Cancelation dialog */}
         <TwoButtonsDialog
           peachButtonFn={() => scheduleSession("later")}
           cyanButtonFn={() => scheduleSession("today")}
@@ -162,13 +265,15 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
           peachButtonText="اليوم"
           cyanButtonText="الدرس القادم"
         />
+
+        {/* Done dialog */}
         <WarningDialog
           preset="white"
           buttonText="متابعة"
           visible={doneDialogVisible}
           cancel={() => {
             setDoneDialogVisible(false)
-            navigation.navigate("SelectStudent")
+            navigation.navigate("SessionType")
           }}
           text="تم حفظ جلسة التسميع والإضافة إلى تقدم بالطالب علمياً بنجاح"
         />
@@ -180,7 +285,7 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
               alignContent: "center",
               paddingHorizontal: spacing.large,
               paddingBottom: spacing.large,
-              paddingTop: spacing.tiny,
+              paddingTop: spacing.small,
             }}
           />
         </View>

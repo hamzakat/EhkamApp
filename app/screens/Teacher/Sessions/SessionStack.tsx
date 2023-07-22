@@ -7,6 +7,9 @@ import { SessionNoteScreen } from "./SessionNoteScreen"
 
 import { StackScreenProps } from "@react-navigation/stack"
 import { SessionTypeScreen } from "./SessionTypeScreen"
+import { getFocusedRouteNameFromRoute } from "@react-navigation/native"
+import { $tabBar } from "../../../navigators/TeacherNavigator"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 export interface VersesListItem {
   type: "chapterTitle" | "verse"
@@ -18,8 +21,8 @@ export interface VersesListItem {
 }
 
 export type SessionStackParamList = {
-  SelectStudent: undefined
   SessionType: undefined
+  SelectStudent: undefined
   SessionSetup: undefined
   Session: {
     startPage: number
@@ -46,15 +49,28 @@ export type SessionStackScreenProps<T extends keyof SessionStackParamList> = Sta
 
 const SessionStack = createNativeStackNavigator<SessionStackParamList>()
 
-export function SessionStackScreen() {
+export function SessionStackScreen({ navigation, route }) {
+  const { bottom } = useSafeAreaInsets()
+  const tabHiddenRoutes = ["Session", "SessionNote"]
+
+  React.useLayoutEffect(() => {
+    const routeName = getFocusedRouteNameFromRoute(route)
+    if (tabHiddenRoutes.includes(routeName)) {
+      navigation.setOptions({ tabBarStyle: { display: "none" } })
+    } else {
+      navigation.setOptions({ tabBarStyle: [$tabBar, { height: bottom + 70 }] })
+    }
+  }, [navigation, route])
+
   return (
     <SessionStack.Navigator
       screenOptions={{
         headerShown: false,
       }}
+      initialRouteName="SessionType"
     >
-      <SessionStack.Screen name="SelectStudent" component={SelectStudentScreen} />
       <SessionStack.Screen name="SessionType" component={SessionTypeScreen} />
+      <SessionStack.Screen name="SelectStudent" component={SelectStudentScreen} />
       <SessionStack.Screen name="SessionSetup" component={SessionSetupScreen} />
       <SessionStack.Screen name="Session" component={SessionScreen} />
       <SessionStack.Screen name="SessionNote" component={SessionNoteScreen} />
