@@ -55,6 +55,7 @@ export const StudentProfileScreen: FC<StudentStackScreenProps<"StudentProfile">>
           style={{
             justifyContent: "space-around",
             marginBottom: spacing.large,
+            marginTop: spacing.medium,
           }}
         >
           {/* bg picture */}
