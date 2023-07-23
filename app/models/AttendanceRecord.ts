@@ -15,7 +15,19 @@ export const AttendanceRecordModel = types
   })
   .actions(withSetPropAction)
   .views((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
-  .actions((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
+  .actions((self) => ({
+    getRate() {
+      const total = self.items.length
+      const present = self.items.filter((item) => item.present).length
+      return Math.round((present / total) * 100)
+    },
+    getNumberOfPresent() {
+      return self.items.filter((item) => item.present).length
+    },
+    getDay() {
+      return new Date(self.timestamp).getDate()
+    },
+  })) // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface AttendanceRecord extends Instance<typeof AttendanceRecordModel> {}
 export interface AttendanceRecordSnapshotOut extends SnapshotOut<typeof AttendanceRecordModel> {}

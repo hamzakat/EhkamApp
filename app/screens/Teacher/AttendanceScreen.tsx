@@ -2,7 +2,14 @@
 import React, { FC, useEffect, useState } from "react"
 import { Observer, observer } from "mobx-react-lite"
 import { ActivityIndicator, Dimensions, FlatList, View, ViewStyle } from "react-native"
-import { DrawerLayoutScreen, EmptyState, StudentCard, Toggle } from "../../components"
+import {
+  DrawerLayoutScreen,
+  EmptyState,
+  ModalSelect,
+  StudentCard,
+  Text,
+  Toggle,
+} from "../../components"
 import { TeacherTabScreenProps } from "../../navigators/TeacherNavigator"
 import { useNavigation } from "@react-navigation/native"
 import { useStores } from "../../models"
@@ -11,58 +18,139 @@ import { delay } from "../../utils/delay"
 import { AttendanceRecordModel, AttendanceRecord } from "../../models/AttendanceRecord"
 import { AttendanceItem, AttendanceItemModel } from "../../models/AttendanceItem"
 import { Student } from "../../models/Student"
-import { getSnapshot } from "mobx-state-tree"
+import { getSnapshot, onSnapshot } from "mobx-state-tree"
 import "react-native-get-random-values"
 import { v4 as uuidv4 } from "uuid"
+import { set } from "date-fns"
 
 interface AttendanceScreenProps extends TeacherTabScreenProps<"Attendance"> {}
 
+const ONE_DAY = 24 * 60 * 60 * 1000
+const today = new Date()
+
 export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function AttendanceScreen() {
-  const { attendanceStore, studentStore } = useStores()
+  const { attendanceStore, studentStore, sessionStore } = useStores()
   const navigation = useNavigation()
 
   const [refreshing, setRefreshing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const statsFilters = [
+    { key: 1, label: "إجمالي" },
+    { key: 2, label: "اليوم" },
+    { key: 3, label: "الاسبوع" },
+    { key: 4, label: "الشهر" },
+  ]
 
-  const createNewAttendanceRecord = (timestamp: string): void => {
-    __DEV__ && console.log("CREATING NEW ATTENDANCE RECORD")
+  const [statsFilter, setStatsFilter] = useState(statsFilters[0])
 
-    attendanceStore.setProp(
-      "currentAttendanceRecord",
-      AttendanceRecordModel.create({
-        _id: uuidv4(),
-        timestamp,
-        items:
-          studentStore.students.length > 0
-            ? studentStore.students.map((student, i) => {
-                return AttendanceItemModel.create({
-                  student_id: student.id,
-                  present: false,
-                })
-              })
-            : [],
-      }),
+  const [attendanceRate, setAttendanceRate] = useState(0)
+  const [sessionsRate, setSessionsRate] = useState(0)
+
+  // update the rates based on the filter
+  useEffect(() => {
+    let _attendanceRate = 0
+    if (statsFilter.key === 1) _attendanceRate = attendanceStore.getRates("total")
+    if (statsFilter.key === 3) _attendanceRate = attendanceStore.getRates("week")
+    if (statsFilter.key === 4) _attendanceRate = attendanceStore.getRates("month")
+
+    setAttendanceRate(_attendanceRate)
+
+    // update the sessions rate
+    const filteredAttendanceRecords = attendanceStore.attendanceRecords
+      .slice()
+      .sort((a, b) => (new Date(a.timestamp) > new Date(b.timestamp) ? 1 : -1))
+      .filter((record: AttendanceRecord) => {
+        const attendanceRecordDate = new Date(record.timestamp)
+        if (statsFilter.key === 1) return true
+        if (statsFilter.key === 3) return today - attendanceRecordDate <= ONE_DAY * 7
+        if (statsFilter.key === 4) return today - attendanceRecordDate <= ONE_DAY * 30
+      })
+
+    const ratesOfSessionOnEveryDay = filteredAttendanceRecords.map((record: AttendanceRecord) => {
+      const numOfPresetStudents = record.getNumberOfPresent()
+      if (numOfPresetStudents === 0) return 0 // prevent division by zero
+
+      const numOfSessions = sessionStore.getSessionsByDate(new Date(record.timestamp)).length
+
+      let sessionsRate = Math.round((numOfSessions / numOfPresetStudents) * 100)
+      if (sessionsRate > 100) sessionsRate = 100
+      return sessionsRate
+    })
+
+    // sum the rates of sessions on every day and divide by the number of days
+    const _sessionsRate = Math.round(
+      ratesOfSessionOnEveryDay.reduce((a, b) => a + b, 0) / ratesOfSessionOnEveryDay.length,
     )
+
+    setSessionsRate(_sessionsRate)
+  }, [statsFilter, attendanceStore])
+
+  const [currentAttendanceRate, setCurrentAttendanceRate] = useState(0)
+  const [currentSessionsRate, setCurrentSessionsRate] = useState(0)
+
+  // update the current rates
+  useEffect(() => {
+    const dispose = onSnapshot(attendanceStore.currentAttendanceRecord.items, (change) => {
+      console.log("DATE", today.toISOString().substring(0, 10))
+
+      setCurrentAttendanceRate(attendanceStore.currentAttendanceRecord.getRate())
+
+      let _currentSessionsRate = 0
+      const numOfPresetStudents = attendanceStore.currentAttendanceRecord.getNumberOfPresent()
+      if (numOfPresetStudents === 0) _currentSessionsRate = 0 // prevent division by zero
+      else {
+        const numOfSessions = sessionStore.getSessionsByDate(
+          new Date(attendanceStore.currentAttendanceRecord.timestamp),
+        ).length
+        _currentSessionsRate = Math.round((numOfSessions / numOfPresetStudents) * 100)
+        if (_currentSessionsRate > 100) _currentSessionsRate = 100
+      }
+      setCurrentSessionsRate(_currentSessionsRate)
+    })
+    return () => {
+      dispose() // Cleanup the observer when the component unmounts
+    }
+  }, [attendanceStore.currentAttendanceRecord, sessionStore])
+
+  const loadStores = async () => {
+    await studentStore.fetchStudents()
+    await attendanceStore.fetchAttendanceRecords()
+    __DEV__ && console.log("Loading stores from Attendance Screen")
   }
+
   useEffect(() => {
     loadStores()
   }, [studentStore, attendanceStore])
 
-  const loadStores = () => {
-    ;(async function load() {
-      await studentStore.fetchStudents()
-      await attendanceStore.fetchAttendanceRecords()
-      __DEV__ && console.log("Loading stores from Attendance Screen")
-    })()
-  }
-
   useEffect(() => {
+    const createNewAttendanceRecord = (timestamp: string): void => {
+      __DEV__ && console.log("CREATING NEW ATTENDANCE RECORD")
+
+      attendanceStore.setProp(
+        "currentAttendanceRecord",
+        AttendanceRecordModel.create({
+          _id: uuidv4(),
+          timestamp,
+          items:
+            studentStore.students.length > 0
+              ? studentStore.students.map((student, i) => {
+                  return AttendanceItemModel.create({
+                    student_id: student.id,
+                    present: false,
+                  })
+                })
+              : [],
+        }),
+      )
+    }
+
     // check today's date
     const timestamp = new Date().toISOString()
-    // const todayDate = timestamp.substring(0, 10) // yyyy-mm-dd
 
     loadStores()
 
+    // *** auto create a new record if there's no current record ***
+    // const todayDate = timestamp.substring(0, 10) // yyyy-mm-dd
     // const currentAttendanceRecord: AttendanceRecord = attendanceStore.currentAttendanceRecord
 
     // eslint-disable-next-line no-extra-boolean-cast
@@ -122,6 +210,79 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
         <FlatList<AttendanceItem>
           contentContainerStyle={$contentContainer}
           data={attendanceStore.currentAttendanceRecord?.items}
+          ListHeaderComponent={
+            <View style={{ marginTop: spacing.medium }}>
+              <Text
+                style={{
+                  textAlign: "left",
+                  marginLeft: spacing.tiny,
+                  color: colors.ehkamDarkGrey,
+                }}
+                preset="formLabel"
+              >
+                معدّلات
+              </Text>
+              <ModalSelect
+                options={statsFilters}
+                placeholder={""}
+                selectedOpt={statsFilter.label}
+                selectedKey={statsFilter.key}
+                onChange={setStatsFilter}
+                containerStyle={{ flex: 1, marginVertical: spacing.small }}
+              />
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: colors.ehkamCyan,
+                  borderRadius: spacing.small,
+                  flexDirection: "row",
+                  justifyContent: "space-around",
+                  paddingVertical: spacing.extraSmall,
+                  minHeight: 120,
+                  alignItems: "center",
+                  marginBottom: spacing.medium,
+                }}
+              >
+                <View style={{ alignItems: "center", flex: 0.5 }}>
+                  <Text style={{ color: colors.ehkamDarkGrey }} size="lg" weight="book">
+                    الحضور
+                  </Text>
+                  <View>
+                    <Text
+                      style={{ color: colors.ehkamCyan, textAlign: "center" }}
+                      size="xxl"
+                      weight="medium"
+                    >
+                      {statsFilter.key === 2 ? currentAttendanceRate : attendanceRate}%
+                    </Text>
+                  </View>
+                </View>
+                <View style={{ alignItems: "center", flex: 0.5 }}>
+                  <Text style={{ color: colors.ehkamDarkGrey }} size="lg" weight="book">
+                    جلسات
+                  </Text>
+                  <View>
+                    <Text
+                      style={{ color: colors.ehkamCyan, textAlign: "center" }}
+                      size="xxl"
+                      weight="medium"
+                    >
+                      {statsFilter.key === 2 ? currentSessionsRate : sessionsRate} %
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <Text
+                weight="book"
+                style={{
+                  color: colors.ehkamGrey,
+                  marginBottom: spacing.small,
+                  marginStart: spacing.medium,
+                }}
+                text="تسجيل الحضور"
+              />
+            </View>
+          }
           renderItem={renderAttendanceItem}
           onRefresh={manualRefresh}
           refreshing={refreshing}
@@ -154,7 +315,6 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
 const $contentContainer: ViewStyle = {
   alignContent: "center",
   paddingHorizontal: spacing.large,
-  marginTop: spacing.small,
   paddingBottom: Dimensions.get("screen").height * 0.2,
 }
 

@@ -120,7 +120,50 @@ export const AttendanceStoreModel = types
         }
       })
     })
-    return { dequeue }
+
+    const getRates = (filter: "total" | "week" | "month") => {
+      const ONE_DAY = 24 * 60 * 60 * 1000
+      const today = new Date()
+      const attendanceStats = self.attendanceRecords
+        .sort((a, b) => (new Date(a.timestamp) > new Date(b.timestamp) ? 1 : -1))
+        .filter((record) => {
+          const attendanceRecordDate = new Date(record.timestamp)
+          if (filter === "total") return true
+          if (filter === "week") return today - attendanceRecordDate <= ONE_DAY * 7
+          if (filter === "month") return today - attendanceRecordDate <= ONE_DAY * 30
+        })
+        .reduce(
+          (acc, record) => {
+            return {
+              attendanceRate: acc.attendanceRate + record.getRate(),
+              numberOfRecords: acc.numberOfRecords + 1,
+            }
+          },
+          {
+            attendanceRate: 0,
+            numberOfRecords: 0,
+          },
+        )
+
+      const _attendanceRate = Math.round(
+        attendanceStats.attendanceRate / attendanceStats.numberOfRecords,
+      )
+      return _attendanceRate
+    }
+
+    const getRateByDate = (date: Date) => {
+      const attendanceRecord = self.attendanceRecords.find(
+        (record) =>
+          new Date(record.timestamp).toISOString().substring(0, 10) ===
+          date.toISOString().substring(0, 10),
+      )
+      if (attendanceRecord) {
+        return attendanceRecord.getRate()
+      }
+      return 0
+    }
+
+    return { dequeue, getRates, getRateByDate }
   })
 
 export interface AttendanceStore extends Instance<typeof AttendanceStoreModel> {}

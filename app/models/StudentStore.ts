@@ -36,7 +36,7 @@ export const StudentStoreModel = types
       }
       try {
         const rawData = res.data.data
-        console.log(rawData)
+        // __DEV__ && console.log(rawData)
 
         const students: StudentSnapshotIn[] = rawData.map((raw) => ({
           id: raw.id,

@@ -189,7 +189,21 @@ export const SessionStoreModel = types
         }
       })
     })
-    return { dequeue }
+
+    const getSessionsByDate = (date: Date) => {
+      return self.sessions.filter((session) => {
+        if (session.timestamp) {
+          return (
+            new Date(session.timestamp).toISOString().substring(0, 10) ===
+            date.toISOString().substring(0, 10)
+          )
+        } else {
+          return false
+        }
+      })
+    }
+
+    return { dequeue, getSessionsByDate }
   })
 
 export interface SessionStore extends Instance<typeof SessionStoreModel> {}
