@@ -11,6 +11,7 @@ import {
   ViewStyle,
   FlatList,
   Dimensions,
+  TouchableOpacity,
 } from "react-native"
 
 import {
@@ -36,6 +37,9 @@ import { useNavigation } from "@react-navigation/native"
 import { StudentStackScreenProps } from "./StudentStack"
 import { NativeStackNavigationHelpers } from "@react-navigation/native-stack/lib/typescript/src/types"
 import { getJuzNumber } from "../../../utils/quranInfo"
+import FastImage from "react-native-fast-image"
+import Config from "../../../config"
+import { set } from "date-fns"
 
 interface SortOptions {
   sortType: "alphabet" | "attendence" | "reciting" | "registration"
@@ -57,7 +61,8 @@ interface FilterOptions {
 export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = observer(
   function StudentsListScreen() {
     // Pull in one of our MST stores
-    const { studentStore, sessionStore, attendanceStore, settingStore } = useStores()
+    const { studentStore, sessionStore, attendanceStore, settingStore, authenticationStore } =
+      useStores()
 
     // Pull in navigation via hook
     const navigation: NativeStackNavigationHelpers = useNavigation()
@@ -106,17 +111,15 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
       navigation.navigate("StudentProfile", { studentId })
     }
 
-    const loadStores = () => {
-      ;(async function load() {
-        setIsLoading(true)
-        await studentStore.fetchStudents()
-        await sessionStore.fetchSessions()
-        await attendanceStore.fetchAttendanceRecords()
-        await settingStore.fetchSchoolSettings()
-        __DEV__ && console.log("Loading stores from Students List Screen")
+    const loadStores = async () => {
+      setIsLoading(true)
+      await studentStore.fetchStudents()
+      await sessionStore.fetchSessions()
+      await attendanceStore.fetchAttendanceRecords()
+      await settingStore.fetchSchoolSettings()
+      __DEV__ && console.log("Loading stores from Students List Screen")
 
-        setIsLoading(false)
-      })()
+      setIsLoading(false)
     }
     const renderSearchItem = ({ item }: { item: StudentSnapshotIn }) => {
       if (searchPhrase === "") {
@@ -203,12 +206,54 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
       }
     })
 
+    const rankFilters = [
+      { key: 1, label: "الأكثر التزاماً" },
+      { key: 2, label: "الأقل التزاماً" },
+    ]
+
+    const [rankFilter, setRankFilter] = useState(rankFilters[0])
+    const [selectedTab, setSelectedTab] = useState<"attendance" | "sessions">("attendance")
+    const [rankingStudents, setRankingStudents] = useState([])
+
+    useEffect(() => {
+      if (selectedTab === "attendance") {
+        const attendanceStudents = studentStore.students
+          .slice()
+          .sort((a: Student, b: Student) => {
+            if (rankFilter.key === 1) {
+              return b.attendanceDays.rate - a.attendanceDays.rate
+            }
+            if (rankFilter.key === 2) {
+              return a.attendanceDays.rate - b.attendanceDays.rate
+            }
+          })
+          .slice(0, 3)
+        setRankingStudents(attendanceStudents)
+      }
+
+      if (selectedTab === "sessions") {
+        const sessionsStudents = studentStore.students
+          .slice()
+          .sort((a: Student, b: Student) => {
+            if (rankFilter.key === 1) {
+              return b.recitingRate - a.recitingRate
+            }
+            if (rankFilter.key === 2) {
+              return a.recitingRate.rate - b.recitingRate.rate
+            }
+          })
+          .slice(0, 3)
+
+        setRankingStudents(sessionsStudents)
+      }
+    }, [selectedTab, rankFilter])
+
     return (
       <DrawerLayoutScreen
         title="الطلاب"
         backBtn={false}
         navigation={navigation}
-        // ScreenProps={{ preset: "fixed" }}
+        ScreenProps={{ preset: "fixed" }}
       >
         {/* Students list & Search Area */}
         {!(showFilterSettings || showSortSettings) && (
@@ -216,14 +261,140 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
             <FlatList<Student>
               /* Search area */
               ListHeaderComponent={
-                <SearchArea
-                  searchFocused={searchBarFocused}
-                  setSearchBarFocused={setSearchBarFocused}
-                  setSearchPhrase={setSearchPhrase}
-                  searchBarRef={searchBarRef}
-                  setShowSortSettings={setShowSortSettings}
-                  setShowFilterSettings={setShowFilterSettings}
-                />
+                <View>
+                  <View style={{ marginBottom: spacing.medium }}>
+                    <ModalSelect
+                      options={rankFilters}
+                      placeholder={""}
+                      selectedOpt={rankFilter.label}
+                      selectedKey={rankFilter.key}
+                      onChange={setRankFilter}
+                      containerStyle={{ marginVertical: spacing.small }}
+                    />
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        marginVertical: spacing.extraSmall,
+                        alignContent: "center",
+                        paddingHorizontal: spacing.large,
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Text
+                        weight="bold"
+                        size="xs"
+                        text="الالتزام بالحضور"
+                        style={{
+                          paddingBottom: spacing.micro,
+                          borderBottomWidth: 2,
+                          borderBottomColor: colors.ehkamCyan,
+                          color: colors.ehkamCyan,
+                          opacity: selectedTab !== "attendance" ? 0.35 : 1,
+                        }}
+                        onPress={() => setSelectedTab("attendance")}
+                      />
+
+                      <Text
+                        weight="bold"
+                        size="xs"
+                        text="إنجاز التسميع"
+                        style={{
+                          paddingBottom: spacing.micro,
+                          borderBottomWidth: 2,
+                          borderBottomColor: colors.ehkamCyan,
+                          color: colors.ehkamCyan,
+                          opacity: selectedTab !== "sessions" ? 0.35 : 1,
+                        }}
+                        onPress={() => setSelectedTab("sessions")}
+                      />
+                    </View>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginTop: spacing.extraSmall,
+                      }}
+                    >
+                      {rankingStudents.map((student, i) => {
+                        const rank = i + 1
+                        let $imageSizes
+
+                        if (rank === 1) {
+                          $imageSizes = {
+                            borderRadius: (100 + 100) / 2,
+                            width: 100,
+                            height: 100,
+                          }
+                        } else if (rank === 2) {
+                          $imageSizes = {
+                            borderRadius: (75 + 75) / 2,
+                            width: 75,
+                            height: 75,
+                          }
+                        } else if (rank === 3) {
+                          $imageSizes = {
+                            borderRadius: (50 + 50) / 2,
+                            width: 50,
+                            height: 50,
+                          }
+                        }
+
+                        return (
+                          <TouchableOpacity
+                            key={i}
+                            style={{ alignItems: "center" }}
+                            onPress={() => openStudentProfile(student.id)}
+                          >
+                            <FastImage
+                              style={[
+                                $imageSizes,
+                                {
+                                  shadowColor: colors.palette.neutral800,
+                                  shadowOffset: { width: 0, height: 12 },
+                                  shadowOpacity: 0.08,
+                                  shadowRadius: 12.81,
+                                  elevation: 8,
+                                },
+                              ]}
+                              defaultSource={require("../../../../assets/images/avatar-placeholder.jpeg")}
+                              source={{
+                                uri: `${Config.API_URL}/assets/${student.avatar}?width=50&height=50&quality=100`,
+                                headers: {
+                                  Authorization: `Bearer ${authenticationStore.accessToken}`,
+                                },
+                                priority: FastImage.priority.high,
+                              }}
+                              resizeMode={FastImage.resizeMode.contain}
+                              onError={() => __DEV__ && console.log("NOIMAGE")}
+                            />
+                            <Text
+                              style={{
+                                marginTop: spacing.extraSmall,
+                                color: colors.ehkamCyan,
+                              }}
+                              size="md"
+                              weight="bold"
+                            >
+                              {rank}
+                            </Text>
+                            <Text style={{ color: colors.ehkamDarkGrey }} size="sm" weight="medium">
+                              {student.fullname}
+                            </Text>
+                          </TouchableOpacity>
+                        )
+                      })}
+                    </View>
+                  </View>
+                  <SearchArea
+                    searchFocused={searchBarFocused}
+                    setSearchBarFocused={setSearchBarFocused}
+                    setSearchPhrase={setSearchPhrase}
+                    searchBarRef={searchBarRef}
+                    setShowSortSettings={setShowSortSettings}
+                    setShowFilterSettings={setShowFilterSettings}
+                  />
+                </View>
               }
               contentContainerStyle={$contentContainer}
               data={sortedData}
@@ -692,6 +863,6 @@ const $searchIcon: ImageStyle = {
 const $contentContainer: ViewStyle = {
   alignContent: "center",
   paddingHorizontal: spacing.large,
-  marginTop: spacing.small,
+  marginTop: spacing.medium,
   paddingBottom: Dimensions.get("screen").height * 0.2,
 }

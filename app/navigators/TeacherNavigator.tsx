@@ -52,21 +52,8 @@ export function TeacherNavigator() {
         tabBarShowLabel: false,
       }}
       defaultScreenOptions={{}}
-      initialRouteName="Home"
+      initialRouteName="Attendance"
     >
-      <Tab.Screen
-        name="Sessions"
-        component={SessionStackScreen}
-        options={{
-          tabBarLabel: "Sessions",
-          tabBarIcon: ({ focused }) => (
-            <View style={focused ? $tabBarIconContainerActive : $tabBarIconContainer}>
-              <Icon icon="book" style={$tabBarIcon} color={focused && colors.background} />
-            </View>
-          ),
-        }}
-        initialParams={{ screen: "SessionType" }}
-      />
       <Tab.Screen
         name="Attendance"
         component={AttendanceScreen}
@@ -81,16 +68,17 @@ export function TeacherNavigator() {
       />
 
       <Tab.Screen
-        name="Home"
-        component={HomeScreen}
+        name="Sessions"
+        component={SessionStackScreen}
         options={{
-          tabBarLabel: "Home",
+          tabBarLabel: "Sessions",
           tabBarIcon: ({ focused }) => (
             <View style={focused ? $tabBarIconContainerActive : $tabBarIconContainer}>
-              <Icon icon="home" style={$tabBarIcon} color={focused && colors.background} />
+              <Icon icon="book" style={$tabBarIcon} color={focused && colors.background} />
             </View>
           ),
         }}
+        initialParams={{ screen: "SessionType" }}
       />
 
       <Tab.Screen

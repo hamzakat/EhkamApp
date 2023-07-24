@@ -43,14 +43,12 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen(_pro
 
   const navigation = useNavigation()
 
-  const loadStores = () => {
-    ;(async function load() {
-      await studentStore.fetchStudents()
-      await sessionStore.fetchSessions()
-      await attendanceStore.fetchAttendanceRecords()
-      await settingStore.fetchSchoolSettings()
-      __DEV__ && console.log("Loading stores from Home Screen")
-    })()
+  const loadStores = async () => {
+    await studentStore.fetchStudents()
+    await sessionStore.fetchSessions()
+    await attendanceStore.fetchAttendanceRecords()
+    await settingStore.fetchSchoolSettings()
+    __DEV__ && console.log("Loading stores from Home Screen")
   }
 
   const exit = async () => {
@@ -62,10 +60,6 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen(_pro
     currentUserStore.setProp("entered", false)
   }
   const [showDialog, setShowDialog] = useState(false)
-  // useHeader({
-  //   rightText: "إنهاء دوام",
-  //   onRightPress: () => setShowDialog(true),
-  // })
 
   const statsFilters = [
     { key: 1, label: "إجمالي" },

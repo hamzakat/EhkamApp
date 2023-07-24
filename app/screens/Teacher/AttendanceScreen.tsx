@@ -9,6 +9,7 @@ import {
   StudentCard,
   Text,
   Toggle,
+  TwoButtonsDialog,
 } from "../../components"
 import { TeacherTabScreenProps } from "../../navigators/TeacherNavigator"
 import { useNavigation } from "@react-navigation/native"
@@ -29,7 +30,7 @@ const ONE_DAY = 24 * 60 * 60 * 1000
 const today = new Date()
 
 export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function AttendanceScreen() {
-  const { attendanceStore, studentStore, sessionStore } = useStores()
+  const { attendanceStore, studentStore, sessionStore, currentUserStore } = useStores()
   const navigation = useNavigation()
 
   const [refreshing, setRefreshing] = useState(false)
@@ -204,8 +205,45 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
     setRefreshing(false)
   }
 
+  const exit = async () => {
+    const currentAttendanceRecord: AttendanceRecord = attendanceStore.currentAttendanceRecord
+    if (currentAttendanceRecord.items.length > 0) {
+      // push the old record to the store (if it holds items) AND send the old record to the server
+      await attendanceStore.sendAttendanceRecord(getSnapshot(currentAttendanceRecord))
+    }
+    currentUserStore.setProp("entered", false)
+  }
+
+  const [showExitDialog, setShowExitDialog] = useState(false)
+
   return (
-    <DrawerLayoutScreen title="الحضور" navigation={navigation} backBtn={false}>
+    <DrawerLayoutScreen
+      title="الحضور"
+      navigation={navigation}
+      backBtn={false}
+      element={
+        <View>
+          <Text
+            onPress={() => setShowExitDialog(true)}
+            size="sm"
+            weight="book"
+            style={{ color: colors.ehkamPeach, marginRight: spacing.medium }}
+          >
+            إنهاء الدوام
+          </Text>
+        </View>
+      }
+    >
+      <TwoButtonsDialog
+        text="⌚ هل أنت متأكد من انتهاء فترة الدوام؟"
+        cyanButtonText="نعم"
+        peachButtonText="لا"
+        cyanButtonFn={exit}
+        visible={showExitDialog}
+        peachButtonFn={() => setShowExitDialog(false)}
+        cancel={() => setShowExitDialog(false)}
+      />
+
       <View>
         <FlatList<AttendanceItem>
           contentContainerStyle={$contentContainer}
