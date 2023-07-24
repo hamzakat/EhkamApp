@@ -49,7 +49,7 @@ export const WarningDialog = (props: WarningDialogProps) => {
           borderRadius: spacing.small,
         }}
       >
-        <View>
+        <View style={{ minHeight: 120 }}>
           <Icon
             icon="x"
             style={{ position: "absolute", top: -12, right: -12, alignSelf: "flex-end" }}
@@ -67,10 +67,11 @@ export const WarningDialog = (props: WarningDialogProps) => {
             text={props.buttonText}
             textStyle={{ color: bgColor }}
             style={{
+              flex: 1,
               borderWidth: 0,
               borderRadius: spacing.small,
               backgroundColor: btnColor,
-              width: 75,
+              minWidth: 100,
               marginTop: spacing.medium,
               alignSelf: "center",
             }}
