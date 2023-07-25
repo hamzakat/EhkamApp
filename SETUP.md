@@ -30,8 +30,20 @@ yarn expo:android
 
 ## Build
 
-- `cd android`
-- `./gradlew clean`
-- Build the Bundle: `cd ..` then `react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res` It creates the `index.android.bundle` named bundle file in assets folder.
-- Build the APK: `cd android` then `./gradlew assembleRelease -x bundleReleaseJsAndAssets` it will gives you the release **APK** at `android\app\build\outputs\apk\release` location.
-- Build the AAB:`./gradlew bundleRelease -x bundleReleaseJsAndAssets` it will gives you the **AAB** file of your project.
+1. `cd android`
+2. Run `./gradlew clean`
+3. Build the Bundle: `cd ..` then `react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res` It creates the `index.android.bundle` named bundle file in assets folder.
+4. Build the package:
+   1. Option 1 (APK): `cd android` then `./gradlew assembleRelease -x bundleReleaseJsAndAssets` it will gives you the release **APK** at `android\app\build\outputs\apk\release` location.
+   2. Option 1 (AAB):`./gradlew bundleRelease -x bundleReleaseJsAndAssets` it will gives you the **AAB** file of your project.
+
+## Troubleshooting
+
+If you face any issue while running the emulator or building the app, try the following:
+
+1. Run `npm cache clean --force`
+2. Run `git clean -fdx`
+3. `cd android` and run `./gradlew clean`
+4. Go to the AVD in the Android Studio and wipe the data of the emulator
+5. Reboot the PC
+6. Try to build now
