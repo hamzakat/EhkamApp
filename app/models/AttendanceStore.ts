@@ -163,7 +163,12 @@ export const AttendanceStoreModel = types
       return 0
     }
 
-    return { dequeue, getRates, getRateByDate }
+    const clearAttendanceStore = () => {
+      self.attendanceRecords.clear()
+      self.recordsOfflineQueue.clear()
+    }
+
+    return { dequeue, getRates, getRateByDate, clearAttendanceStore }
   })
 
 export interface AttendanceStore extends Instance<typeof AttendanceStoreModel> {}

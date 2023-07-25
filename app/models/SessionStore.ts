@@ -203,7 +203,15 @@ export const SessionStoreModel = types
       })
     }
 
-    return { dequeue, getSessionsByDate }
+    const clearSessionStore = () => {
+      self.sessions.clear()
+      self.sessionOfflineQueue.clear()
+      self.currentSessionNotes.clear()
+      self.noteOfflineQueue.clear()
+      self.selectedStudent = undefined
+      self.selectedSessionType = "new"
+    }
+    return { dequeue, getSessionsByDate, clearSessionStore }
   })
 
 export interface SessionStore extends Instance<typeof SessionStoreModel> {}
