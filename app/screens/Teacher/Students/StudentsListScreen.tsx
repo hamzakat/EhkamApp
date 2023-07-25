@@ -61,8 +61,14 @@ interface FilterOptions {
 export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = observer(
   function StudentsListScreen() {
     // Pull in one of our MST stores
-    const { studentStore, sessionStore, attendanceStore, settingStore, authenticationStore } =
-      useStores()
+    const {
+      studentStore,
+      sessionStore,
+      attendanceStore,
+      settingStore,
+      authenticationStore,
+      currentUserStore,
+    } = useStores()
 
     // Pull in navigation via hook
     const navigation: NativeStackNavigationHelpers = useNavigation()
@@ -113,6 +119,7 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
 
     const loadStores = async () => {
       setIsLoading(true)
+      await currentUserStore.fetchCurrentUser()
       await studentStore.fetchStudents()
       await sessionStore.fetchSessions()
       await attendanceStore.fetchAttendanceRecords()

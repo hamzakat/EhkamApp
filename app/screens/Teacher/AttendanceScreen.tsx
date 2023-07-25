@@ -47,78 +47,19 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
   const [attendanceRate, setAttendanceRate] = useState(0)
   const [sessionsRate, setSessionsRate] = useState(0)
 
-  // update the rates based on the filter
-  useEffect(() => {
-    let _attendanceRate = 0
-    if (statsFilter.key === 1) _attendanceRate = attendanceStore.getRates("total")
-    if (statsFilter.key === 3) _attendanceRate = attendanceStore.getRates("week")
-    if (statsFilter.key === 4) _attendanceRate = attendanceStore.getRates("month")
-
-    setAttendanceRate(_attendanceRate)
-
-    // update the sessions rate
-    const filteredAttendanceRecords = attendanceStore.attendanceRecords
-      .slice()
-      .sort((a, b) => (new Date(a.timestamp) > new Date(b.timestamp) ? 1 : -1))
-      .filter((record: AttendanceRecord) => {
-        const attendanceRecordDate = new Date(record.timestamp)
-        if (statsFilter.key === 1) return true
-        if (statsFilter.key === 3) return today - attendanceRecordDate <= ONE_DAY * 7
-        if (statsFilter.key === 4) return today - attendanceRecordDate <= ONE_DAY * 30
-      })
-
-    const ratesOfSessionOnEveryDay = filteredAttendanceRecords.map((record: AttendanceRecord) => {
-      const numOfPresetStudents = record.getNumberOfPresent()
-      if (numOfPresetStudents === 0) return 0 // prevent division by zero
-
-      const numOfSessions = sessionStore.getSessionsByDate(new Date(record.timestamp)).length
-
-      let sessionsRate = Math.round((numOfSessions / numOfPresetStudents) * 100)
-      if (sessionsRate > 100) sessionsRate = 100
-      return sessionsRate
-    })
-
-    // sum the rates of sessions on every day and divide by the number of days
-    const _sessionsRate = Math.round(
-      ratesOfSessionOnEveryDay.reduce((a, b) => a + b, 0) / ratesOfSessionOnEveryDay.length,
-    )
-
-    setSessionsRate(_sessionsRate)
-  }, [statsFilter, attendanceStore])
-
-  const [currentAttendanceRate, setCurrentAttendanceRate] = useState(0)
-  const [currentSessionsRate, setCurrentSessionsRate] = useState(0)
-
-  // update the current rates
-  useEffect(() => {
-    const dispose = onSnapshot(attendanceStore.currentAttendanceRecord.items, (change) => {
-      console.log("DATE", today.toISOString().substring(0, 10))
-
-      setCurrentAttendanceRate(attendanceStore.currentAttendanceRecord.getRate())
-
-      let _currentSessionsRate = 0
-      const numOfPresetStudents = attendanceStore.currentAttendanceRecord.getNumberOfPresent()
-      if (numOfPresetStudents === 0) _currentSessionsRate = 0 // prevent division by zero
-      else {
-        const numOfSessions = sessionStore.getSessionsByDate(
-          new Date(attendanceStore.currentAttendanceRecord.timestamp),
-        ).length
-        _currentSessionsRate = Math.round((numOfSessions / numOfPresetStudents) * 100)
-        if (_currentSessionsRate > 100) _currentSessionsRate = 100
-      }
-      setCurrentSessionsRate(_currentSessionsRate)
-    })
-    return () => {
-      dispose() // Cleanup the observer when the component unmounts
-    }
-  }, [attendanceStore.currentAttendanceRecord, sessionStore])
-
   const loadStores = async () => {
+    await currentUserStore.fetchCurrentUser()
     await studentStore.fetchStudents()
     await attendanceStore.fetchAttendanceRecords()
     __DEV__ && console.log("Loading stores from Attendance Screen")
   }
 
+  /**
+   * We should first do the following when the screen loads:
+   * 1. load the stores
+   * 2. create a new attendance record if there's no current record
+   *
+   */
   useEffect(() => {
     loadStores()
   }, [studentStore, attendanceStore])
@@ -174,6 +115,72 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
     createNewAttendanceRecord(timestamp)
   }, [])
 
+  // update the rates based on the filter
+  useEffect(() => {
+    let _attendanceRate = 0
+    if (statsFilter.key === 1) _attendanceRate = attendanceStore.getRates("total")
+    if (statsFilter.key === 3) _attendanceRate = attendanceStore.getRates("week")
+    if (statsFilter.key === 4) _attendanceRate = attendanceStore.getRates("month")
+
+    setAttendanceRate(_attendanceRate)
+
+    // update the sessions rate
+    const filteredAttendanceRecords = attendanceStore.attendanceRecords
+      .slice()
+      .sort((a, b) => (new Date(a.timestamp) > new Date(b.timestamp) ? 1 : -1))
+      .filter((record: AttendanceRecord) => {
+        const attendanceRecordDate = new Date(record.timestamp)
+        if (statsFilter.key === 1) return true
+        if (statsFilter.key === 3) return today - attendanceRecordDate <= ONE_DAY * 7
+        if (statsFilter.key === 4) return today - attendanceRecordDate <= ONE_DAY * 30
+      })
+
+    const ratesOfSessionOnEveryDay = filteredAttendanceRecords.map((record: AttendanceRecord) => {
+      const numOfPresetStudents = record.getNumberOfPresent()
+      if (numOfPresetStudents === 0) return 0 // prevent division by zero
+
+      const numOfSessions = sessionStore.getSessionsByDate(new Date(record.timestamp)).length
+
+      let sessionsRate = Math.round((numOfSessions / numOfPresetStudents) * 100)
+      if (sessionsRate > 100) sessionsRate = 100
+      return sessionsRate
+    })
+
+    // sum the rates of sessions on every day and divide by the number of days
+    const _sessionsRate = Math.round(
+      ratesOfSessionOnEveryDay.reduce((a, b) => a + b, 0) / ratesOfSessionOnEveryDay.length,
+    )
+
+    setSessionsRate(_sessionsRate)
+  }, [statsFilter, attendanceStore])
+
+  const [currentAttendanceRate, setCurrentAttendanceRate] = useState(0)
+  const [currentSessionsRate, setCurrentSessionsRate] = useState(0)
+
+  // update the current rates
+  useEffect(() => {
+    const dispose = onSnapshot(attendanceStore.currentAttendanceRecord?.items, (change) => {
+      console.log("DATE", today.toISOString().substring(0, 10))
+
+      setCurrentAttendanceRate(attendanceStore.currentAttendanceRecord.getRate())
+
+      let _currentSessionsRate = 0
+      const numOfPresetStudents = attendanceStore.currentAttendanceRecord.getNumberOfPresent()
+      if (numOfPresetStudents === 0) _currentSessionsRate = 0 // prevent division by zero
+      else {
+        const numOfSessions = sessionStore.getSessionsByDate(
+          new Date(attendanceStore.currentAttendanceRecord.timestamp),
+        ).length
+        _currentSessionsRate = Math.round((numOfSessions / numOfPresetStudents) * 100)
+        if (_currentSessionsRate > 100) _currentSessionsRate = 100
+      }
+      setCurrentSessionsRate(_currentSessionsRate)
+    })
+    return () => {
+      dispose() // Cleanup the observer when the component unmounts
+    }
+  }, [attendanceStore.currentAttendanceRecord, sessionStore])
+
   const renderAttendanceItem = ({ item }: { item: AttendanceItem }) => {
     const student = studentStore.students.find((student) => student.id === item.student_id)
 
@@ -207,7 +214,7 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
 
   const exit = async () => {
     const currentAttendanceRecord: AttendanceRecord = attendanceStore.currentAttendanceRecord
-    if (currentAttendanceRecord.items.length > 0) {
+    if (currentAttendanceRecord?.items.length > 0) {
       // push the old record to the store (if it holds items) AND send the old record to the server
       await attendanceStore.sendAttendanceRecord(getSnapshot(currentAttendanceRecord))
     }

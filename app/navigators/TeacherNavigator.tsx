@@ -6,7 +6,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { Icon } from "../components"
 import {
   AttendanceScreen,
-  HomeScreen,
   MessagesScreen,
   SessionStackScreen,
   SessionStackParamList,
@@ -17,7 +16,6 @@ import { colors, spacing, typography } from "../theme"
 import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
 
 export type TeacherTabParamList = {
-  Home: undefined
   Students: NavigatorScreenParams<StudentStackParamList>
   Sessions: NavigatorScreenParams<SessionStackParamList>
   Attendance: undefined

@@ -14,14 +14,12 @@ export const SessionTypeScreen: FC<SessionStackScreenProps<"SessionType">> = obs
   function SessionTypeScreen({ navigation }) {
     const { sessionStore, studentStore, attendanceStore, settingStore } = useStores()
 
-    const loadStores = () => {
-      ;(async function load() {
-        await studentStore.fetchStudents()
-        await sessionStore.fetchSessions()
-        await attendanceStore.fetchAttendanceRecords()
-        await settingStore.fetchSchoolSettings()
-        __DEV__ && console.log("Loading stores from Session Type Screen")
-      })()
+    const loadStores = async () => {
+      await studentStore.fetchStudents()
+      await sessionStore.fetchSessions()
+      await attendanceStore.fetchAttendanceRecords()
+      await settingStore.fetchSchoolSettings()
+      __DEV__ && console.log("Loading stores from Session Type Screen")
     }
     useEffect(() => {
       loadStores()

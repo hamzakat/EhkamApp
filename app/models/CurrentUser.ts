@@ -38,6 +38,8 @@ export const CurrentUserStoreModel = types
       }
       try {
         const rawData: ApiUserResponse = res.data.data
+
+        // we should check whether the user belong to a school or not to prevent a null pointer exception
         const userData = {
           id: rawData.id,
           first_name: rawData.first_name,
@@ -46,9 +48,9 @@ export const CurrentUserStoreModel = types
           title: rawData.title,
           location: rawData.location,
           description: rawData.description,
-          school_id: rawData.school_id.id,
+          school_id: rawData.school_id?.id,
           class_id: null,
-          school_name: rawData.school_id.name,
+          school_name: rawData.school_id?.name,
         }
 
         const classTeacherRes: ApiResponse<any> = yield self.request({
