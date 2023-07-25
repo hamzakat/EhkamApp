@@ -92,6 +92,7 @@ export const CurrentUserStoreModel = types
       self.user.description = ""
       self.user.class_id = ""
       self.user.school_id = ""
+      self.entered = false
     }
     return { fetchCurrentUser, cleanCurrentUser }
   })

@@ -70,7 +70,10 @@ export const StudentStoreModel = types
       }
     })
 
-    return { fetchStudents }
+    const clearStudentStore = () => {
+      self.students.clear()
+    }
+    return { fetchStudents, clearStudentStore }
   }) // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface StudentStore extends Instance<typeof StudentStoreModel> {}

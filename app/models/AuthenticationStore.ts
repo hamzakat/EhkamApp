@@ -136,8 +136,14 @@ export const AuthenticationStoreModel = types
         self.authEmail = ""
         self.authPassword = ""
 
+        // Clear all the stores
         // @ts-ignore
-        rootStore.currentUserStore.cleanCurrentUser()
+        rootStore.currentUserStore.cleanCurrentUser() // @ts-ignore
+        rootStore.sessionStore.clearSessionStore() // @ts-ignore
+        rootStore.studentStore.clearStudentStore() // @ts-ignore
+        rootStore.attendanceStore.clearAttendanceStore() // @ts-ignore
+        rootStore.settingStore.clearSettingStore()
+        __DEV__ && console.log("Clear stores!")
       },
       setAuthEmail(value: string) {
         self.authEmail = value.replace(/ /g, "")

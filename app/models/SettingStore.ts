@@ -47,7 +47,12 @@ export const SettingStoreModel = types
       }
     })
 
-    return { fetchSchoolSettings }
+    const clearSettingStore = () => {
+      self.setProp("attendance_rate", 80)
+      self.setProp("session_rate", 80)
+    }
+
+    return { fetchSchoolSettings, clearSettingStore }
   }) // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface SettingStore extends Instance<typeof SettingStoreModel> {}
