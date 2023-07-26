@@ -21,8 +21,6 @@ import { AttendanceItem, AttendanceItemModel } from "../../models/AttendanceItem
 import { Student } from "../../models/Student"
 import { getSnapshot, onSnapshot } from "mobx-state-tree"
 import "react-native-get-random-values"
-import { v4 as uuidv4 } from "uuid"
-import { set } from "date-fns"
 
 interface AttendanceScreenProps extends TeacherTabScreenProps<"Attendance"> {}
 
@@ -46,74 +44,6 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
 
   const [attendanceRate, setAttendanceRate] = useState(0)
   const [sessionsRate, setSessionsRate] = useState(0)
-
-  const loadStores = async () => {
-    await currentUserStore.fetchCurrentUser()
-    await studentStore.fetchStudents()
-    await attendanceStore.fetchAttendanceRecords()
-    __DEV__ && console.log("Loading stores from Attendance Screen")
-  }
-
-  /**
-   * We should first do the following when the screen loads:
-   * 1. load the stores
-   * 2. create a new attendance record if there's no current record
-   *
-   */
-  useEffect(() => {
-    loadStores()
-  }, [studentStore, attendanceStore])
-
-  useEffect(() => {
-    const createNewAttendanceRecord = (timestamp: string): void => {
-      __DEV__ && console.log("CREATING NEW ATTENDANCE RECORD")
-
-      attendanceStore.setProp(
-        "currentAttendanceRecord",
-        AttendanceRecordModel.create({
-          _id: uuidv4(),
-          timestamp,
-          items:
-            studentStore.students.length > 0
-              ? studentStore.students.map((student, i) => {
-                  return AttendanceItemModel.create({
-                    student_id: student.id,
-                    present: false,
-                  })
-                })
-              : [],
-        }),
-      )
-    }
-
-    // check today's date
-    const timestamp = new Date().toISOString()
-
-    loadStores()
-
-    // *** auto create a new record if there's no current record ***
-    // const todayDate = timestamp.substring(0, 10) // yyyy-mm-dd
-    // const currentAttendanceRecord: AttendanceRecord = attendanceStore.currentAttendanceRecord
-
-    // eslint-disable-next-line no-extra-boolean-cast
-    // if (!!currentAttendanceRecord) {
-    //   // check if it's a new day
-    //   if (currentAttendanceRecord?.timestamp.substring(0, 10) !== todayDate) {
-    //     __DEV__ && console.log("NEW DAY")
-    //     if (currentAttendanceRecord.items.length > 0) {
-    //       // push the old record to the store (if it holds items) AND send the old record to the server
-    //       attendanceStore.sendAttendanceRecord(getSnapshot(currentAttendanceRecord))
-    //     }
-
-    //     // create a new empty record on new day
-    //     createNewAttendanceRecord(timestamp)
-    //   }
-    // } else {
-    __DEV__ && console.log("FRESH APP LAUNCH")
-
-    // create a new empty record on a fresh app start
-    createNewAttendanceRecord(timestamp)
-  }, [])
 
   // update the rates based on the filter
   useEffect(() => {
@@ -160,10 +90,10 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
   // update the current rates
   useEffect(() => {
     const dispose = onSnapshot(attendanceStore.currentAttendanceRecord?.items, (change) => {
-      console.log("DATE", today.toISOString().substring(0, 10))
-
+      // update the attendance rate
       setCurrentAttendanceRate(attendanceStore.currentAttendanceRecord.getRate())
 
+      // update the sessions rate
       let _currentSessionsRate = 0
       const numOfPresetStudents = attendanceStore.currentAttendanceRecord.getNumberOfPresent()
       if (numOfPresetStudents === 0) _currentSessionsRate = 0 // prevent division by zero
@@ -252,106 +182,108 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
       />
 
       <View>
-        <FlatList<AttendanceItem>
-          contentContainerStyle={$contentContainer}
-          data={attendanceStore.currentAttendanceRecord?.items}
-          ListHeaderComponent={
-            <View style={{ marginTop: spacing.medium }}>
-              <Text
-                style={{
-                  textAlign: "left",
-                  marginLeft: spacing.tiny,
-                  color: colors.ehkamDarkGrey,
-                }}
-                preset="formLabel"
-              >
-                معدّلات
-              </Text>
-              <ModalSelect
-                options={statsFilters}
-                placeholder={""}
-                selectedOpt={statsFilter.label}
-                selectedKey={statsFilter.key}
-                onChange={setStatsFilter}
-                containerStyle={{ flex: 1, marginVertical: spacing.small }}
-              />
-              <View
-                style={{
-                  borderWidth: 1,
-                  borderColor: colors.ehkamCyan,
-                  borderRadius: spacing.small,
-                  flexDirection: "row",
-                  justifyContent: "space-around",
-                  paddingVertical: spacing.extraSmall,
-                  minHeight: 120,
-                  alignItems: "center",
-                  marginBottom: spacing.medium,
-                }}
-              >
-                <View style={{ alignItems: "center", flex: 0.5 }}>
-                  <Text style={{ color: colors.ehkamDarkGrey }} size="lg" weight="book">
-                    الحضور
-                  </Text>
-                  <View>
-                    <Text
-                      style={{ color: colors.ehkamCyan, textAlign: "center" }}
-                      size="xxl"
-                      weight="medium"
-                    >
-                      {statsFilter.key === 2 ? currentAttendanceRate : attendanceRate}%
+        {attendanceStore.currentAttendanceRecord?.items.length > 0 && (
+          <FlatList<AttendanceItem>
+            contentContainerStyle={$contentContainer}
+            data={attendanceStore.currentAttendanceRecord?.items}
+            ListHeaderComponent={
+              <View style={{ marginTop: spacing.medium }}>
+                <Text
+                  style={{
+                    textAlign: "left",
+                    marginLeft: spacing.tiny,
+                    color: colors.ehkamDarkGrey,
+                  }}
+                  preset="formLabel"
+                >
+                  معدّلات
+                </Text>
+                <ModalSelect
+                  options={statsFilters}
+                  placeholder={""}
+                  selectedOpt={statsFilter.label}
+                  selectedKey={statsFilter.key}
+                  onChange={setStatsFilter}
+                  containerStyle={{ flex: 1, marginVertical: spacing.small }}
+                />
+                <View
+                  style={{
+                    borderWidth: 1,
+                    borderColor: colors.ehkamCyan,
+                    borderRadius: spacing.small,
+                    flexDirection: "row",
+                    justifyContent: "space-around",
+                    paddingVertical: spacing.extraSmall,
+                    minHeight: 120,
+                    alignItems: "center",
+                    marginBottom: spacing.medium,
+                  }}
+                >
+                  <View style={{ alignItems: "center", flex: 0.5 }}>
+                    <Text style={{ color: colors.ehkamDarkGrey }} size="lg" weight="book">
+                      الحضور
                     </Text>
+                    <View>
+                      <Text
+                        style={{ color: colors.ehkamCyan, textAlign: "center" }}
+                        size="xxl"
+                        weight="medium"
+                      >
+                        {statsFilter.key === 2 ? currentAttendanceRate : attendanceRate}%
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={{ alignItems: "center", flex: 0.5 }}>
+                    <Text style={{ color: colors.ehkamDarkGrey }} size="lg" weight="book">
+                      جلسات
+                    </Text>
+                    <View>
+                      <Text
+                        style={{ color: colors.ehkamCyan, textAlign: "center" }}
+                        size="xxl"
+                        weight="medium"
+                      >
+                        {statsFilter.key === 2 ? currentSessionsRate : sessionsRate} %
+                      </Text>
+                    </View>
                   </View>
                 </View>
-                <View style={{ alignItems: "center", flex: 0.5 }}>
-                  <Text style={{ color: colors.ehkamDarkGrey }} size="lg" weight="book">
-                    جلسات
-                  </Text>
-                  <View>
-                    <Text
-                      style={{ color: colors.ehkamCyan, textAlign: "center" }}
-                      size="xxl"
-                      weight="medium"
-                    >
-                      {statsFilter.key === 2 ? currentSessionsRate : sessionsRate} %
-                    </Text>
-                  </View>
-                </View>
+                <Text
+                  weight="book"
+                  style={{
+                    color: colors.ehkamGrey,
+                    marginBottom: spacing.small,
+                    marginStart: spacing.medium,
+                  }}
+                  text="تسجيل الحضور"
+                />
               </View>
-              <Text
-                weight="book"
-                style={{
-                  color: colors.ehkamGrey,
-                  marginBottom: spacing.small,
-                  marginStart: spacing.medium,
-                }}
-                text="تسجيل الحضور"
-              />
-            </View>
-          }
-          renderItem={renderAttendanceItem}
-          onRefresh={manualRefresh}
-          refreshing={refreshing}
-          ListEmptyComponent={
-            isLoading ? (
-              <ActivityIndicator />
-            ) : (
-              <EmptyState
-                preset="generic"
-                buttonOnPress={manualRefresh}
-                ImageProps={{ resizeMode: "contain" }}
-                heading="القائمة فارغة"
-                content=""
-                button="تحديث القائمة"
-                ButtonProps={{ preset: "reversed" }}
-                buttonStyle={{
-                  backgroundColor: colors.ehkamPeach,
-                  borderRadius: 20,
-                }}
-                imageSource={{}}
-              />
-            )
-          }
-        />
+            }
+            renderItem={renderAttendanceItem}
+            onRefresh={manualRefresh}
+            refreshing={refreshing}
+            ListEmptyComponent={
+              isLoading ? (
+                <ActivityIndicator />
+              ) : (
+                <EmptyState
+                  preset="generic"
+                  buttonOnPress={manualRefresh}
+                  ImageProps={{ resizeMode: "contain" }}
+                  heading="القائمة فارغة"
+                  content=""
+                  button="تحديث القائمة"
+                  ButtonProps={{ preset: "reversed" }}
+                  buttonStyle={{
+                    backgroundColor: colors.ehkamPeach,
+                    borderRadius: 20,
+                  }}
+                  imageSource={{}}
+                />
+              )
+            }
+          />
+        )}
       </View>
     </DrawerLayoutScreen>
   )

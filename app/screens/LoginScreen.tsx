@@ -38,8 +38,8 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
   useEffect(() => {
     // Here is where you could fetch credientials from keychain or storage
     // and pre-fill the form fields.
-    __DEV__ && setAuthEmail("superusermhk@gmail.com")
-    __DEV__ && setAuthPassword("d1r3ctu5!")
+    __DEV__ && setAuthEmail("demo_t@ehkam.app")
+    __DEV__ && setAuthPassword("DEMoDEMo")
   }, [])
 
   const errors: typeof validationErrors = isSubmitted ? validationErrors : ({} as any)

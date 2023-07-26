@@ -1,18 +1,72 @@
 /* eslint-disable react-native/no-inline-styles */
 import { useNavigation } from "@react-navigation/native"
-import React, { FC } from "react"
+import React, { FC, useEffect } from "react"
 import { View } from "react-native"
 import { AutoImage, Button, Icon, Screen, Text } from "../components"
 import { AppStackScreenProps } from "../navigators"
 import { colors, spacing } from "../theme"
 import { useStores } from "../models"
+import { AttendanceRecordModel } from "../models/AttendanceRecord"
+import { AttendanceItemModel } from "../models/AttendanceItem"
+import { v4 as uuidv4 } from "uuid"
 
 interface EnterScreenProps extends AppStackScreenProps<"Enter"> {}
 
 const headerImg = require("../../assets/images/welcome-header.png")
 export const EnterScreen: FC<EnterScreenProps> = function EnterScreen(_props) {
-  const navigation = useNavigation()
-  const { currentUserStore } = useStores()
+  const { currentUserStore, attendanceStore, studentStore } = useStores()
+
+  const loadStores = () => {
+    ;(async function load() {
+      await currentUserStore.fetchCurrentUser()
+      await studentStore.fetchStudents()
+      await attendanceStore.fetchAttendanceRecords()
+      __DEV__ && console.log("Loading stores from Attendance Screen")
+    })()
+  }
+
+  const createNewAttendanceRecord = (timestamp: string): void => {
+    __DEV__ && console.log("CREATING NEW ATTENDANCE RECORD")
+
+    attendanceStore.setProp(
+      "currentAttendanceRecord",
+      AttendanceRecordModel.create({
+        _id: uuidv4(),
+        timestamp,
+        items:
+          studentStore.students.length > 0
+            ? studentStore.students.map((student, i) => {
+                return AttendanceItemModel.create({
+                  student_id: student.id,
+                  present: false,
+                })
+              })
+            : [],
+      }),
+    )
+  }
+
+  /**
+   * We should first do the following in order when the screen loads:
+   * 1. load the stores
+   * 2. create a new attendance record if there's no current record
+   *
+   */
+
+  // load stores
+  useEffect(() => {
+    loadStores()
+  }, [])
+
+  const enter = () => {
+    const timestamp = new Date().toISOString()
+
+    // create a new empty record on a fresh app start
+    __DEV__ && console.log("Entering the system")
+    createNewAttendanceRecord(timestamp)
+    currentUserStore.setProp("entered", true)
+  }
+
   return (
     <Screen preset="auto" safeAreaEdges={["top", "bottom"]}>
       <AutoImage
@@ -40,10 +94,7 @@ export const EnterScreen: FC<EnterScreenProps> = function EnterScreen(_props) {
             borderRadius: 20,
           }}
           textStyle={{ flexDirection: "row" }}
-          onPress={() => {
-            // enter the app
-            currentUserStore.setProp("entered", true)
-          }}
+          onPress={enter}
         >
           <View
             style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: spacing.large }}
