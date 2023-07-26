@@ -44,6 +44,7 @@ If you face any issue while running the emulator or building the app, try the fo
 1. Run `npm cache clean --force`
 2. Run `git clean -fdx`
 3. `cd android` and run `./gradlew clean`
-4. Go to the AVD in the Android Studio and wipe the data of the emulator
-5. Reboot the PC
-6. Try to build now
+4. Back to the project root, and run `yarn`
+5. Go to the AVD in the Android Studio and wipe the data of the emulator
+6. Reboot the PC
+7. Try to build now
