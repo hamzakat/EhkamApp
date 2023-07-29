@@ -47,7 +47,7 @@ export const MessagesScreen: FC<MessagesScreenProps> = observer(function Message
       }}
     >
       <WarningDialog
-        text="ميزة المراسلات غير مفعلة بعد. سنخبركم عندمت يتم إطلاقها"
+        text={`ميزة المراسلات غير مفعلة بعد \n سنخبركم عندما يتم إطلاقها`}
         visible={shown}
         buttonText="رجوع"
         preset="peach"
