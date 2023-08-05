@@ -80,18 +80,6 @@ export function TeacherNavigator() {
       />
 
       <Tab.Screen
-        name="Messages"
-        component={MessagesScreen}
-        options={{
-          tabBarLabel: "Messages",
-          tabBarIcon: ({ focused }) => (
-            <View style={focused ? $tabBarIconContainerActive : $tabBarIconContainer}>
-              <Icon icon="envelope" style={$tabBarIcon} color={focused && colors.background} />
-            </View>
-          ),
-        }}
-      />
-      <Tab.Screen
         name="Students"
         component={StudentStackScreen}
         options={{
@@ -99,6 +87,18 @@ export function TeacherNavigator() {
           tabBarIcon: ({ focused }) => (
             <View style={focused ? $tabBarIconContainerActive : $tabBarIconContainer}>
               <Icon icon="people" style={$tabBarIcon} color={focused && colors.background} />
+            </View>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Messages"
+        component={MessagesScreen}
+        options={{
+          tabBarLabel: "Messages",
+          tabBarIcon: ({ focused }) => (
+            <View style={focused ? $tabBarIconContainerActive : $tabBarIconContainer}>
+              <Icon icon="envelope" style={$tabBarIcon} color={focused && colors.background} />
             </View>
           ),
         }}
