@@ -129,35 +129,37 @@ export const SessionStoreModel = types
         }
       } else {
         try {
-          const sessions = res.data.data.map((session) => {
-            return SessionModel.create({
-              _id: session._id,
-              id: session.id,
-              student_id: session.student_id,
-              type: session.type,
-              start_page: session.start_page,
-              start_chapter: session.start_chapter,
-              start_verse: session.start_verse,
-              end_page: session.end_page,
-              end_chapter: session.end_chapter,
-              end_verse: session.end_verse,
-              notes: session.notes?.map((note) => {
-                return SessionNoteModel.create({
-                  _id: note?._id,
-                  id: note?.id,
-                  verse_number: note?.verse_number,
-                  chapter_number: note?.chapter_number,
-                  page_number: note?.page_number,
-                  tajweed: note?.tajweed,
-                  pronunciation: note?.pronunciation,
-                  memorization: note?.memorization,
-                  text: note?.text,
-                  session_id: note?.session_id,
-                })
-              }),
-              timestamp: session.timestamp,
+          const sessions = res.data.data
+            .filter((session) => session.type !== "exam")
+            .map((session) => {
+              return SessionModel.create({
+                _id: session._id,
+                id: session.id,
+                student_id: session.student_id,
+                type: session.type,
+                start_page: session.start_page,
+                start_chapter: session.start_chapter,
+                start_verse: session.start_verse,
+                end_page: session.end_page,
+                end_chapter: session.end_chapter,
+                end_verse: session.end_verse,
+                notes: session.notes?.map((note) => {
+                  return SessionNoteModel.create({
+                    _id: note?._id,
+                    id: note?.id,
+                    verse_number: note?.verse_number,
+                    chapter_number: note?.chapter_number,
+                    page_number: note?.page_number,
+                    tajweed: note?.tajweed,
+                    pronunciation: note?.pronunciation,
+                    memorization: note?.memorization,
+                    text: note?.text,
+                    session_id: note?.session_id,
+                  })
+                }),
+                timestamp: session.timestamp,
+              })
             })
-          })
           self.sessions = sessions
         } catch (e) {
           if (__DEV__) {

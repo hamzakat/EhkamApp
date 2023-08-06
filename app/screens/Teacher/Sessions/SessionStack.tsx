@@ -10,6 +10,7 @@ import { SessionTypeScreen } from "./SessionTypeScreen"
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native"
 import { $tabBar } from "../../../navigators/TeacherNavigator"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { ExamSessionScreen } from "./ExamSessionScreen"
 
 export interface VersesListItem {
   type: "chapterTitle" | "verse"
@@ -23,6 +24,9 @@ export interface VersesListItem {
 export type SessionStackParamList = {
   SessionType: undefined
   SelectStudent: undefined
+  ExamSession: {
+    examQNum: number
+  }
   SessionSetup: undefined
   Session: {
     startPage: number
@@ -51,7 +55,7 @@ const SessionStack = createNativeStackNavigator<SessionStackParamList>()
 
 export function SessionStackScreen({ navigation, route }) {
   const { bottom } = useSafeAreaInsets()
-  const tabHiddenRoutes = ["Session", "SessionNote"]
+  const tabHiddenRoutes = ["Session", "SessionNote", "ExamSession"]
 
   React.useLayoutEffect(() => {
     const routeName = getFocusedRouteNameFromRoute(route)
@@ -71,6 +75,7 @@ export function SessionStackScreen({ navigation, route }) {
     >
       <SessionStack.Screen name="SessionType" component={SessionTypeScreen} />
       <SessionStack.Screen name="SelectStudent" component={SelectStudentScreen} />
+      <SessionStack.Screen name="ExamSession" component={ExamSessionScreen} />
       <SessionStack.Screen name="SessionSetup" component={SessionSetupScreen} />
       <SessionStack.Screen name="Session" component={SessionScreen} />
       <SessionStack.Screen name="SessionNote" component={SessionNoteScreen} />

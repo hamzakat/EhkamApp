@@ -13,15 +13,16 @@ export const SessionModel = types
     id: types.optional(types.string, ""), // server id
     student_id: types.string,
     type: types.enumeration(["new", "repeat", "exam"]),
-    start_page: types.number,
-    start_chapter: types.number,
-    start_verse: types.number,
-    end_page: types.number,
-    end_chapter: types.number,
-    end_verse: types.number,
+    start_page: types.maybe(types.number),
+    start_chapter: types.maybe(types.number),
+    start_verse: types.maybe(types.number),
+    end_page: types.maybe(types.number),
+    end_chapter: types.maybe(types.number),
+    end_verse: types.maybe(types.number),
     notes: types.optional(types.array(SessionNoteModel), []),
     timestamp: types.string,
-    grade: types.maybeNull(types.number),
+    grade: types.maybe(types.number),
+    exam_grade: types.maybe(types.number),
   })
   .actions(withSetPropAction)
   .views((self) => ({

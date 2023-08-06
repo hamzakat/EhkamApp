@@ -19,6 +19,8 @@ import {
   TextField,
   DrawerLayoutScreen,
   Text,
+  Button,
+  Icon,
 } from "../../../components"
 import { useStores } from "../../../models"
 import { colors, spacing } from "../../../theme"
@@ -31,6 +33,7 @@ import { NativeStackNavigationHelpers } from "@react-navigation/native-stack/lib
 import { SessionStackScreenProps } from "./SessionStack"
 import { getSnapshot } from "mobx-state-tree"
 import { values } from "mobx"
+import { Dialog } from "react-native-simple-dialogs"
 
 export const SelectStudentScreen: FC<SessionStackScreenProps<"SelectStudent">> = observer(
   function SelectStudentScreen() {
@@ -76,9 +79,40 @@ export const SelectStudentScreen: FC<SessionStackScreenProps<"SelectStudent">> =
       setRefreshing(false)
     }
 
+    const [showExamQNumModal, setShowExamQNumModal] = useState(false)
+    const [examQNum, setExamQNum] = useState("")
+    const [qNumError, setQNumError] = useState("")
+    const [qNumValid, setQNumValid] = useState(false)
+
+    const handleInputChange = (text) => {
+      // Validate the input value
+      const numericValue = parseInt(text)
+      if (numericValue >= 0 && numericValue <= 50) {
+        setQNumError("")
+        setQNumValid(true)
+      } else if (text === "") {
+        setQNumError("")
+        setQNumValid(false)
+      } else {
+        setQNumError("ادخل قيمة بين 0 و 50")
+        setQNumValid(false)
+      }
+      setExamQNum(numericValue)
+    }
+
     const selectStudent = (student: Student) => {
       sessionStore.setProp("selectedStudent", getSnapshot(student))
-      navigation.navigate("SessionSetup")
+      if (sessionStore.selectedSessionType === "exam") {
+        // show model to propmt the user to enter the numbers of planned questions
+        setShowExamQNumModal(true)
+      } else {
+        navigation.navigate("SessionSetup")
+      }
+    }
+
+    const startExamSession = () => {
+      setShowExamQNumModal(false)
+      navigation.navigate("ExamSession", { examQNum: examQNum })
     }
 
     const renderSearchItem = ({ item }: { item: Student }) => {
@@ -173,6 +207,75 @@ export const SelectStudentScreen: FC<SessionStackScreenProps<"SelectStudent">> =
         {/* Students list & Search Area */}
 
         <View style={{ justifyContent: "space-between" }}>
+          <Dialog
+            visible={showExamQNumModal}
+            onTouchOutside={() => setShowExamQNumModal(false)}
+            dialogStyle={{
+              backgroundColor: colors.background,
+              borderRadius: spacing.small,
+            }}
+          >
+            <View>
+              <Icon
+                icon="x"
+                style={{ position: "absolute", top: -12, right: -12, alignSelf: "flex-end" }}
+                color={colors.ehkamDarkGrey}
+                onPress={() => setShowExamQNumModal(false)}
+              />
+
+              <Text
+                weight="medium"
+                text={"أدخل عدد أسئلة الاختبار"}
+                style={{
+                  color: colors.ehkamDarkGrey,
+                  textAlign: "center",
+                  marginVertical: spacing.medium,
+                }}
+                size="md"
+              />
+              <TextField
+                placeholder="عدد الأسئلة"
+                keyboardType="number-pad"
+                value={examQNum}
+                onChangeText={handleInputChange}
+                inputWrapperStyle={{
+                  alignItems: "center",
+                  maxWidth: 150,
+                }}
+                containerStyle={{ alignItems: "center" }}
+              />
+              {qNumError ? (
+                <Text
+                  weight="light"
+                  size="xs"
+                  style={{ color: colors.ehkamRed, marginTop: spacing.small }}
+                >
+                  {qNumError}
+                </Text>
+              ) : null}
+              {qNumValid ? (
+                <View
+                  style={{
+                    flexDirection: "row",
+                    marginTop: spacing.medium,
+                    justifyContent: "space-around",
+                  }}
+                >
+                  <Button
+                    text={"ابدأ الاختبار"}
+                    textStyle={{ color: colors.background }}
+                    style={{
+                      borderWidth: 0,
+                      borderRadius: spacing.small,
+                      width: 120,
+                      backgroundColor: colors.ehkamCyan,
+                    }}
+                    onPress={startExamSession}
+                  />
+                </View>
+              ) : null}
+            </View>
+          </Dialog>
           <TouchableWithoutFeedback onPress={() => searchBarRef.current.blur()}>
             <FlatList<Student>
               /* Search area */
