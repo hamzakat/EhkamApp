@@ -459,7 +459,7 @@ const StudentRankItem = function ({ student, rank, onPressFunction, imgAuthToken
     <TouchableOpacity style={{ alignItems: "center" }} onPress={() => onPressFunction(student.id)}>
       <FastImage
         style={{
-          borderRadius: 90,
+          borderRadius: 20,
           width: 90,
           height: 90,
           shadowColor: colors.palette.neutral800,
