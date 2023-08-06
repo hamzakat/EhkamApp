@@ -221,6 +221,11 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
     const [rankFilter, setRankFilter] = useState(rankFilters[0])
     const [selectedTab, setSelectedTab] = useState<"attendance" | "sessions">("attendance")
     const [rankingStudents, setRankingStudents] = useState([])
+    const [showStudentsRanking, setShowStudentsRanking] = useState(false)
+
+    function toggleStudentsRanking() {
+      setShowStudentsRanking(!showStudentsRanking)
+    }
 
     useEffect(() => {
       if (selectedTab === "attendance") {
@@ -269,130 +274,106 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
               /* Search area */
               ListHeaderComponent={
                 <View>
-                  <View style={{ marginBottom: spacing.medium }}>
-                    <ModalSelect
-                      options={rankFilters}
-                      placeholder={""}
-                      selectedOpt={rankFilter.label}
-                      selectedKey={rankFilter.key}
-                      onChange={setRankFilter}
-                      containerStyle={{ marginVertical: spacing.small }}
-                    />
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        marginVertical: spacing.extraSmall,
-                        alignContent: "center",
-                        paddingHorizontal: spacing.large,
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Text
-                        weight="bold"
-                        size="xs"
-                        text="الالتزام بالحضور"
-                        style={{
-                          paddingBottom: spacing.micro,
-                          borderBottomWidth: 2,
-                          borderBottomColor: colors.ehkamCyan,
-                          color: colors.ehkamCyan,
-                          opacity: selectedTab !== "attendance" ? 0.35 : 1,
-                        }}
-                        onPress={() => setSelectedTab("attendance")}
+                  {showStudentsRanking && (
+                    <View style={{ marginBottom: spacing.medium }}>
+                      <ModalSelect
+                        options={rankFilters}
+                        placeholder={""}
+                        selectedOpt={rankFilter.label}
+                        selectedKey={rankFilter.key}
+                        onChange={setRankFilter}
+                        containerStyle={{ marginVertical: spacing.small }}
                       />
-
-                      <Text
-                        weight="bold"
-                        size="xs"
-                        text="إنجاز التسميع"
+                      <View
                         style={{
-                          paddingBottom: spacing.micro,
-                          borderBottomWidth: 2,
-                          borderBottomColor: colors.ehkamCyan,
-                          color: colors.ehkamCyan,
-                          opacity: selectedTab !== "sessions" ? 0.35 : 1,
+                          flexDirection: "row",
+                          marginVertical: spacing.extraSmall,
+                          alignContent: "center",
+                          paddingHorizontal: spacing.large,
+                          width: "100%",
                         }}
-                        onPress={() => setSelectedTab("sessions")}
-                      />
-                    </View>
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        marginTop: spacing.extraSmall,
-                      }}
-                    >
-                      {rankingStudents.map((student, i) => {
-                        const rank = i + 1
-                        let $imageSizes
+                      >
+                        <View
+                          style={{
+                            flex: 1,
+                            borderBottomWidth: 2,
+                            borderBottomColor: colors.ehkamCyan,
+                            alignItems: "center",
+                            opacity: selectedTab !== "attendance" ? 0.35 : 1,
+                          }}
+                        >
+                          <Text
+                            weight="bold"
+                            size="xs"
+                            text="الالتزام بالحضور"
+                            style={{
+                              paddingBottom: spacing.micro,
+                              color: colors.ehkamCyan,
+                            }}
+                            onPress={() => setSelectedTab("attendance")}
+                          />
+                        </View>
 
-                        if (rank === 1) {
-                          $imageSizes = {
-                            borderRadius: (100 + 100) / 2,
-                            width: 100,
-                            height: 100,
-                          }
-                        } else if (rank === 2) {
-                          $imageSizes = {
-                            borderRadius: (75 + 75) / 2,
-                            width: 75,
-                            height: 75,
-                          }
-                        } else if (rank === 3) {
-                          $imageSizes = {
-                            borderRadius: (50 + 50) / 2,
-                            width: 50,
-                            height: 50,
-                          }
-                        }
-
-                        return (
-                          <TouchableOpacity
-                            key={i}
-                            style={{ alignItems: "center" }}
-                            onPress={() => openStudentProfile(student.id)}
-                          >
-                            <FastImage
-                              style={[
-                                $imageSizes,
-                                {
-                                  shadowColor: colors.palette.neutral800,
-                                  shadowOffset: { width: 0, height: 12 },
-                                  shadowOpacity: 0.08,
-                                  shadowRadius: 12.81,
-                                  elevation: 8,
-                                },
-                              ]}
-                              defaultSource={require("../../../../assets/images/avatar-placeholder.jpeg")}
-                              source={{
-                                uri: `${Config.API_URL}/assets/${student.avatar}?width=50&height=50&quality=100`,
-                                headers: {
-                                  Authorization: `Bearer ${authenticationStore.accessToken}`,
-                                },
-                                priority: FastImage.priority.high,
-                              }}
-                              resizeMode={FastImage.resizeMode.contain}
-                              onError={() => __DEV__ && console.log("NOIMAGE")}
-                            />
-                            <Text
-                              style={{
-                                marginTop: spacing.extraSmall,
-                                color: colors.ehkamCyan,
-                              }}
-                              size="md"
-                              weight="bold"
-                            >
-                              {rank}
-                            </Text>
-                            <Text style={{ color: colors.ehkamDarkGrey }} size="sm" weight="medium">
-                              {student.fullname}
-                            </Text>
-                          </TouchableOpacity>
-                        )
-                      })}
+                        <View
+                          style={{
+                            flex: 1,
+                            borderBottomWidth: 2,
+                            borderBottomColor: colors.ehkamCyan,
+                            alignItems: "center",
+                            opacity: selectedTab !== "sessions" ? 0.35 : 1,
+                          }}
+                        >
+                          <Text
+                            weight="bold"
+                            size="xs"
+                            text="إنجاز التسميع"
+                            style={{
+                              paddingBottom: spacing.micro,
+                              color: colors.ehkamCyan,
+                            }}
+                            onPress={() => setSelectedTab("sessions")}
+                          />
+                        </View>
+                      </View>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginTop: spacing.extraSmall,
+                        }}
+                      >
+                        {rankingStudents && rankingStudents.length > 0 && (
+                          <>
+                            {rankingStudents[1] && (
+                              <StudentRankItem
+                                student={rankingStudents[1]}
+                                rank={2}
+                                onPressFunction={openStudentProfile}
+                                imgAuthToken={authenticationStore.accessToken}
+                              />
+                            )}
+                            {rankingStudents[0] && (
+                              <StudentRankItem
+                                student={rankingStudents[0]}
+                                rank={1}
+                                onPressFunction={openStudentProfile}
+                                imgAuthToken={authenticationStore.accessToken}
+                              />
+                            )}
+                            {rankingStudents[2] && (
+                              <StudentRankItem
+                                student={rankingStudents[2]}
+                                rank={3}
+                                onPressFunction={openStudentProfile}
+                                imgAuthToken={authenticationStore.accessToken}
+                              />
+                            )}
+                          </>
+                        )}
+                      </View>
                     </View>
-                  </View>
+                  )}
                   <SearchArea
                     searchFocused={searchBarFocused}
                     setSearchBarFocused={setSearchBarFocused}
@@ -400,6 +381,7 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
                     searchBarRef={searchBarRef}
                     setShowSortSettings={setShowSortSettings}
                     setShowFilterSettings={setShowFilterSettings}
+                    toggleStudentsRanking={toggleStudentsRanking}
                   />
                 </View>
               }
@@ -472,6 +454,48 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
   },
 )
 
+const StudentRankItem = function ({ student, rank, onPressFunction, imgAuthToken }) {
+  return (
+    <TouchableOpacity style={{ alignItems: "center" }} onPress={() => onPressFunction(student.id)}>
+      <FastImage
+        style={{
+          borderRadius: 90,
+          width: 90,
+          height: 90,
+          shadowColor: colors.palette.neutral800,
+          shadowOffset: { width: 0, height: 12 },
+          shadowOpacity: 0.08,
+          shadowRadius: 12.81,
+          elevation: 8,
+        }}
+        defaultSource={require("../../../../assets/images/avatar-placeholder.jpeg")}
+        source={{
+          uri: `${Config.API_URL}/assets/${student.avatar}?width=50&height=50&quality=100`,
+          headers: {
+            Authorization: `Bearer ${imgAuthToken}`,
+          },
+          priority: FastImage.priority.high,
+        }}
+        resizeMode={FastImage.resizeMode.contain}
+        onError={() => __DEV__ && console.log("NOIMAGE")}
+      />
+      <Text
+        style={{
+          marginTop: spacing.extraSmall,
+          color: colors.ehkamCyan,
+        }}
+        size="md"
+        weight="bold"
+      >
+        {rank}
+      </Text>
+      <Text style={{ color: colors.ehkamDarkGrey }} size="sm" weight="medium">
+        {student.fullname}
+      </Text>
+    </TouchableOpacity>
+  )
+}
+
 const SearchArea = function ({
   searchBarRef,
   searchFocused,
@@ -479,6 +503,7 @@ const SearchArea = function ({
   setSearchBarFocused,
   setShowFilterSettings,
   setShowSortSettings,
+  toggleStudentsRanking,
 }) {
   return (
     <View
@@ -492,9 +517,18 @@ const SearchArea = function ({
     >
       {!searchFocused && (
         <View style={$searchIcons}>
-          <Icon onPress={() => setShowSortSettings(true)} style={$searchIcon} icon="sortCyan" />
-
-          <Icon onPress={() => setShowFilterSettings(true)} style={$searchIcon} icon="filterCyan" />
+          <Icon onPress={() => setShowSortSettings(true)} style={{ width: 14 }} icon="sortCyan" />
+          <Icon
+            onPress={() => setShowFilterSettings(true)}
+            style={{ width: 14 }}
+            icon="filterCyan"
+          />
+          <Icon
+            onPress={toggleStudentsRanking}
+            style={{ width: 18 }}
+            icon="rank"
+            color={colors.ehkamCyan}
+          />
         </View>
       )}
       <View style={{ flex: searchFocused ? 1 : 0.7 }}>
@@ -858,7 +892,7 @@ const FilterSettings = function ({
 }
 
 const $searchIcons: ViewStyle = {
-  flex: 0.25,
+  flex: 0.3,
   flexDirection: "row",
   justifyContent: "space-evenly",
   alignItems: "center",
