@@ -14,14 +14,17 @@ interface EnterScreenProps extends AppStackScreenProps<"Enter"> {}
 
 const headerImg = require("../../assets/images/welcome-header.png")
 export const EnterScreen: FC<EnterScreenProps> = function EnterScreen(_props) {
-  const { currentUserStore, attendanceStore, studentStore } = useStores()
+  const { currentUserStore, attendanceStore, studentStore, sessionStore, settingStore } =
+    useStores()
 
   const loadStores = () => {
     ;(async function load() {
       await currentUserStore.fetchCurrentUser()
       await studentStore.fetchStudents()
       await attendanceStore.fetchAttendanceRecords()
-      __DEV__ && console.log("Loading stores from Attendance Screen")
+      await sessionStore.fetchSessions()
+      await settingStore.fetchSchoolSettings()
+      __DEV__ && console.log("Loading stores from Enter Screen")
     })()
   }
 

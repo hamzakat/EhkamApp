@@ -12,7 +12,7 @@ import {
   TwoButtonsDialog,
 } from "../../components"
 import { TeacherTabScreenProps } from "../../navigators/TeacherNavigator"
-import { useNavigation } from "@react-navigation/native"
+import { useFocusEffect, useNavigation } from "@react-navigation/native"
 import { useStores } from "../../models"
 import { colors, spacing } from "../../theme"
 import { delay } from "../../utils/delay"
@@ -28,7 +28,8 @@ const ONE_DAY = 24 * 60 * 60 * 1000
 const today = new Date()
 
 export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function AttendanceScreen() {
-  const { attendanceStore, studentStore, sessionStore, currentUserStore } = useStores()
+  const { attendanceStore, studentStore, sessionStore, currentUserStore, settingStore } =
+    useStores()
   const navigation = useNavigation()
 
   const [refreshing, setRefreshing] = useState(false)
@@ -45,44 +46,72 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
   const [attendanceRate, setAttendanceRate] = useState(0)
   const [sessionsRate, setSessionsRate] = useState(0)
 
-  // update the rates based on the filter
-  useEffect(() => {
-    let _attendanceRate = 0
-    if (statsFilter.key === 1) _attendanceRate = attendanceStore.getRates("total")
-    if (statsFilter.key === 3) _attendanceRate = attendanceStore.getRates("week")
-    if (statsFilter.key === 4) _attendanceRate = attendanceStore.getRates("month")
+  const loadStores = async () => {
+    setIsLoading(true)
+    await currentUserStore.fetchCurrentUser()
+    await studentStore.fetchStudents()
+    await sessionStore.fetchSessions()
+    await attendanceStore.fetchAttendanceRecords()
+    await settingStore.fetchSchoolSettings()
+    __DEV__ && console.log("Loading stores from Students List Screen")
 
-    setAttendanceRate(_attendanceRate)
+    setIsLoading(false)
+  }
 
-    // update the sessions rate
-    const filteredAttendanceRecords = attendanceStore.attendanceRecords
-      .slice()
-      .sort((a, b) => (new Date(a.timestamp) > new Date(b.timestamp) ? 1 : -1))
-      .filter((record: AttendanceRecord) => {
-        const attendanceRecordDate = new Date(record.timestamp)
-        if (statsFilter.key === 1) return true
-        if (statsFilter.key === 3) return today - attendanceRecordDate <= ONE_DAY * 7
-        if (statsFilter.key === 4) return today - attendanceRecordDate <= ONE_DAY * 30
-      })
+  const manualRefresh = async () => {
+    setRefreshing(true)
+    __DEV__ && console.log("refreshing...")
+    await Promise.all([loadStores(), delay(750)])
+    setRefreshing(false)
+  }
 
-    const ratesOfSessionOnEveryDay = filteredAttendanceRecords.map((record: AttendanceRecord) => {
-      const numOfPresetStudents = record.getNumberOfPresent()
-      if (numOfPresetStudents === 0) return 0 // prevent division by zero
+  // update the rates based on the filters (total, week, month)
+  useFocusEffect(
+    React.useCallback(() => {
+      const updateRates = () => {
+        let _attendanceRate = 0
+        if (statsFilter.key === 1) _attendanceRate = attendanceStore.getRates("total")
+        if (statsFilter.key === 3) _attendanceRate = attendanceStore.getRates("week")
+        if (statsFilter.key === 4) _attendanceRate = attendanceStore.getRates("month")
 
-      const numOfSessions = sessionStore.getSessionsByDate(new Date(record.timestamp)).length
+        setAttendanceRate(_attendanceRate)
 
-      let sessionsRate = Math.round((numOfSessions / numOfPresetStudents) * 100)
-      if (sessionsRate > 100) sessionsRate = 100
-      return sessionsRate
-    })
+        // update the sessions rate
+        const filteredAttendanceRecords = attendanceStore.attendanceRecords
+          .slice()
+          .sort((a, b) => (new Date(a.timestamp) > new Date(b.timestamp) ? 1 : -1))
+          .filter((record: AttendanceRecord) => {
+            const attendanceRecordDate = new Date(record.timestamp)
+            if (statsFilter.key === 1) return true
+            if (statsFilter.key === 3) return today - attendanceRecordDate <= ONE_DAY * 7
+            if (statsFilter.key === 4) return today - attendanceRecordDate <= ONE_DAY * 30
+          })
 
-    // sum the rates of sessions on every day and divide by the number of days
-    const _sessionsRate = Math.round(
-      ratesOfSessionOnEveryDay.reduce((a, b) => a + b, 0) / ratesOfSessionOnEveryDay.length,
-    )
+        const ratesOfSessionOnEveryDay = filteredAttendanceRecords.map(
+          (record: AttendanceRecord) => {
+            const numOfPresetStudents = record.getNumberOfPresent()
+            if (numOfPresetStudents === 0) return 0 // prevent division by zero
 
-    setSessionsRate(_sessionsRate)
-  }, [statsFilter, attendanceStore])
+            const numOfSessions = sessionStore.getSessionsByDate(new Date(record.timestamp)).length
+
+            let sessionsRate = Math.round((numOfSessions / numOfPresetStudents) * 100)
+            if (sessionsRate > 100) sessionsRate = 100
+            return sessionsRate
+          },
+        )
+
+        // sum the rates of sessions on every day and divide by the number of days
+        const _sessionsRate = Math.round(
+          ratesOfSessionOnEveryDay.reduce((a, b) => a + b, 0) / ratesOfSessionOnEveryDay.length,
+        )
+
+        setSessionsRate(_sessionsRate)
+      }
+
+      Promise.all([loadStores(), updateRates()])
+      return () => updateRates()
+    }, [statsFilter, attendanceStore, sessionStore]),
+  )
 
   const [currentAttendanceRate, setCurrentAttendanceRate] = useState(0)
   const [currentSessionsRate, setCurrentSessionsRate] = useState(0)
@@ -145,14 +174,6 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
         </Observer>
       )
     }
-  }
-
-  const manualRefresh = async () => {
-    setRefreshing(true)
-    console.log("refreshing...")
-
-    await Promise.all([studentStore.fetchStudents(), delay(750)])
-    setRefreshing(false)
   }
 
   return (
