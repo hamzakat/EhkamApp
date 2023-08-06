@@ -25,6 +25,7 @@ export const AttendanceStoreModel = types
   .props({
     attendanceRecords: types.optional(types.array(AttendanceRecordModel), []),
     currentAttendanceRecord: types.maybeNull(AttendanceRecordModel),
+    currentAttendanceRecordChanged: false,
     recordsOfflineQueue: types.optional(types.array(RecordsQueueItemModel), []),
   })
   .extend(withRequest)

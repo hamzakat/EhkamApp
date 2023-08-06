@@ -111,6 +111,19 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
     }
   }, [attendanceStore.currentAttendanceRecord, sessionStore])
 
+  // check if the current record is changed
+  useEffect(() => {
+    const dispose = onSnapshot(attendanceStore.currentAttendanceRecord?.items, (change) => {
+      if (!attendanceStore.currentAttendanceRecordChanged) {
+        attendanceStore.setProp("currentAttendanceRecordChanged", true)
+        __DEV__ && console.log("currentAttendanceRecordChanged")
+      }
+    })
+    return () => {
+      dispose() // Cleanup the observer when the component unmounts
+    }
+  }, [attendanceStore.currentAttendanceRecord, sessionStore])
+
   const renderAttendanceItem = ({ item }: { item: AttendanceItem }) => {
     const student = studentStore.students.find((student) => student.id === item.student_id)
 
@@ -142,49 +155,16 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
     setRefreshing(false)
   }
 
-  const exit = async () => {
-    const currentAttendanceRecord: AttendanceRecord = attendanceStore.currentAttendanceRecord
-    if (currentAttendanceRecord?.items.length > 0) {
-      // push the old record to the store (if it holds items) AND send the old record to the server
-      await attendanceStore.sendAttendanceRecord(getSnapshot(currentAttendanceRecord))
-    }
-    currentUserStore.setProp("entered", false)
-  }
-
-  const [showExitDialog, setShowExitDialog] = useState(false)
-
   return (
-    <DrawerLayoutScreen
-      title="الحضور"
-      navigation={navigation}
-      backBtn={false}
-      element={
-        <View>
-          <Text
-            onPress={() => setShowExitDialog(true)}
-            size="sm"
-            weight="book"
-            style={{ color: colors.ehkamPeach, marginRight: spacing.medium }}
-          >
-            إنهاء الدوام
-          </Text>
-        </View>
-      }
-    >
-      <TwoButtonsDialog
-        text="⌚ هل أنت متأكد من انتهاء فترة الدوام؟"
-        cyanButtonText="نعم"
-        peachButtonText="لا"
-        cyanButtonFn={exit}
-        visible={showExitDialog}
-        peachButtonFn={() => setShowExitDialog(false)}
-        cancel={() => setShowExitDialog(false)}
-      />
-
+    <DrawerLayoutScreen title="الحضور" navigation={navigation} backBtn={false}>
       <View>
         {attendanceStore.currentAttendanceRecord?.items.length > 0 && (
           <FlatList<AttendanceItem>
-            contentContainerStyle={$contentContainer}
+            contentContainerStyle={{
+              alignContent: "center",
+              paddingHorizontal: spacing.large,
+              paddingBottom: Dimensions.get("screen").height * 0.2,
+            }}
             data={attendanceStore.currentAttendanceRecord?.items}
             ListHeaderComponent={
               <View style={{ marginTop: spacing.medium }}>
@@ -288,12 +268,6 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
     </DrawerLayoutScreen>
   )
 })
-
-const $contentContainer: ViewStyle = {
-  alignContent: "center",
-  paddingHorizontal: spacing.large,
-  paddingBottom: Dimensions.get("screen").height * 0.2,
-}
 
 const AttendanceCard = function AttendanceCard({
   onPress,

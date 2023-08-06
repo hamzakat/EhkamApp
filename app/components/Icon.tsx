@@ -145,6 +145,7 @@ export const iconRegistry = {
   syncIndicator: require("../../assets/icons/ehkam/sync-indicator.png"),
   outbox: require("../../assets/icons/ehkam/outbox.png"),
   exit: require("../../assets/icons/ehkam/exit.png"),
+  powerBtn: require("../../assets/icons/ehkam/power-btn.png"),
 
   drawerProfileCircle: require("../../assets/icons/ehkam/drawer-profile-circle.png"),
 

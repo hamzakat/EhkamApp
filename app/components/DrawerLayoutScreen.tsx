@@ -11,6 +11,10 @@ import { Text } from "./Text"
 import { useStores } from "../models"
 import { useNavigation } from "@react-navigation/native"
 import { useBackButtonHandler } from "../navigators"
+import { AttendanceRecord, AttendanceRecordSnapshotIn } from "../models/AttendanceRecord"
+import { getSnapshot } from "mobx-state-tree"
+import { TwoButtonsDialog } from "./TwoButtonsDialog"
+import { AttendanceItem } from "../models/AttendanceItem"
 
 interface DrawerLayoutScreenProps {
   navigation?: any
@@ -61,6 +65,24 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
     }
     navigation.addListener("blur", closeDrawer) // close drawer when we switch the screen
   }, [drawerOpen])
+
+  const [showExitDialog, setShowExitDialog] = useState(false)
+
+  const exit = async () => {
+    const currentAttendanceRecord = getSnapshot(attendanceStore.currentAttendanceRecord)
+    if (currentAttendanceRecord?.items.length > 0) {
+      const allAreAbsent = currentAttendanceRecord?.items.every(
+        (item: AttendanceItem) => !item.present,
+      )
+
+      if (attendanceStore.currentAttendanceRecordChanged && !allAreAbsent) {
+        // push the old record to the store (if it holds items) AND send the old record to the server
+        await attendanceStore.sendAttendanceRecord(currentAttendanceRecord)
+        __DEV__ && console.log("The current attendance record was sent to the server and recorded")
+      }
+    }
+    currentUserStore.setProp("entered", false)
+  }
 
   useHeader(
     {
@@ -136,6 +158,7 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
             sessionStore.sessionOfflineQueue.length > 0 ||
             attendanceStore.recordsOfflineQueue.length > 0
           }
+          exit={() => setShowExitDialog(true)}
         />
       )}
       onDrawerClose={() => setDrawerOpen(false)}
@@ -148,6 +171,16 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
         }}
         {...props.ScreenProps}
       >
+        <TwoButtonsDialog
+          text="⌚ هل أنت متأكد من انتهاء فترة الدوام؟"
+          cyanButtonText="نعم"
+          peachButtonText="لا"
+          cyanButtonFn={exit}
+          visible={showExitDialog}
+          peachButtonFn={() => setShowExitDialog(false)}
+          cancel={() => setShowExitDialog(false)}
+        />
+
         {props.children}
       </Screen>
     </DrawerLayout>
@@ -161,6 +194,7 @@ const DrawerContent = ({
   navigation,
   logout,
   syncIndicator,
+  exit,
 }) => {
   return (
     <View style={[{ flex: 1 }, drawerInsets]}>
@@ -206,6 +240,18 @@ const DrawerContent = ({
             الاحصائيات
           </Text>
         </View> */}
+
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.medium }}>
+          <Icon icon={"powerBtn"} size={22} color={colors.ehkamCyan} />
+          <Text
+            weight="semiBold"
+            style={{ color: colors.ehkamGrey, marginStart: spacing.small }}
+            size="md"
+            onPress={exit}
+          >
+            إنهاء الدوام
+          </Text>
+        </View>
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.medium }}>
           <Icon icon={syncIndicator ? "syncIndicator" : "sync"} size={22} />
           <Text

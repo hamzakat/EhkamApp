@@ -64,6 +64,7 @@ export const EnterScreen: FC<EnterScreenProps> = function EnterScreen(_props) {
     // create a new empty record on a fresh app start
     __DEV__ && console.log("Entering the system")
     createNewAttendanceRecord(timestamp)
+    attendanceStore.setProp("currentAttendanceRecordChanged", false)
     currentUserStore.setProp("entered", true)
   }
 
