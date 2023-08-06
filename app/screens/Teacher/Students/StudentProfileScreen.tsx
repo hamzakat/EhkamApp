@@ -208,7 +208,7 @@ export const StudentProfileScreen: FC<StudentStackScreenProps<"StudentProfile">>
                 <InfoGridRow info={currentStudent.age} label="العمر" />
                 <InfoGridRow info={currentStudent.edu_grade} label="الصف" />
                 <InfoGridRow info={currentStudent.edu_school} label="المدرسة" />
-                <InfoGridRow info={currentStudent.city} label="المحافظة" />
+                <InfoGridRow info={currentStudent.city} label="البلد الأصل" />
                 <InfoGridRow info={currentStudent.location} label="السكن" />
                 <InfoGridRow info={currentStudent.blood} label="زمرة الدم" />
                 <InfoGridRow info={currentStudent.health_issues} label="ملاحظات صحية" />
