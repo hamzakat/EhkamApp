@@ -15,7 +15,8 @@ i18n.fallbacks = true
  */
 i18n.translations = { ar, en, "en-US": en, ko }
 
-i18n.locale = Localization.locale
+i18n.locale = "ar" // Enforce "ar" localization
+// i18n.locale = Localization.locale
 
 // if (__DEV__) console.log("i18n.locale:", i18n.locale)
 
