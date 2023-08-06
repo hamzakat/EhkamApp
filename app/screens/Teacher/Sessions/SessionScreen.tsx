@@ -3,8 +3,8 @@ import { observer } from "mobx-react-lite"
 import { Alert, View, Dimensions } from "react-native"
 import {
   Button,
-  DrawerLayoutScreen,
   Icon,
+  NoDrawerLayoutScreen,
   Text,
   TextField,
   VerseItem,
@@ -43,7 +43,7 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
     const [gradeValid, setGradeValid] = useState(false)
     const { bottom } = useSafeAreaInsets()
 
-    React.useEffect(
+    useEffect(
       // Preventing accidental back button press: https://reactnavigation.org/docs/preventing-going-back/
       () =>
         navigation.addListener("beforeRemove", (e) => {
@@ -174,7 +174,13 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
       }
     }
     return (
-      <DrawerLayoutScreen title="جلسة تسميع جديدة" backBtn={true} navigation={navigation}>
+      <NoDrawerLayoutScreen
+        title={sessionStore.selectedSessionType === "new" ? "تسميع مقرر جديد" : "مراجعة المحفوظات"}
+        backBtn={true}
+        preset="fixed"
+        navigation={navigation}
+        safeAreaEdge={["bottom"]}
+      >
         {/* <TwoButtonsDialog
           peachButtonFn={() => setConfirmationDialogVisible(false)}
           cyanButtonFn={sendSession}
@@ -322,7 +328,7 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
             <Text text="إتمام" weight="bold" size="md" style={{ color: colors.background }} />
           </Button>
         </View>
-      </DrawerLayoutScreen>
+      </NoDrawerLayoutScreen>
     )
   },
 )
