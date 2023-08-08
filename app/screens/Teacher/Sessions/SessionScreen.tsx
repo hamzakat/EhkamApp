@@ -165,9 +165,8 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
           >
             <Text
               text={item.chapterTitle}
-              weight="semiBold"
               size="lg"
-              style={{ color: colors.ehkamPeach }}
+              style={{ color: colors.ehkamPeach, fontFamily: "jannatBold" }}
             />
           </View>
         )

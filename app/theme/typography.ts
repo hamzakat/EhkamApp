@@ -9,6 +9,10 @@ export const customFontsToLoad = {
   expoArabicLight: require("../../assets/fonts/ExpoArabic-Light.ttf"),
   expoArabicSemiBold: require("../../assets/fonts/ExpoArabic-SemiBold.ttf"),
   expoArabicBold: require("../../assets/fonts/ExpoArabic-Bold.otf"),
+
+  // Jannat fonts
+  jannatRegular: require("../../assets/fonts/A.Jannat.LT.Regular_1.ttf"),
+  jannatBold: require("../../assets/fonts/A.Jannat.LT.Bold_1.ttf"),
 }
 
 const fonts = {
@@ -40,6 +44,10 @@ const fonts = {
     light: "expoArabicLight",
     semiBold: "expoArabicSemiBold",
     bold: "expoArabicBold",
+  },
+  jannat: {
+    regular: "jannatRegular",
+    bold: "jannatBold",
   },
 }
 
