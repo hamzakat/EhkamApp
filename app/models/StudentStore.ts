@@ -16,14 +16,20 @@ export const StudentStoreModel = types
     students: types.optional(types.array(StudentModel), []),
   })
   .actions(withSetPropAction)
-  .views((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
+  .views((self) => ({
+    get getCurrentClassStudents() {
+      return self.students.filter(
+        (student) => student.class_id === getRoot(self).currentUserStore.user.currentClassId,
+      )
+    },
+  })) // eslint-disable-line @typescript-eslint/no-unused-vars
 
   .actions((self) => {
     const root = getRoot(self)
     const fetchStudents = flow(function* () {
       const res: ApiResponse<any> = yield self.request({
         method: "GET",
-        url: `/items/students?filter[class_id][_eq]=${root.currentUserStore.user.class_id}&fields=id,date_created,user_id.first_name,user_id.last_name,user_id.avatar,user_id.email,user_id.school_id,user_id.location,birthdate,edu_grade,edu_school,city,blood,health_issues,parent_job,social_issues,inclass_id,previous_memo`,
+        url: `/items/students?filter[class_id][_eq]=${root.currentUserStore.currentClass.id}&fields=id,date_created,user_id.first_name,user_id.last_name,user_id.avatar,user_id.email,user_id.school_id,user_id.location,birthdate,edu_grade,edu_school,city,blood,health_issues,parent_job,social_issues,inclass_id,previous_memo`,
       })
 
       if (!res.ok) {

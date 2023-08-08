@@ -152,6 +152,7 @@ export const DrawerLayoutScreen: React.FC<React.PropsWithChildren<DrawerLayoutSc
           drawerInsets={$drawerInsets}
           teacherName={currentUserStore.user.fullname}
           schoolName={currentUserStore.user.school_name}
+          currentClassName={currentUserStore.currentClass?.name}
           logout={authenticationStore.logOut}
           navigation={props.navigation}
           syncIndicator={
@@ -195,18 +196,20 @@ const DrawerContent = ({
   logout,
   syncIndicator,
   exit,
+  currentClassName,
 }) => {
   return (
     <View style={[{ flex: 1 }, drawerInsets]}>
       {/* teacher's name + school name */}
       <View style={{ flexDirection: "row", marginStart: spacing.extraSmall, alignItems: "center" }}>
         <Icon icon="drawerProfileCircle" />
-        <View style={{ paddingVertical: spacing.small }}>
+        <View style={{ paddingVertical: spacing.small, alignItems: "flex-start" }}>
           <Text weight="semiBold" style={{ color: colors.ehkamPeach }}>
             {teacherName}
           </Text>
+
           <Text weight="book" size="xxs" style={{ color: colors.ehkamCyan }}>
-            {schoolName}
+            {currentClassName} ({schoolName})
           </Text>
         </View>
       </View>

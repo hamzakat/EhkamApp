@@ -15,7 +15,7 @@ export const AuthenticationStoreModel = types
   })
   .views((self) => ({
     get isAuthenticated() {
-      return self.refreshToken !== null
+      return self.refreshToken !== null && self.authState === "done" // wait for current user data to be fetched
     },
     get validationErrors() {
       return {
@@ -36,50 +36,69 @@ export const AuthenticationStoreModel = types
   }))
   .actions(withSetPropAction)
   .actions((self) => {
-    let refreshTokensPromise = null
-    const refreshTokens = flow(function* () {
-      // No catch clause because we want the caller to handle the error.
-
-      const refreshTokenRes = yield api.apisauce.any({
-        method: "POST",
-        url: "/auth/refresh/",
-        data: {
-          refresh_token: self.refreshToken,
-        },
-        headers: {
-          Authorization: undefined,
-        },
-      })
-
-      if (!refreshTokenRes.ok) {
-        const problem: void | GeneralApiProblem = getGeneralApiProblem(refreshTokenRes)
-        __DEV__ && console.log("Problem from AuthenticationStore.refreshTokens():", refreshTokenRes)
-
-        if (problem) return problem
-      }
-      try {
-        self.accessToken = refreshTokenRes.data.data.access_token
-        self.refreshToken = refreshTokenRes.data.data.refresh_token
-        console.log("Successful refresh token!")
-        refreshTokensPromise = null
-
-        return { kind: "ok", refreshTokenRes }
-      } catch (e) {
-        if (__DEV__) {
-          console.tron.error(`Bad data: ${e.message}\n${refreshTokenRes}`, e.stack)
-          console.log("Error from AuthenticationStore.fetchCurrentUser():", e)
-        }
-        refreshTokensPromise = null
-        return { kind: "bad-data" }
-      }
-    })
-
     const rootStore = getRoot(self)
     return {
-      // Multiple requests could fail at the same time because of an old
-      // accessToken, so we want to make sure only one token refresh
-      // request is sent.
+      logOut() {
+        self.accessToken = null
+        self.refreshToken = null
+        self.authEmail = ""
+        self.authPassword = ""
+
+        // Clear all the stores
+        // @ts-ignore
+        rootStore.currentUserStore.cleanCurrentUser() // @ts-ignore
+        rootStore.sessionStore.clearSessionStore() // @ts-ignore
+        rootStore.studentStore.clearStudentStore() // @ts-ignore
+        rootStore.attendanceStore.clearAttendanceStore() // @ts-ignore
+        rootStore.settingStore.clearSettingStore()
+        __DEV__ && console.log("Clear stores!")
+      },
+
       refreshTokens() {
+        // Multiple requests could fail at the same time because of an old
+        // accessToken, so we want to make sure only one token refresh
+        // request is sent.
+        let refreshTokensPromise = null
+        const refreshTokens = flow(function* () {
+          // No catch clause because we want the caller to handle the error.
+
+          const refreshTokenRes = yield api.apisauce.any({
+            method: "POST",
+            url: "/auth/refresh/",
+            data: {
+              refresh_token: self.refreshToken,
+            },
+            headers: {
+              Authorization: undefined,
+            },
+          })
+
+          if (!refreshTokenRes.ok) {
+            const problem: void | GeneralApiProblem = getGeneralApiProblem(refreshTokenRes)
+            __DEV__ &&
+              console.log("Problem from AuthenticationStore.refreshTokens():", refreshTokenRes)
+
+            if (problem) {
+              // self.logOut()
+              return problem
+            }
+          }
+          try {
+            self.accessToken = refreshTokenRes.data.data.access_token
+            self.refreshToken = refreshTokenRes.data.data.refresh_token
+            console.log("Successful refresh token!")
+            refreshTokensPromise = null
+
+            return { kind: "ok", refreshTokenRes }
+          } catch (e) {
+            if (__DEV__) {
+              console.tron.error(`Bad data: ${e.message}\n${refreshTokenRes}`, e.stack)
+              console.log("Error from AuthenticationStore.fetchCurrentUser():", e)
+            }
+            refreshTokensPromise = null
+            return { kind: "bad-data" }
+          }
+        })
         if (refreshTokensPromise) return refreshTokensPromise
 
         refreshTokensPromise = refreshTokens()
@@ -110,16 +129,21 @@ export const AuthenticationStoreModel = types
             refreshToken: response.data.data.refresh_token,
           }
 
-          self.authState = "done"
           self.accessToken = loginResponse.accessToken
           self.refreshToken = loginResponse.refreshToken
 
           // get user info after the successful login
           // @ts-ignore
 
-          rootStore.currentUserStore.fetchCurrentUser()
-
-          return { kind: "ok" }
+          // execute rootStore.currentUserStore.fetchCurrentUser() and wait for it to finish before returning
+          // @ts-ignore
+          const currentUserFetching = yield rootStore.currentUserStore.fetchCurrentUser()
+          if (currentUserFetching.kind === "ok") {
+            self.authState = "done"
+            return { kind: "ok" }
+          } else {
+            return { kind: "bad-data" }
+          }
         } catch (e) {
           if (__DEV__) {
             console.tron.error(`Bad data: ${e.message}\n${e}`, e.stack)
@@ -130,21 +154,7 @@ export const AuthenticationStoreModel = types
           return { kind: "bad-data" }
         }
       }),
-      logOut() {
-        self.accessToken = null
-        self.refreshToken = null
-        self.authEmail = ""
-        self.authPassword = ""
 
-        // Clear all the stores
-        // @ts-ignore
-        rootStore.currentUserStore.cleanCurrentUser() // @ts-ignore
-        rootStore.sessionStore.clearSessionStore() // @ts-ignore
-        rootStore.studentStore.clearStudentStore() // @ts-ignore
-        rootStore.attendanceStore.clearAttendanceStore() // @ts-ignore
-        rootStore.settingStore.clearSettingStore()
-        __DEV__ && console.log("Clear stores!")
-      },
       setAuthEmail(value: string) {
         self.authEmail = value.replace(/ /g, "")
       },

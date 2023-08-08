@@ -88,7 +88,7 @@ export const SessionStoreModel = types
         url: `/items/sessions`,
         data: {
           ...session,
-          class_id: root.currentUserStore.user.class_id,
+          class_id: root.currentUserStore.currentClass.id,
         },
       })
       if (!req.ok) {
@@ -118,7 +118,7 @@ export const SessionStoreModel = types
       // do POST request for session
       const res: ApiResponse<any> = yield self.request({
         method: "GET",
-        url: `/items/sessions?filter[class_id][_eq]=${root.currentUserStore.user.class_id}&fields=*,notes.*`,
+        url: `/items/sessions?filter[class_id][_eq]=${root.currentUserStore.currentClass.id}&fields=*,notes.*`,
       })
 
       if (!res.ok) {

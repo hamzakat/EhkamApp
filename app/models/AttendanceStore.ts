@@ -41,7 +41,7 @@ export const AttendanceStoreModel = types
         url: `/items/attendance`,
         data: {
           items: attendanceRecord.items,
-          class_id: root.currentUserStore.user.class_id,
+          class_id: root.currentUserStore.currentClass.id,
           timestamp: attendanceRecord.timestamp,
         },
       })
@@ -73,7 +73,7 @@ export const AttendanceStoreModel = types
     const fetchAttendanceRecords = flow(function* () {
       const req: ApiResponse<any> = yield self.request({
         method: "GET",
-        url: `/items/attendance?filter[class_id][_eq]=${root.currentUserStore.user.class_id}&fields=id,timestamp,items.student_id,items.present`,
+        url: `/items/attendance?filter[class_id][_eq]=${root.currentUserStore.currentClass.id}&fields=id,timestamp,items.student_id,items.present`,
       })
       if (!req.ok) {
         const problem: void | GeneralApiProblem = getGeneralApiProblem(req)
@@ -146,9 +146,12 @@ export const AttendanceStoreModel = types
           },
         )
 
-      const _attendanceRate = Math.round(
-        attendanceStats.attendanceRate / attendanceStats.numberOfRecords,
-      )
+      let _attendanceRate = 0
+      if (attendanceStats.numberOfRecords > 0) {
+        _attendanceRate = Math.round(
+          attendanceStats.attendanceRate / attendanceStats.numberOfRecords,
+        )
+      }
       return _attendanceRate
     }
 

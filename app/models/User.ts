@@ -13,7 +13,6 @@ export const UserModel = types
     title: types.maybeNull(types.string),
     description: types.maybeNull(types.string),
     role: types.maybeNull(types.string),
-    class_id: types.maybeNull(types.string),
     school_id: types.maybeNull(types.string),
     school_name: types.maybeNull(types.string),
   })

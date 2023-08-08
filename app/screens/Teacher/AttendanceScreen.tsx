@@ -100,15 +100,18 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
           },
         )
 
-        // sum the rates of sessions on every day and divide by the number of days
-        const _sessionsRate = Math.round(
-          ratesOfSessionOnEveryDay.reduce((a, b) => a + b, 0) / ratesOfSessionOnEveryDay.length,
-        )
+        let _sessionsRate = 0
+        if (ratesOfSessionOnEveryDay.length > 0) {
+          // sum the rates of sessions on every day and divide by the number of days
+          _sessionsRate = Math.round(
+            ratesOfSessionOnEveryDay.reduce((a, b) => a + b, 0) / ratesOfSessionOnEveryDay.length,
+          )
+        }
 
         setSessionsRate(_sessionsRate)
       }
 
-      Promise.all([loadStores(), updateRates()])
+      loadStores().then(() => updateRates())
       return () => updateRates()
     }, [statsFilter, attendanceStore, sessionStore]),
   )

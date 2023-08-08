@@ -1,31 +1,51 @@
 /* eslint-disable react-native/no-inline-styles */
 import { useNavigation } from "@react-navigation/native"
-import React, { FC, useEffect } from "react"
-import { View } from "react-native"
-import { AutoImage, Button, Icon, Screen, Text } from "../components"
+import React, { FC, useEffect, useState } from "react"
+import { Dimensions, View } from "react-native"
+import { AutoImage, Button, Card, Icon, Screen, Text, Toggle } from "../components"
 import { AppStackScreenProps } from "../navigators"
 import { colors, spacing } from "../theme"
 import { useStores } from "../models"
 import { AttendanceRecordModel } from "../models/AttendanceRecord"
 import { AttendanceItemModel } from "../models/AttendanceItem"
 import { v4 as uuidv4 } from "uuid"
+import { delay } from "../utils/delay"
+import { getSnapshot } from "mobx-state-tree"
 
 interface EnterScreenProps extends AppStackScreenProps<"Enter"> {}
 
 const headerImg = require("../../assets/images/welcome-header.png")
 export const EnterScreen: FC<EnterScreenProps> = function EnterScreen(_props) {
-  const { currentUserStore, attendanceStore, studentStore, sessionStore, settingStore } =
-    useStores()
+  const {
+    currentUserStore,
+    attendanceStore,
+    studentStore,
+    sessionStore,
+    settingStore,
+    authenticationStore,
+  } = useStores()
 
-  const loadStores = () => {
-    ;(async function load() {
+  const [selectedClass, setSelectedClass] = useState(
+    currentUserStore.assignedClasses[0]
+      ? getSnapshot(currentUserStore.assignedClasses[0])
+      : undefined,
+  )
+
+  useEffect(() => {
+    // fetch current user data
+
+    ;(async function fetchCurrentUser() {
       await currentUserStore.fetchCurrentUser()
-      await studentStore.fetchStudents()
-      await attendanceStore.fetchAttendanceRecords()
-      await sessionStore.fetchSessions()
-      await settingStore.fetchSchoolSettings()
-      __DEV__ && console.log("Loading stores from Enter Screen")
+      __DEV__ && console.log("Loading current user from Enter Screen")
     })()
+  }, [])
+
+  const loadStores = async () => {
+    await studentStore.fetchStudents()
+    await attendanceStore.fetchAttendanceRecords()
+    await sessionStore.fetchSessions()
+    await settingStore.fetchSchoolSettings()
+    __DEV__ && console.log("Loading stores from Enter Screen")
   }
 
   const createNewAttendanceRecord = (timestamp: string): void => {
@@ -56,17 +76,20 @@ export const EnterScreen: FC<EnterScreenProps> = function EnterScreen(_props) {
    *
    */
 
-  // load stores
-  useEffect(() => {
-    loadStores()
-  }, [])
-
   const enter = () => {
+    if (!selectedClass) {
+      return
+    }
+
+    // set the current class
+    currentUserStore.setProp("currentClass", selectedClass)
+
     const timestamp = new Date().toISOString()
 
     // create a new empty record on a fresh app start
     __DEV__ && console.log("Entering the system")
-    createNewAttendanceRecord(timestamp)
+    loadStores().then(() => createNewAttendanceRecord(timestamp))
+
     attendanceStore.setProp("currentAttendanceRecordChanged", false)
     currentUserStore.setProp("entered", true)
   }
@@ -88,30 +111,203 @@ export const EnterScreen: FC<EnterScreenProps> = function EnterScreen(_props) {
       />
 
       <View
-        style={{ justifyContent: "space-around", alignItems: "center", marginTop: spacing.medium }}
+        style={{
+          justifyContent: "space-around",
+          marginTop: spacing.medium,
+
+          paddingHorizontal: spacing.large,
+          paddingBottom: Dimensions.get("screen").height * 0.1,
+        }}
       >
-        <Button
-          preset="reversed"
-          style={{
-            marginTop: spacing.large,
-            backgroundColor: colors.ehkamPeach,
-            borderRadius: 20,
-          }}
-          textStyle={{ flexDirection: "row" }}
-          onPress={enter}
-        >
-          <View
-            style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: spacing.large }}
-          >
-            <Icon
-              icon="leftStickArrow"
-              size={spacing.medium}
-              containerStyle={{ marginEnd: spacing.small }}
-            />
-            <Text weight="medium" text="ادخل إلى النظام" style={{ color: colors.background }} />
-          </View>
-        </Button>
+        {currentUserStore.assignedClasses.length > 0 && (
+          <>
+            <View style={{ marginTop: spacing.small }}>
+              {currentUserStore.assignedClasses.map((teacherClass, i) => {
+                return (
+                  <TeacherClassCard
+                    key={i}
+                    teacherClass={teacherClass}
+                    selected={selectedClass?.id === teacherClass.id}
+                    onPress={() => setSelectedClass(getSnapshot(teacherClass))}
+                  />
+                )
+              })}
+            </View>
+
+            <Button
+              preset="reversed"
+              style={{
+                marginTop: spacing.large,
+                backgroundColor: colors.ehkamPeach,
+                borderRadius: 20,
+              }}
+              textStyle={{ flexDirection: "row" }}
+              onPress={enter}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  paddingHorizontal: spacing.large,
+                }}
+              >
+                <Icon
+                  icon="leftStickArrow"
+                  size={spacing.medium}
+                  containerStyle={{ marginEnd: spacing.small }}
+                />
+                <Text weight="medium" text="ادخل إلى النظام" style={{ color: colors.background }} />
+              </View>
+            </Button>
+            <Button
+              preset="reversed"
+              style={{
+                marginTop: spacing.large,
+                backgroundColor: colors.background,
+                borderRadius: 20,
+                borderWidth: 1,
+                borderColor: colors.ehkamPeach,
+              }}
+              textStyle={{ flexDirection: "row" }}
+              onPress={authenticationStore.logOut}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  paddingHorizontal: spacing.large,
+                }}
+              >
+                <Icon
+                  icon="exit"
+                  color={colors.ehkamPeach}
+                  size={spacing.medium}
+                  containerStyle={{ marginEnd: spacing.small }}
+                />
+                <Text weight="medium" text="تسجيل الخروج" style={{ color: colors.ehkamPeach }} />
+              </View>
+            </Button>
+          </>
+        )}
+        {currentUserStore.assignedClasses.length === 0 && (
+          <>
+            <View style={{ alignItems: "center" }}>
+              <Text
+                text={`لم يتم إسنادك إلى أية حلقة حتى الآن `}
+                weight="medium"
+                size="lg"
+                style={{ color: colors.ehkamDarkGrey, textAlign: "center" }}
+              />
+            </View>
+            <Button
+              preset="reversed"
+              style={{
+                marginTop: spacing.large,
+                backgroundColor: colors.ehkamPeach,
+                borderRadius: 20,
+              }}
+              textStyle={{ flexDirection: "row" }}
+              onPress={authenticationStore.logOut}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  paddingHorizontal: spacing.large,
+                }}
+              >
+                <Icon
+                  icon="exit"
+                  color={colors.background}
+                  size={spacing.medium}
+                  containerStyle={{ marginEnd: spacing.small }}
+                />
+                <Text weight="medium" text="تسجيل الخروج" style={{ color: colors.background }} />
+              </View>
+            </Button>
+          </>
+        )}
       </View>
     </Screen>
+  )
+}
+
+const TeacherClassCard = ({ teacherClass, selected, onPress }) => {
+  return (
+    <Card
+      HeadingComponent={
+        <View
+          style={{
+            justifyContent: "center",
+            paddingTop: spacing.extraSmall,
+          }}
+        >
+          <Text
+            text={teacherClass.name}
+            weight="semiBold"
+            size="lg"
+            style={{ color: selected ? colors.ehkamPeach : colors.ehkamGrey }}
+          />
+        </View>
+      }
+      LeftComponent={
+        <View
+          style={{
+            justifyContent: "center",
+            marginVertical: spacing.large,
+            marginStart: spacing.small,
+          }}
+        >
+          <Toggle
+            variant="radio"
+            inputOuterStyle={{
+              width: 18.3,
+              height: 18.3,
+              justifyContent: "center",
+
+              borderColor: colors.ehkamPeach,
+              backgroundColor: colors.background,
+            }}
+            inputInnerStyle={{
+              backgroundColor: colors.background,
+            }}
+            inputDetailStyle={{
+              backgroundColor: colors.ehkamPeach,
+              width: 9,
+              height: 9,
+              borderRadius: 25,
+            }}
+            value={selected}
+          />
+        </View>
+      }
+      FooterComponent={
+        <View>
+          <Text
+            text={teacherClass.mosque_name}
+            weight="book"
+            size="xs"
+            style={{ color: selected ? colors.ehkamPeach : colors.ehkamGrey }}
+          />
+        </View>
+      }
+      style={{
+        backgroundColor: colors.background,
+        marginBottom: spacing.small,
+        alignItems: "center",
+        paddingVertical: spacing.small,
+        shadowColor: selected ? colors.ehkamPeach : colors.shadow,
+
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+
+        elevation: 5,
+      }}
+      onPress={onPress}
+    />
   )
 }
