@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import { useNavigation } from "@react-navigation/native"
 import React, { FC, useEffect, useState } from "react"
-import { Dimensions, View } from "react-native"
+import { ActivityIndicator, Dimensions, View } from "react-native"
 import { AutoImage, Button, Card, Icon, Screen, Text, Toggle } from "../components"
 import { AppStackScreenProps } from "../navigators"
 import { colors, spacing } from "../theme"
@@ -30,6 +30,8 @@ export const EnterScreen: FC<EnterScreenProps> = function EnterScreen(_props) {
       ? getSnapshot(currentUserStore.assignedClasses[0])
       : undefined,
   )
+
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     // fetch current user data
@@ -80,7 +82,7 @@ export const EnterScreen: FC<EnterScreenProps> = function EnterScreen(_props) {
     if (!selectedClass) {
       return
     }
-
+    setIsLoading(true)
     // set the current class
     currentUserStore.setProp("currentClass", selectedClass)
 
@@ -88,10 +90,11 @@ export const EnterScreen: FC<EnterScreenProps> = function EnterScreen(_props) {
 
     // create a new empty record on a fresh app start
     __DEV__ && console.log("Entering the system")
-    loadStores().then(() => createNewAttendanceRecord(timestamp))
-
-    attendanceStore.setProp("currentAttendanceRecordChanged", false)
-    currentUserStore.setProp("entered", true)
+    loadStores()
+      .then(() => createNewAttendanceRecord(timestamp))
+      .then(() => attendanceStore.setProp("currentAttendanceRecordChanged", false))
+      .then(() => currentUserStore.setProp("entered", true))
+      .then(() => setIsLoading(false))
   }
 
   return (
@@ -151,11 +154,13 @@ export const EnterScreen: FC<EnterScreenProps> = function EnterScreen(_props) {
                   paddingHorizontal: spacing.large,
                 }}
               >
-                <Icon
-                  icon="leftStickArrow"
-                  size={spacing.medium}
-                  containerStyle={{ marginEnd: spacing.small }}
-                />
+                <View style={{ marginEnd: spacing.small }}>
+                  {isLoading ? (
+                    <ActivityIndicator color={colors.background} />
+                  ) : (
+                    <Icon icon="leftStickArrow" size={spacing.medium} />
+                  )}
+                </View>
                 <Text weight="medium" text="ادخل إلى النظام" style={{ color: colors.background }} />
               </View>
             </Button>

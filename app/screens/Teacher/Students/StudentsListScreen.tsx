@@ -456,7 +456,11 @@ export const StudentsListScreen: FC<StudentStackScreenProps<"StudentsList">> = o
 
 const StudentRankItem = function ({ student, rank, onPressFunction, imgAuthToken }) {
   return (
-    <TouchableOpacity style={{ alignItems: "center" }} onPress={() => onPressFunction(student.id)}>
+    <TouchableOpacity
+      style={{ alignItems: "center" }}
+      onPress={() => onPressFunction(student.id)}
+      activeOpacity={0.9}
+    >
       <FastImage
         style={{
           borderRadius: 20,

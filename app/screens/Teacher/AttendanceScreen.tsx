@@ -53,7 +53,7 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
     await sessionStore.fetchSessions()
     await attendanceStore.fetchAttendanceRecords()
     await settingStore.fetchSchoolSettings()
-    __DEV__ && console.log("Loading stores from Students List Screen")
+    __DEV__ && console.log("Loading stores from Attendance Screen")
 
     setIsLoading(false)
   }
@@ -228,13 +228,17 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
                       الحضور
                     </Text>
                     <View>
-                      <Text
-                        style={{ color: colors.ehkamCyan, textAlign: "center" }}
-                        size="xxl"
-                        weight="medium"
-                      >
-                        {statsFilter.key === 2 ? currentAttendanceRate : attendanceRate}%
-                      </Text>
+                      {isLoading ? (
+                        <ActivityIndicator size={"large"} color={colors.ehkamCyan} />
+                      ) : (
+                        <Text
+                          style={{ color: colors.ehkamCyan, textAlign: "center" }}
+                          size="xxl"
+                          weight="medium"
+                        >
+                          {statsFilter.key === 2 ? currentAttendanceRate : attendanceRate} %
+                        </Text>
+                      )}
                     </View>
                   </View>
                   <View style={{ alignItems: "center", flex: 0.5 }}>
@@ -242,13 +246,17 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
                       جلسات
                     </Text>
                     <View>
-                      <Text
-                        style={{ color: colors.ehkamCyan, textAlign: "center" }}
-                        size="xxl"
-                        weight="medium"
-                      >
-                        {statsFilter.key === 2 ? currentSessionsRate : sessionsRate} %
-                      </Text>
+                      {isLoading ? (
+                        <ActivityIndicator size={"large"} color={colors.ehkamCyan} />
+                      ) : (
+                        <Text
+                          style={{ color: colors.ehkamCyan, textAlign: "center" }}
+                          size="xxl"
+                          weight="medium"
+                        >
+                          {statsFilter.key === 2 ? currentSessionsRate : sessionsRate} %
+                        </Text>
+                      )}
                     </View>
                   </View>
                 </View>

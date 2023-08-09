@@ -44,28 +44,29 @@ export const StudentStoreModel = types
         const rawData = res.data.data
         // __DEV__ && console.log(rawData)
 
-        const students: StudentSnapshotIn[] = rawData.map((raw) => ({
-          id: raw.id,
-          class_id: raw.class_id,
-          date_created: raw.date_created,
-          birthdate: raw.birthdate,
-          edu_grade: raw.edu_grade,
-          edu_school: raw.edu_school,
-          city: raw.city,
-          blood: raw.blood,
-          health_issues: raw.health_issues,
-          parent_job: raw.parent_job,
-          social_issues: raw.social_issues,
-          inclass_id: raw.inclass_id,
-          previous_memo: raw.previous_memo,
+        const students: StudentSnapshotIn[] = rawData
+          .filter((raw) => raw.user_id)
+          .map((raw) => ({
+            id: raw.id,
+            date_created: raw.date_created,
+            birthdate: raw.birthdate,
+            edu_grade: raw.edu_grade,
+            edu_school: raw.edu_school,
+            city: raw.city,
+            blood: raw.blood,
+            health_issues: raw.health_issues,
+            parent_job: raw.parent_job,
+            social_issues: raw.social_issues,
+            inclass_id: raw.inclass_id,
+            previous_memo: raw.previous_memo,
 
-          first_name: raw.user_id.first_name,
-          last_name: raw.user_id.last_name,
-          avatar: raw.user_id.avatar,
-          email: raw.user_id.email,
-          school_id: raw.user_id.school_id,
-          location: raw.user_id.location,
-        }))
+            first_name: raw.user_id?.first_name,
+            last_name: raw.user_id?.last_name,
+            avatar: raw.user_id?.avatar,
+            email: raw.user_id?.email,
+            school_id: raw.user_id?.school_id,
+            location: raw.user_id?.location,
+          }))
 
         self.setProp("students", students)
       } catch (e) {
