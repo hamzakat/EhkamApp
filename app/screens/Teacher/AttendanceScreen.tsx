@@ -179,6 +179,35 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
     }
   }
 
+  // select/unselect all
+
+  const toggleAll = () => {
+    const allPresent = attendanceStore.currentAttendanceRecord.items.every(
+      (item) => item.present === true,
+    )
+    if (allPresent) {
+      attendanceStore.currentAttendanceRecord.items.forEach((item) =>
+        item.setProp("present", false),
+      )
+    } else {
+      attendanceStore.currentAttendanceRecord.items.forEach((item) => item.setProp("present", true))
+    }
+  }
+
+  const [allIsSelected, setAllIsSelected] = useState(false)
+
+  useEffect(() => {
+    const disposer = onSnapshot(attendanceStore.currentAttendanceRecord, (snapshot) => {
+      // Trigger your side effect here
+      const allPresent = snapshot.items.every((item) => item.present === true)
+      setAllIsSelected(allPresent)
+    })
+
+    return () => {
+      disposer() // Cleanup the observer when the component unmounts
+    }
+  }, [attendanceStore.currentAttendanceRecord])
+
   return (
     <DrawerLayoutScreen title="الحضور" navigation={navigation} backBtn={false}>
       <View>
@@ -260,7 +289,7 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
                     </View>
                   </View>
                 </View>
-                <Text
+                {/* <Text
                   weight="book"
                   style={{
                     color: colors.ehkamGrey,
@@ -268,7 +297,42 @@ export const AttendanceScreen: FC<AttendanceScreenProps> = observer(function Att
                     marginStart: spacing.medium,
                   }}
                   text="تسجيل الحضور"
-                />
+                /> */}
+
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between", // Aligns children to the start and end of the View
+                    marginEnd: spacing.medium, // Adds a gap between the children and the end of the view
+                  }}
+                >
+                  <View>
+                    <Text
+                      weight="book"
+                      style={{
+                        color: colors.ehkamGrey,
+                        marginBottom: spacing.small,
+                        marginStart: spacing.medium,
+                      }}
+                      text="تحديد الكل"
+                    />
+                  </View>
+                  <Toggle
+                    inputOuterStyle={{
+                      backgroundColor: colors.background,
+                      borderRadius: 8,
+                      borderColor: allIsSelected ? colors.ehkamPeach : colors.ehkamGrey,
+                    }}
+                    inputInnerStyle={{ backgroundColor: colors.background }}
+                    inputDetailStyle={{
+                      tintColor: colors.ehkamPeach,
+                    }}
+                    containerStyle={{ marginBottom: spacing.small }}
+                    value={allIsSelected}
+                    variant="checkbox"
+                    onPress={toggleAll}
+                  />
+                </View>
               </View>
             }
             renderItem={renderAttendanceItem}

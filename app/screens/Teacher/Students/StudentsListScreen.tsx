@@ -39,7 +39,6 @@ import { NativeStackNavigationHelpers } from "@react-navigation/native-stack/lib
 import { getJuzNumber } from "../../../utils/quranInfo"
 import FastImage from "react-native-fast-image"
 import Config from "../../../config"
-import { set } from "date-fns"
 
 interface SortOptions {
   sortType: "alphabet" | "attendence" | "reciting" | "registration"

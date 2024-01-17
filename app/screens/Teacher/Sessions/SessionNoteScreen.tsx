@@ -12,25 +12,41 @@ import {
   WarningDialog,
 } from "../../../components"
 
-import React, { FC, useState } from "react"
+import React, { FC, useEffect, useState } from "react"
 import { SessionStackScreenProps } from "./SessionStack"
 import { colors, spacing } from "../../../theme"
 import { useStores } from "../../../models"
-import { SessionNoteModel } from "../../../models/SessionNote"
+import { AyahNote, SessionNoteModel } from "../../../models/SessionNote"
 import "react-native-get-random-values"
 import { v4 as uuidv4 } from "uuid"
+import { getSnapshot } from "mobx-state-tree"
 
 export const SessionNoteScreen: FC<SessionStackScreenProps<"SessionNote">> = observer(
   function SessionNoteScreen({ navigation, route }) {
-    const { pageNumber, chpaterNumber, verseNumber, verseText } = route.params
-    console.log(pageNumber)
+    const { pageNumber, chapterNumber, verseNumber, verseText, index } = route.params
+    __DEV__ && console.log("pageNumber", pageNumber)
 
     const { sessionStore } = useStores()
-
     const [tajweed, setTajweed] = useState(false)
     const [pronunciation, setPronunciation] = useState(false)
     const [memorization, setMemorization] = useState(false)
     const [text, setText] = useState("")
+
+    useEffect(() => {
+      const existingNote: AyahNote = sessionStore.currentSessionNotes.find(
+        (note) =>
+          note.chapter_number === chapterNumber &&
+          note.verse_number === verseNumber &&
+          note.page_number === pageNumber,
+      )
+      if (existingNote) {
+        setTajweed(existingNote.tajweed)
+        setPronunciation(existingNote.pronunciation)
+        setMemorization(existingNote.memorization)
+
+        setText(existingNote.text)
+      }
+    }, [])
 
     const [dialogVisible, setDialogVisible] = useState(false)
 
@@ -47,24 +63,71 @@ export const SessionNoteScreen: FC<SessionStackScreenProps<"SessionNote">> = obs
     }
 
     const addNote = () => {
+      const existingNoteIndex = sessionStore.currentSessionNotes.findIndex(
+        (note) =>
+          note.chapter_number === chapterNumber &&
+          note.verse_number === verseNumber &&
+          note.page_number === pageNumber,
+      )
       if (tajweed || pronunciation || memorization) {
-        sessionStore.setProp("currentSessionNotes", [
-          ...sessionStore.currentSessionNotes,
-          SessionNoteModel.create({
-            _id: uuidv4(),
-            chapter_number: chpaterNumber,
-            verse_number: verseNumber,
-            page_number: pageNumber,
+        if (existingNoteIndex !== -1) {
+          // Note with the same chapter, verse, and page already exists, update it
+          const updatedNotes = [...sessionStore.currentSessionNotes]
+          updatedNotes[existingNoteIndex] = {
+            ...updatedNotes[existingNoteIndex],
             tajweed,
             memorization,
             pronunciation,
             text,
-            session_id: "",
-          }),
-        ])
+          }
+
+          sessionStore.setProp("currentSessionNotes", updatedNotes)
+        } else {
+          // No existing note found, add a new one
+          sessionStore.setProp("currentSessionNotes", [
+            ...sessionStore.currentSessionNotes,
+            SessionNoteModel.create({
+              _id: uuidv4(),
+              chapter_number: chapterNumber,
+              verse_number: verseNumber,
+              page_number: pageNumber,
+              tajweed,
+              memorization,
+              pronunciation,
+              text,
+              session_id: "",
+            }),
+          ])
+        }
+
+        // update the verse list
+        const newVersesList = [...sessionStore.currentSessionVerses]
+        const _updated = {
+          ...newVersesList[index],
+          flagged: true,
+        }
+        newVersesList[index] = _updated
+        sessionStore.setProp("currentSessionVerses", newVersesList)
+
         navigation.goBack()
       } else {
-        setDialogVisible(true)
+        if (existingNoteIndex !== -1) {
+          // Note with the same chapter, verse, and page already exists, update it
+          const updatedNotes = [...sessionStore.currentSessionNotes]
+
+          updatedNotes.splice(existingNoteIndex, 1)
+          sessionStore.setProp("currentSessionNotes", updatedNotes)
+          // update the verse list
+          const newVersesList = [...sessionStore.currentSessionVerses]
+          const _updated = {
+            ...newVersesList[index],
+            flagged: false,
+          }
+          newVersesList[index] = _updated
+          sessionStore.setProp("currentSessionVerses", newVersesList)
+        }
+
+        navigation.goBack()
       }
     }
 
@@ -174,6 +237,7 @@ export const SessionNoteScreen: FC<SessionStackScreenProps<"SessionNote">> = obs
                 backgroundColor: colors.background,
                 height: 150,
               }}
+              value={text}
               onChangeText={setText}
             />
           </View>

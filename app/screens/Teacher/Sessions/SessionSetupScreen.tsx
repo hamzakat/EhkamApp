@@ -38,6 +38,10 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
     const [versesInStartPage, setVersesInStartPage] = useState([])
     const [versesInEndPage, setVersesInEndPage] = useState([])
 
+    const [showEndPageWarning, setShowEndPageWarning] = useState(false)
+    const [showStartPageWarning, setShowStartPageWarning] = useState(false)
+
+
     /* for sessions of type "new", get the student's last checkpoints automatically */
     const { sessionStore } = useStores()
     useEffect(() => {
@@ -52,6 +56,7 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
 
     useEffect(() => {
       if (validPageNumber(startPage)) {
+        setShowStartPageWarning(false)
         const chapterNumbers = Object.keys(muhsaf[startPage])
 
         chapterNumbers.pop() // workaround: remove the latest key "juzNumber"
@@ -71,6 +76,8 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
 
         setVersesInStartPage(versesModalList)
         setStartVerse(versesModalList[0])
+      } else {
+        setShowStartPageWarning(true)
       }
     }, [startPage])
 
@@ -90,6 +97,7 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
 
     useEffect(() => {
       if (validPagesRange()) {
+        setShowEndPageWarning(false)
         const chapterNumbers = Object.keys(muhsaf[endPage])
         chapterNumbers.pop() // workaround: remove the latest key "juzNumber"
         const chaptersModalList = chapterNumbers.map((k) => {
@@ -108,6 +116,8 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
 
         setVersesInEndPage(versesModalList)
         setEndVerse(versesModalList[0])
+      } else {
+        setShowEndPageWarning(true)
       }
     }, [endPage])
 
@@ -156,7 +166,9 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
       // if validCheckpoints, get verses, and navigate (pass verses as params)
       // else, show warning
       if (validCheckpoints()) {
-        const versesList = getVerses()
+        const versesList: VersesListItem[] = getVerses()
+
+        sessionStore.setProp("currentSessionVerses", versesList)
         navigation.navigate("Session", {
           versesList,
           startPage: parseInt(startPage),
@@ -278,6 +290,15 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
                 />
               </View>
 
+              {showStartPageWarning && (
+                <Text
+                  size="xs"
+                  weight="light"
+                  style={{ marginBottom: spacing.small, color: colors.ehkamRed }}
+                  text="تأكد من إدخال رقم صفحة صحيح"
+                />
+              )}
+
               <ModalSelect
                 options={chaptersInStartPage}
                 placeholder={"سورة"}
@@ -337,6 +358,15 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
                   keyboardType="number-pad"
                 />
               </View>
+
+              {showEndPageWarning && (
+                <Text
+                  size="xs"
+                  weight="light"
+                  style={{ marginBottom: spacing.small, color: colors.ehkamRed }}
+                  text="تأكد من إدخال رقم صفحة صحيح"
+                />
+              )}
 
               <ModalSelect
                 options={chaptersInEndPage}

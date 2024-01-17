@@ -15,6 +15,7 @@ import { withSetPropAction } from "./helpers/withSetPropAction"
 import { Session, SessionModel, SessionSnapshotOut } from "./Session"
 import { SessionNoteModel } from "./SessionNote"
 import { StudentModel } from "./Student"
+import { VersesListItem } from "../screens/Teacher/Sessions/SessionStack"
 
 const SessionQueueItemModel = types.model({
   session: SessionModel,
@@ -26,6 +27,16 @@ const NoteQueueItemModel = types.model({
   problem: types.frozen(),
 })
 
+export const VersesListItemModel = types.model({
+  type: types.string,
+  pageNumber: types.maybeNull(types.number),
+  chapterNumber: types.maybeNull(types.string),
+  chapterTitle: types.maybeNull(types.string),
+  verseNumber: types.maybeNull(types.number),
+  verseText: types.maybeNull(types.string),
+  flagged: types.optional(types.boolean, false),
+})
+
 export interface SessionQueueItem extends Instance<typeof SessionQueueItemModel> {}
 
 export const SessionStoreModel = types
@@ -35,6 +46,7 @@ export const SessionStoreModel = types
     sessions: types.optional(types.array(SessionModel), []),
     sessionOfflineQueue: types.optional(types.array(SessionQueueItemModel), []),
     currentSessionNotes: types.optional(types.array(SessionNoteModel), []),
+    currentSessionVerses: types.optional(types.array(VersesListItemModel), []),
     noteOfflineQueue: types.optional(types.array(NoteQueueItemModel), []),
     selectedStudent: types.maybe(StudentModel),
     selectedSessionType: types.optional(types.enumeration(["new", "repeat", "exam"]), "new"),

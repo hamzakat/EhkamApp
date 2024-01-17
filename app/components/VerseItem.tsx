@@ -8,6 +8,7 @@ export interface VerseItemProps {
   verseText: string
   verseNumber: string
   onTouchEnd?: () => void
+  flagged?: boolean
 }
 
 export const VerseItem = (props: VerseItemProps) => {
@@ -21,7 +22,8 @@ export const VerseItem = (props: VerseItemProps) => {
         paddingVertical: spacing.medium,
         alignItems: "center",
         backgroundColor: colors.background,
-
+        borderColor: props.flagged ? colors.ehkamPeach : colors.border,
+        borderWidth: props.flagged ? spacing.micro : 0,
         shadowColor: colors.palette.neutral800,
         shadowOffset: {
           width: 0,

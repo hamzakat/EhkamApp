@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import { observer } from "mobx-react-lite"
+import { Observer, observer } from "mobx-react-lite"
 import { Alert, View, Dimensions } from "react-native"
 import {
   Button,
@@ -67,7 +67,12 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
                 style: "destructive",
                 // If the user confirmed, then we dispatch the action we blocked earlier
                 // This will continue the action that had triggered the removal of the screen
-                onPress: () => navigation.dispatch(e.data.action),
+                onPress: () => {
+                  sessionStore.setProp("currentSessionNotes", [])
+                  sessionStore.setProp("selectedStudent", undefined)
+                  sessionStore.setProp("currentSessionVerses", [])
+                  navigation.dispatch(e.data.action)
+                },
               },
             ],
           )
@@ -109,6 +114,7 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
       })
 
       sessionStore.setProp("currentSessionNotes", [])
+
       sessionStore.setProp("selectedStudent", undefined)
       sessionStore.sendSession(session)
       setConfirmationDialogVisible(false)
@@ -116,25 +122,33 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const scheduleSession = (time: "today" | "later") => {
-      // TODO: add to notification area
+    // const scheduleSession = (time: "today" | "later") => {
+    //   // TODO: add to notification area
+    // }
+
+    const exit = () => {
+      navigation.navigate("SessionType")
     }
-    const renderItem = ({ item }: { item: VersesListItem }) => {
+
+    const renderItem = ({ item, index }: { item: VersesListItem; index: number }) => {
       // render verse
 
       if (item.type === "verse") {
         return (
           <VerseItem
+            key={index}
             verseNumber={item.verseNumber}
             verseText={item.verseText}
             onTouchEnd={() =>
               navigation.navigate("SessionNote", {
                 pageNumber: parseInt(item.pageNumber),
-                chpaterNumber: parseInt(item.chapterNumber),
+                chapterNumber: parseInt(item.chapterNumber),
                 verseNumber: parseInt(item.verseNumber),
                 verseText: item.verseText,
+                index: index,
               })
             }
+            flagged={item.flagged}
           />
         )
       }
@@ -215,6 +229,52 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
               }}
               size="md"
             />
+            <View style={{ marginBottom: spacing.small, alignItems: "center" }}>
+              {(() => {
+                const summary = sessionStore.currentSessionNotes.reduce(
+                  (acc, note) => {
+                    if (note.tajweed) {
+                      acc.tajweedCount++
+                    }
+                    if (note.memorization) {
+                      acc.memorizationCount++
+                    }
+                    if (note.pronunciation) {
+                      acc.pronunciationCount++
+                    }
+                    return acc
+                  },
+                  {
+                    tajweedCount: 0,
+                    memorizationCount: 0,
+                    pronunciationCount: 0,
+                  },
+                )
+                return (
+                  <View>
+                    {summary.tajweedCount > 0 && (
+                      <Text weight="light">
+                        أخطاء التجويد: <Text weight="bold">{summary.tajweedCount}</Text>
+                      </Text>
+                    )}
+                    {summary.memorizationCount > 0 && (
+                      <Text weight="light">
+                        أخطاء الحفظ: <Text weight="bold">{summary.memorizationCount}</Text>
+                      </Text>
+                    )}
+                    {summary.pronunciationCount > 0 && (
+                      <Text weight="light">
+                        أخطاء النطق: <Text weight="bold">{summary.pronunciationCount}</Text>
+                      </Text>
+                    )}
+                    {summary.tajweedCount === 0 &&
+                      summary.memorizationCount === 0 &&
+                      summary.pronunciationCount === 0 && <Text weight="light">لايوجد أخطاء</Text>}
+                  </View>
+                )
+              })()}
+            </View>
+
             <TextField
               placeholder="درجة مئوية"
               keyboardType="number-pad"
@@ -261,7 +321,7 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
         </Dialog>
 
         {/* Cancelation dialog */}
-        <TwoButtonsDialog
+        {/* <TwoButtonsDialog
           peachButtonFn={() => scheduleSession("later")}
           cyanButtonFn={() => scheduleSession("today")}
           cancel={() => setRepeatDialogVisible(false)}
@@ -269,7 +329,7 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
           text="متى سيعيد الطالب تسميع المقرر؟"
           peachButtonText="اليوم"
           cyanButtonText="الدرس القادم"
-        />
+        /> */}
 
         {/* Done dialog */}
         <WarningDialog
@@ -278,13 +338,16 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
           visible={doneDialogVisible}
           cancel={() => {
             setDoneDialogVisible(false)
+            sessionStore.setProp("currentSessionVerses", [])
             navigation.navigate("SessionType")
           }}
           text="تم حفظ جلسة التسميع والإضافة إلى تقدم بالطالب علمياً بنجاح"
         />
         <View style={{ maxHeight: ayatListHeight }}>
           <FlatList
-            data={versesList}
+            // slice() is important here for re-rendering after adding a note!
+            data={sessionStore.currentSessionVerses.slice()}
+            keyExtractor={(item, index) => `${index}`}
             renderItem={renderItem}
             contentContainerStyle={{
               alignContent: "center",
@@ -311,7 +374,7 @@ export const SessionScreen: FC<SessionStackScreenProps<"Session">> = observer(
               borderWidth: 0,
               borderRadius: 9,
             }}
-            onPress={() => setRepeatDialogVisible(true)}
+            onPress={exit}
           >
             <Text text="غير مقبول" weight="bold" size="md" style={{ color: colors.background }} />
           </Button>

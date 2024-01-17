@@ -19,6 +19,7 @@ export interface VersesListItem {
   chapterTitle: string
   verseNumber?: number
   verseText?: string
+  flagged?: boolean
 }
 
 export type SessionStackParamList = {
@@ -42,7 +43,8 @@ export type SessionStackParamList = {
     pageNumber: string
     verseText: string
     verseNumber: string
-    chpaterNumber: string
+    chapterNumber: string
+    index?: number
   }
 }
 
@@ -55,7 +57,7 @@ const SessionStack = createNativeStackNavigator<SessionStackParamList>()
 
 export function SessionStackScreen({ navigation, route }) {
   const { bottom } = useSafeAreaInsets()
-  const tabHiddenRoutes = ["Session", "SessionNote", "ExamSession"]
+  const tabHiddenRoutes = ["SessionSetup", "Session", "SessionNote", "ExamSession"]
 
   React.useLayoutEffect(() => {
     const routeName = getFocusedRouteNameFromRoute(route)
