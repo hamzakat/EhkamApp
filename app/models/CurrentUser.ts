@@ -27,6 +27,7 @@ export const CurrentUserStoreModel = types
   })) // eslint-disable-line @typescript-eslint/no-unused-vars
   .actions((self) => {
     const fetchCurrentUser = flow(function* () {
+      // get current user info
       const res: ApiResponse<any> = yield self.request({
         method: "GET",
         url: "/users/me?fields=id,first_name,last_name,role,title,location,description,school_id.name,school_id.id",
@@ -61,6 +62,7 @@ export const CurrentUserStoreModel = types
         return { kind: "bad-data" }
       }
 
+      // get teacher info of the current user
       const teacherRes: ApiResponse<any> = yield self.request({
         method: "GET",
         url: `/items/teachers?filter[user_id][_eq]=${self.user.id}&fields=classes.id,classes.name,classes.mosque_id,classes.mosque_id.name,classes.mosque_id.id, id`,
@@ -96,8 +98,8 @@ export const CurrentUserStoreModel = types
           return TeacherClassModel.create({
             id: c.id,
             name: c.name,
-            mosque_id: c.mosque_id.id,
-            mosque_name: c.mosque_id.name,
+            mosque_id: c.mosque_id?.id,
+            mosque_name: c.mosque_id?.name,
           })
         })
       } catch (e) {
