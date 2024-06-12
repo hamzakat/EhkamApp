@@ -16,8 +16,8 @@ export const AboutScreen: FC<AboutScreenProps> = function AboutScreen(_props) {
 
   return (
     <NoDrawerLayoutScreen
-      Icon={<Icon icon="qurtasIcon" containerStyle={{ marginHorizontal: spacing.medium }} />}
-      title="الشركة المطوّرة"
+      Icon={<Icon icon="info" containerStyle={{ marginHorizontal: spacing.medium }} />}
+      title="معلومات عن المطوّر"
       backBtn={true}
       navigation={navigation}
       preset="scroll"
@@ -39,38 +39,22 @@ export const AboutScreen: FC<AboutScreenProps> = function AboutScreen(_props) {
       </View>
       <View style={{ paddingHorizontal: spacing.medium }}>
         <ListItem
-          link="+90 53 83 2009 86"
-          iconName="wp"
-          description="تواصل معنا عبر واتس أب"
-          onTouchEnd={() =>
-            Linking.openURL("whatsapp://send?phone=905383200986").catch(() =>
-              openLinkInBrowser("https://wa.me/+905383200986"),
-            )
-          }
+          link="ايميل المطوّر"
+          iconName="envelope"
+          description="hamzakattan@outlook.com"
+          onTouchEnd={() => openLinkInBrowser("mailto:hamzakattan@outlook.com")}
         />
         <ListItem
-          link="@QURTAS"
-          iconName="tg"
-          description="تواصل معنا عبر تلغرام"
-          onTouchEnd={() => openLinkInBrowser("https://t.me/qurtas")}
-        />
-        <ListItem
-          link="@QurtasStudio"
-          iconName="fb"
-          description="تابعنا على فيس بوك"
-          onTouchEnd={() => openLinkInBrowser("https://facebook.com/QurtasStudio")}
+          link="Github Repo"
+          iconName="globe"
+          description=""
+          onTouchEnd={() => openLinkInBrowser("https://github.com/hamzakat/EhkamApp/")}
         />
         <ListItem
           link="Be.net/Qurtas.Studio"
           iconName="behance"
-          description="شاهد نماذج أعمالنا على بيهانس"
-          onTouchEnd={() => openLinkInBrowser("https://behance.net/Qurtas.Studio")}
-        />
-        <ListItem
-          link="QurtasGroup.com"
-          iconName="globe"
-          description="لزيارة موقعنا الالكتروني"
-          onTouchEnd={() => openLinkInBrowser("https://QurtasGroup.com")}
+          description="حساب مصمم الواجهات على بيهانس"
+          onTouchEnd={() => openLinkInBrowser("https://www.behance.net/Qurtas-Studio")}
         />
       </View>
     </NoDrawerLayoutScreen>

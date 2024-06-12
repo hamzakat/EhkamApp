@@ -14,7 +14,7 @@ import { getSnapshot } from "mobx-state-tree"
 
 interface EnterScreenProps extends AppStackScreenProps<"Enter"> {}
 
-const headerImg = require("../../assets/images/welcome-header.png")
+const headerImg = require("../../assets/images/login-header.jpg")
 export const EnterScreen: FC<EnterScreenProps> = function EnterScreen(_props) {
   const {
     currentUserStore,

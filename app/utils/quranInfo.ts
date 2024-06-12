@@ -14,3 +14,10 @@ export const getJuzNumber = (pageNumber: number): number => {
     return muhsaf[pageNumber].juzNumber
   } else return undefined
 }
+
+export const getFirstPageOfChapter = (chapterNumber: number): number => {
+  if (chapterNumber > 0 && chapterNumber <= 114) {
+    const chapters: any[] = require("../../assets/data/quranjson/chapters.json")
+    return chapters[chapterNumber].pages
+  } else return undefined
+}

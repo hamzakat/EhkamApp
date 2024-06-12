@@ -267,14 +267,14 @@ const DrawerContent = ({
           </Text>
         </View>
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.medium }}>
-          <Icon icon="qurtasIcon" size={22} color={colors.ehkamCyan} />
+          <Icon icon="info" size={22} color={colors.ehkamCyan} />
           <Text
             weight="semiBold"
             style={{ color: colors.ehkamGrey, marginStart: spacing.small }}
             size="md"
             onPress={() => navigation.navigate("About")}
           >
-            الشركة المطورة
+            المطوِّر
           </Text>
         </View>
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.medium }}>

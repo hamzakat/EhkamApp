@@ -8,7 +8,7 @@ import { colors, spacing } from "../theme"
 
 interface WelcomeScreenProps extends AppStackScreenProps<"Welcome"> {}
 
-const headerImg = require("../../assets/images/welcome-header.png")
+const headerImg = require("../../assets/images/login-header.jpg")
 export const WelcomeScreen: FC<WelcomeScreenProps> = function WelcomeScreen(_props) {
   const navigation = useNavigation()
 

@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { FC, useEffect, useState } from "react"
 import { observer } from "mobx-react-lite"
-import { ViewStyle, View, ScrollView, Dimensions } from "react-native"
+import { ViewStyle, View, ScrollView, Dimensions, Alert } from "react-native"
 import {
   BorderedText,
   BorderedTextField,
@@ -17,6 +17,124 @@ import { SessionStackScreenProps, VersesListItem } from "./SessionStack"
 import { useStores } from "../../../models"
 import { Student } from "../../../models/Student"
 import { Session } from "../../../models/Session"
+import { getFirstPageOfChapter } from "../../../utils/quranInfo"
+
+const chaptersList = [
+  { label: "الفاتحة", key: 1 },
+  { label: "البقرة", key: 2 },
+  { label: "آل عمران", key: 3 },
+  { label: "النساء", key: 4 },
+  { label: "المائدة", key: 5 },
+  { label: "الأنعام", key: 6 },
+  { label: "الأعراف", key: 7 },
+  { label: "الأنفال", key: 8 },
+  { label: "التوبة", key: 9 },
+  { label: "يونس", key: 10 },
+  { label: "هود", key: 11 },
+  { label: "يوسف", key: 12 },
+  { label: "الرعد", key: 13 },
+  { label: "إبراهيم", key: 14 },
+  { label: "الحجر", key: 15 },
+  { label: "النحل", key: 16 },
+  { label: "الإسراء", key: 17 },
+  { label: "الكهف", key: 18 },
+  { label: "مريم", key: 19 },
+  { label: "طه", key: 20 },
+  { label: "الأنبياء", key: 21 },
+  { label: "الحج", key: 22 },
+  { label: "المؤمنون", key: 23 },
+  { label: "النور", key: 24 },
+  { label: "الفرقان", key: 25 },
+  { label: "الشعراء", key: 26 },
+  { label: "النمل", key: 27 },
+  { label: "القصص", key: 28 },
+  { label: "العنكبوت", key: 29 },
+  { label: "الروم", key: 30 },
+  { label: "لقمان", key: 31 },
+  { label: "السجدة", key: 32 },
+  { label: "الأحزاب", key: 33 },
+  { label: "سبإ", key: 34 },
+  { label: "فاطر", key: 35 },
+  { label: "يس", key: 36 },
+  { label: "الصافات", key: 37 },
+  { label: "ص", key: 38 },
+  { label: "الزمر", key: 39 },
+  { label: "غافر", key: 40 },
+  { label: "فصلت", key: 41 },
+  { label: "الشورى", key: 42 },
+  { label: "الزخرف", key: 43 },
+  { label: "الدخان", key: 44 },
+  { label: "الجاثية", key: 45 },
+  { label: "الأحقاف", key: 46 },
+  { label: "محمد", key: 47 },
+  { label: "الفتح", key: 48 },
+  { label: "الحجرات", key: 49 },
+  { label: "ق", key: 50 },
+  { label: "الذاريات", key: 51 },
+  { label: "الطور", key: 52 },
+  { label: "النجم", key: 53 },
+  { label: "القمر", key: 54 },
+  { label: "الرحمن", key: 55 },
+  { label: "الواقعة", key: 56 },
+  { label: "الحديد", key: 57 },
+  { label: "المجادلة", key: 58 },
+  { label: "الحشر", key: 59 },
+  { label: "الممتحنة", key: 60 },
+  { label: "الصف", key: 61 },
+  { label: "الجمعة", key: 62 },
+  { label: "المنافقون", key: 63 },
+  { label: "التغابن", key: 64 },
+  { label: "التلاوة", key: 65 },
+  { label: "التحريم", key: 66 },
+  { label: "الملك", key: 67 },
+  { label: "القلم", key: 68 },
+  { label: "الحاقة", key: 69 },
+  { label: "المعارج", key: 70 },
+  { label: "نوح", key: 71 },
+  { label: "الجن", key: 72 },
+  { label: "المزمل", key: 73 },
+  { label: "المدثر", key: 74 },
+  { label: "القيامة", key: 75 },
+  { label: "الإنسان", key: 76 },
+  { label: "المرسلات", key: 77 },
+  { label: "النبأ", key: 78 },
+  { label: "النازعات", key: 79 },
+  { label: "عبس", key: 80 },
+  { label: "التكوير", key: 81 },
+  { label: "الانفطار", key: 82 },
+  { label: "المطففين", key: 83 },
+  { label: "الانشقاق", key: 84 },
+  { label: "البروج", key: 85 },
+  { label: "الطارق", key: 86 },
+  { label: "الأعلى", key: 87 },
+  { label: "الغاشية", key: 88 },
+  { label: "الفجر", key: 89 },
+  { label: "البلد", key: 90 },
+  { label: "الشمس", key: 91 },
+  { label: "الليل", key: 92 },
+  { label: "الضحى", key: 93 },
+  { label: "الشرح", key: 94 },
+  { label: "التين", key: 95 },
+  { label: "العلق", key: 96 },
+  { label: "القدر", key: 97 },
+  { label: "البينة", key: 98 },
+  { label: "الزلزلة", key: 99 },
+  { label: "العاديات", key: 100 },
+  { label: "القارعة", key: 101 },
+  { label: "التكاثر", key: 102 },
+  { label: "العصر", key: 103 },
+  { label: "الهمزة", key: 104 },
+  { label: "الفيل", key: 105 },
+  { label: "قريش", key: 106 },
+  { label: "الماعون", key: 107 },
+  { label: "الكوثر", key: 108 },
+  { label: "الكافرون", key: 109 },
+  { label: "النصر", key: 110 },
+  { label: "المسد", key: 111 },
+  { label: "الإخلاص", key: 112 },
+  { label: "الفلق", key: 113 },
+  { label: "الناس", key: 114 },
+]
 
 export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = observer(
   function SessionSetupScreen({ navigation }) {
@@ -38,9 +156,38 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
     const [versesInStartPage, setVersesInStartPage] = useState([])
     const [versesInEndPage, setVersesInEndPage] = useState([])
 
+    const [done, setDone] = useState(false)
+
     const [showEndPageWarning, setShowEndPageWarning] = useState(false)
     const [showStartPageWarning, setShowStartPageWarning] = useState(false)
 
+    // useEffect(
+    //   // Preventing accidental back button press: https://reactnavigation.org/docs/preventing-going-back/
+    //   () =>
+    //     navigation.addListener("beforeRemove", (e) => {
+    //       if (done) {
+    //         // If we don't have unsaved changes, then we don't need to do anything
+    //         return
+    //       }
+
+    //       // Prevent default behavior of leaving the screen
+    //       e.preventDefault()
+
+    //       // Prompt the user before leaving the screen
+
+    //       Alert.alert("هل تريد الرجوع؟", "", [
+    //         { text: "متابعة", style: "cancel", onPress: () => {} },
+    //         {
+    //           text: "إلغاء الجلسة والرجوع",
+    //           style: "destructive",
+    //           // If the user confirmed, then we dispatch the action we blocked earlier
+    //           // This will continue the action that had triggered the removal of the screen
+    //           onPress: () => navigation.dispatch(e.data.action),
+    //         },
+    //       ])
+    //     }),
+    //   [navigation, done],
+    // )
 
     /* for sessions of type "new", get the student's last checkpoints automatically */
     const { sessionStore } = useStores()
@@ -83,6 +230,11 @@ export const SessionSetupScreen: FC<SessionStackScreenProps<"SessionSetup">> = o
 
     useEffect(() => {
       if (validPageNumber(startPage)) {
+        // update startPage
+        // const firstPageOfChapter = getFirstPageOfChapter(startChapter.key)
+
+        // setStartPage(firstPageOfChapter.toString())
+
         // update verses list
         const currentChapterNumber = startChapter.key.toString()
         const currentChapter = muhsaf[startPage][currentChapterNumber]
